@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ title }} :: {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<h2 class="text-center mb-4 mt-5">{{ title }} </h2>
+<br>
+
+<form method="POST"  action="" style="margin: 0 30px">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-dark">Відправити</button>
+</form>
+
+<div class="text-center mt-3">
+    <p>Ще не зареєстровані? <a href="{% url 'signup' %}">Реєстрація</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+<nav class="navbar navbar-expand-lg bg-light" style="padding: 0 20px;">
+    <a class="navbar-brand" href="{%  url 'home' %}">Smile Pass.</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+            <li class="nav-item"><a class="nav-link" href="">Мої документи</a></li>
+
+            <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">
+                Подати заявку
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="">Створити внутрішній паспорт</a></li>
+                <li><a class="dropdown-item" href="">Створити закордонний паспорт</a></li>
+                <li><a class="dropdown-item" href="">Повідомити про втрату внутрішнього паспорту</a></li>
+                <li><a class="dropdown-item" href="">Повідомити про втрату закордонного паспорту</a></li>
+                <li><a class="dropdown-item" href="">Оновити внутрішній паспорт</a></li>
+                <li><a class="dropdown-item" href="">Оновити закордонний паспорт</a></li>
+                <li><a class="dropdown-item" href="">Змінити дані паспорту</a></li>
+            </ul>
+            </li>
+
+            {% if request.user.is_authenticated %}
+                <li class="nav-item"><a class="nav-link">|</a></li>
+
+                {% if request.user.is_staff %}
+
+                <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown5" role="button"
+                   data-bs-toggle="dropdown" aria-expanded="false" style="color: #912D9B;">
+                    Заявки
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="">Створення паспорту</a></li>
+                    <li><a class="dropdown-item" href="">Створення закордонного паспорту</a></li>
+                </ul>
+                </li>
+                {% endif %}
+            {% endif %}
+        </ul>
+
+        {% if request.user.is_authenticated %}
+        <span class="navbar-text">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown7" role="button"
+                   data-bs-toggle="dropdown" aria-expanded="false" style="color: #912D9B;">
+                    <i class="bi bi-person-circle"></i>  Профіль
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="" >Видалити профіль</a></li>
+                </ul>
+                </li>
+
+        <li class="nav-item">
+            <a href="{% url 'signout' %}" class="btn btn-light">Вихід</a>
+        </li>
+        </ul>
+
+        {% else %}
+        <span class="navbar-text">
+            <a href="{% url 'signin' %}" class="btn btn-light">Вхід</a>
+            <a href="{% url 'signup' %}" class="btn btn-light">Реєстрація</a>
+            </span>
+        {% endif %}
+
+    </div>
+</nav>
