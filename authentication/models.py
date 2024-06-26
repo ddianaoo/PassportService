@@ -3,6 +3,7 @@ from django.db import models
 from passports.models import Address, Passport, ForeignPassport
 from validation.validate_birth_date import validate_birth_date
 from validation.validate_email import validate_email
+from passports.utils import COUNTRY_CHOICES
 
 
 class CustomUserManager(BaseUserManager):
@@ -26,6 +27,7 @@ class CustomUser(AbstractBaseUser):
         ('F', 'Female'),
         ('M', 'Male'),
     ]
+    COUNTRY_CHOICES = COUNTRY_CHOICES
 
     email          = models.EmailField(unique=True, validators=[validate_email,])
     name           = models.CharField(max_length=50)
@@ -34,7 +36,7 @@ class CustomUser(AbstractBaseUser):
     sex            = models.CharField(max_length=1, choices=GENDER_CHOICES) 
     date_of_birth  = models.DateField(validators=[validate_birth_date,])
     place_of_birth = models.CharField(max_length=255)
-    nationality    = models.CharField(max_length=50)
+    nationality    = models.CharField(max_length=2, choices=COUNTRY_CHOICES)
 
     address          = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True)
     passport         = models.OneToOneField(Passport, on_delete=models.SET_NULL, null=True, related_name='user')

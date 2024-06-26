@@ -23,7 +23,7 @@ class Address(models.Model):
 
 
 class AbstractPassport(models.Model):
-    number         = models.IntegerField(primary_key=True, db_default=random.randint(10000000,99999999), validators=[validate_number,])
+    number         = models.IntegerField(primary_key=True, validators=[validate_number,])
     record_number  = models.CharField(max_length=14, unique=True, blank=True, validators=[validate_record_number,]) 
     authority      = models.IntegerField(blank=True, validators=[validate_authority,])
     date_of_issue  = models.DateField(blank=True, validators=[validate_issue_date])
@@ -35,6 +35,11 @@ class AbstractPassport(models.Model):
 
     def __str__(self):
         return f"Document number: {self.number}"
+    
+    def save(self, *args, **kwargs):
+        if not self.number:
+            self.number = random.randint(10000000, 99999999)
+        super().save(*args, **kwargs)
 
 
 class Passport(AbstractPassport):
@@ -64,7 +69,7 @@ class Visa(models.Model):
         ('Transit', 'Transit Type'),
     ]
 
-    number           = models.IntegerField(primary_key=True, db_default=random.randint(10000000,99999999), validators=[validate_number,])
+    number           = models.IntegerField(primary_key=True, validators=[validate_number,])
 
     foreign_passport = models.ForeignKey(ForeignPassport, related_name='visas', on_delete=models.CASCADE)
     place_of_issue   = models.CharField(max_length=25, choices=REGION_CHOICES)
@@ -77,4 +82,10 @@ class Visa(models.Model):
     
     def __str__(self):
         return f"Visa to {self.country}.Expiration date: {self.expiry_date})"
+    
+
+    def save(self, *args, **kwargs):
+        if not self.number:
+            self.number = random.randint(10000000, 99999999)
+        super().save(*args, **kwargs)
     
