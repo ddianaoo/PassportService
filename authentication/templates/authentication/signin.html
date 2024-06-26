@@ -8,11 +8,13 @@
 <h2 class="text-center mb-4 mt-5">{{ title }} </h2>
 <br>
 
-<form method="POST"  action="" style="margin: 0 30px">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-dark">Відправити</button>
-</form>
+<div class="d-flex justify-content-center">
+    <form method="POST" action="" class="w-50" style="max-width: 700px; margin: 0 30px;">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-dark">Відправити</button>
+    </form>
+</div>
 
 <div class="text-center mt-3">
     <p>Ще не зареєстровані? <a href="{% url 'signup' %}">Реєстрація</a></p>

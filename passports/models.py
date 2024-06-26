@@ -6,20 +6,21 @@ from validation.validate_number import validate_number
 from validation.validate_post_code import validate_post_code
 from validation.validate_record_number import validate_record_number
 import random
-from .utils import COUNTRY_CHOICES, REGION_CHOICES
+from .utils import COUNTRY_CHOICES
 
 
 class Address(models.Model):
     COUNTRY_CHOICES = COUNTRY_CHOICES
-    REGION_CHOICES = REGION_CHOICES
 
     country_code = models.CharField(max_length=2, choices=COUNTRY_CHOICES)
-    region       = models.CharField(max_length=25, choices=REGION_CHOICES)
+    region       = models.CharField(max_length=100)
     settlement   = models.CharField(max_length=100)
-    district     = models.CharField(max_length=100)
     street       = models.CharField(max_length=100)
     apartments   = models.CharField(max_length=10)
     post_code    = models.IntegerField(validators=[validate_post_code,])
+
+    def __str__(self) -> str:
+        return f"Address: {self.country_code}, {self.region}, {self.settlement}, {self.street}, {self.apartments}"
 
 
 class AbstractPassport(models.Model):
@@ -54,7 +55,7 @@ class ForeignPassport(AbstractPassport):
 
 class Visa(models.Model):
     COUNTRY_CHOICES = COUNTRY_CHOICES    
-    REGION_CHOICES = REGION_CHOICES
+
     ENTRY_CHOICES = [
         ('1', 'Single Entry'),
         ('2', 'Double Entry'),
@@ -72,7 +73,7 @@ class Visa(models.Model):
     number           = models.IntegerField(primary_key=True, validators=[validate_number,])
 
     foreign_passport = models.ForeignKey(ForeignPassport, related_name='visas', on_delete=models.CASCADE)
-    place_of_issue   = models.CharField(max_length=25, choices=REGION_CHOICES)
+    place_of_issue   = models.CharField(max_length=50)
     date_of_issue  = models.DateField(blank=True, validators=[validate_issue_date])
     date_of_expiry = models.DateField(blank=True, validators=[validate_expiry_date])
     photo            = models.ImageField(upload_to='photos/visas/%Y/%m/%d/', blank=True)

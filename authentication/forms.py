@@ -6,8 +6,8 @@ from django.core.exceptions import ValidationError
 
 
 class UserRegisterForm(UserCreationForm):
-    password1 = forms.CharField(label='Придумайте пароль', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-    password2 = forms.CharField(label='Повторіть введення пароля',
+    password1 = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    password2 = forms.CharField(label='Re-enter password',
                                 widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
     class Meta:

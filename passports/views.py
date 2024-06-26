@@ -1,6 +1,55 @@
-from django.shortcuts import render
+from administration.models import Task
+import datetime
+from django.contrib import messages
+from django.core.files.storage import default_storage
+from django.shortcuts import render, redirect
+from .forms import AddressForm, PhotoForm
+from .models import Address
 
-# Create your views here.
 
 def main_page(request):
     return render(request, 'home.html')
+
+
+def create_passport(request):
+    task = Task.objects.filter(user=request.user, title="Create ip").exists()
+    if request.user.passport or task:
+        messages.error(request, 'Ви вже відправили заявку на створення внутрішнього паспорту.')
+        return redirect('home')
+
+    if request.method == 'POST':
+        photo_form = PhotoForm(request.POST, request.FILES)       
+        address_form = AddressForm(request.POST)
+
+        if address_form.is_valid() and photo_form.is_valid():
+            country_code = address_form.cleaned_data.get('country_code')
+            region = address_form.cleaned_data.get('region')
+            settlement = address_form.cleaned_data.get('settlement')
+            street = address_form.cleaned_data.get('street')
+            apartments = address_form.cleaned_data.get('apartments')
+            post_code = address_form.cleaned_data.get('post_code')
+
+            adr, created = Address.objects.get_or_create(country_code=country_code, region=region, settlement=settlement, 
+                                         street=street, apartments=apartments, post_code=post_code)
+            request.user.address = adr
+            request.user.save()
+
+            photo = photo_form.cleaned_data.get('photo')
+            today = datetime.date.today()
+            month = '0' + str(today.month) if today.month < 10 else today.month
+            day = '0' + str(today.day) if today.day < 10 else today.day
+            photo_name = f'{request.user.pk}-{request.user.name}-{request.user.surname}-passport'
+            photo_path = default_storage.save(f'photos/passports/{today.year}/{month}/{day}/{photo_name}', photo)    
+
+            task = Task.objects.create(user=request.user,title='Create ip', user_data={'photo': photo_path})        
+            messages.success(request, 'Ваша заявка на створення внутрішнього паспорту відправлена!')
+            return redirect('home')
+        else:
+            messages.error(request, address_form.errors)
+            messages.error(request, photo_form.errors)
+    else:
+        address_form = AddressForm()
+        photo_form = PhotoForm()
+    return render(request, 'passports/create_passport.html', {'address_form': address_form, 
+                                                              'photo_form': photo_form, 
+                                                              'title': 'Заявка на створення паспорту'})
