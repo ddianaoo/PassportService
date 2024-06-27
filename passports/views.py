@@ -2,7 +2,7 @@ from administration.models import Task
 import datetime
 from django.contrib import messages
 from django.core.files.storage import default_storage
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import AddressForm, PhotoForm
 from .models import Address
 
@@ -12,10 +12,13 @@ def main_page(request):
 
 
 def create_passport(request):
-    task = Task.objects.filter(user=request.user, title="Create ip").exists()
-    if request.user.passport or task:
+    task = Task.objects.filter(user=request.user, title="Create ip", status=0).exists()
+    if task:
         messages.error(request, 'Ви вже відправили заявку на створення внутрішнього паспорту.')
-        return redirect('home')
+        return redirect('get_documents')
+    if request.user.passport:
+        messages.error(request, 'Ви вже маєте внутрішній паспорт.')
+        return redirect('get_documents')
 
     if request.method == 'POST':
         photo_form = PhotoForm(request.POST, request.FILES)       
@@ -43,7 +46,7 @@ def create_passport(request):
 
             task = Task.objects.create(user=request.user,title='Create ip', user_data={'photo': photo_path})        
             messages.success(request, 'Ваша заявка на створення внутрішнього паспорту відправлена!')
-            return redirect('home')
+            return redirect('get_documents')
         else:
             messages.error(request, address_form.errors)
             messages.error(request, photo_form.errors)
@@ -53,3 +56,9 @@ def create_passport(request):
     return render(request, 'passports/create_passport.html', {'address_form': address_form, 
                                                               'photo_form': photo_form, 
                                                               'title': 'Заявка на створення паспорту'})
+
+
+def get_documents(request):
+    return render(request, 'passports/get_documents.html', {'passport': request.user.passport,
+                                                            'foreign_passport': request.user.foreign_passport,
+                                                            'user': request.user})

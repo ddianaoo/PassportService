@@ -33,7 +33,6 @@ def create_passport(request, pk):
     if request.method == 'POST':
         form = PassportForm(request.POST, request.FILES, instance=passport)
         if form.is_valid():
-            print(form.cleaned_data)
             p = form.save()
             task.user.passport = p
             task.user.save()

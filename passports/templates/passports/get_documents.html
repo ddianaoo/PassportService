@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ title }} :: {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4 mt-5">Passport Documents</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    Internal Passport
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% if passport %}
+                            <div class="col-md-5">
+                                {% if passport.photo %}
+                                    <img src="{{ passport.photo.url }}" alt="Passport Photo" class="img-fluid mb-3">
+                                {% else %}
+                                    <p>Photo: Not available</p>
+                                {% endif %}
+                                <p><strong>Authority:</strong> {{ passport.authority }}</p>
+                                <p><strong>Date of Issue:</strong> {{ passport.date_of_issue|date:"d-m-Y" }}</p>
+                                <p><strong>Date of Expiry:</strong> {{ passport.date_of_expiry|date:"d-m-Y" }}</p>
+                            </div>
+                            <div class="col-md-7">
+                                <p><strong>Surname:</strong> {{ user.surname }}</p>
+                                <p><strong>Name:</strong> {{ user.name }}</p>
+                                <p><strong>Patronymic:</strong> {{ user.patronymic }}</p>
+                                <p><strong>Date of Birth:</strong> {{ user.date_of_birth|date:"d m Y" }}</p>
+                                <p><strong>Place of Birth:</strong> {{ user.place_of_birth }}</p>
+                                <p><strong>Sex:</strong> {{ user.sex }}</p>
+                                <br/>
+                                <p><strong>Nationality:</strong> {{ user.get_nationality_display }}</p>
+                                <p><strong>Document Number:</strong> {{ passport.number }}</p>
+                                <p><strong>Record Number:</strong> {{ passport.record_number }}</p>
+                                <p>
+                                    <strong>Registration Address:</strong> 
+                                    {{ user.address.region }}, {{ user.address.settlement }}, 
+                                    {{ user.address.street }}, {{ user.address.apartments }}
+                                </p>
+                            </div>
+                        {% else %}
+                            <p>No internal passport available.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    Foreign Passport
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% if foreign_passport %}
+                            <div class="col-md-4">
+                                {% if foreign_passport.photo %}
+                                    <img src="{{ foreign_passport.photo.url }}" alt="Foreign Passport Photo" class="img-fluid mb-3">
+                                {% else %}
+                                    <p>Photo: Not available</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <p><strong>Document Number:</strong> {{ foreign_passport.number }}</p>
+                                <p><strong>Record Number:</strong> {{ foreign_passport.record_number }}</p>
+                                <p><strong>Authority:</strong> {{ foreign_passport.authority }}</p>
+                                <p><strong>Date of Issue:</strong> {{ foreign_passport.date_of_issue|date:"d-m-Y" }}</p>
+                                <p><strong>Date of Expiry:</strong> {{ foreign_passport.date_of_expiry|date:"d-m-Y" }}</p>
+                            </div>
+                        {% else %}
+                            <p>No foreign passport available.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

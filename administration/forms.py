@@ -1,3 +1,4 @@
+from typing import Any
 from django import forms
 from django.core.exceptions import ValidationError
 from passports.models import Passport
@@ -17,3 +18,9 @@ class PassportForm(forms.ModelForm):
             'date_of_expiry': forms.DateInput(attrs={'class': 'form-control'}),
             'photo': forms.FileInput(attrs={'class': 'form-control'}),
         }
+
+    def clean_authority(self):
+        data = self.cleaned_data['authority']
+        if not data:
+            raise ValidationError("authority is a required field.")
+        return data        
