@@ -45,6 +45,10 @@
                 <a href="{% url 'create_passport_s' task.id %}" class="btn btn-info">
                     Перейти до оформлення
                   </a>
+                {% elif task.title == 'Create fp' and task.status == 0 %}
+                <a href="{% url 'create_fpassport_s' task.id %}" class="btn btn-info">
+                    Перейти до оформлення
+                  </a>
                 {% endif %}
             </td>
         </tr>

@@ -2,7 +2,7 @@ from administration.models import Task
 import datetime
 from django.contrib import messages
 from django.core.files.storage import default_storage
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from .forms import AddressForm, PhotoForm
 from .models import Address
 
@@ -56,6 +56,39 @@ def create_passport(request):
     return render(request, 'passports/create_passport.html', {'address_form': address_form, 
                                                               'photo_form': photo_form, 
                                                               'title': 'Заявка на створення паспорту'})
+
+
+def create_fpassport(request):
+    task = Task.objects.filter(user=request.user, title="Create fp", status=0).exists()
+    if task:
+        messages.error(request, 'Ви вже відправили заявку на створення закордонного паспорту.')
+        return redirect('get_documents')
+    if request.user.foreign_passport:
+        messages.error(request, 'Ви вже маєте закордонний паспорт.')
+        return redirect('get_documents')
+    if not request.user.passport:
+        messages.error(request, 'Для створення закордонного паспорту необхідно мати внутрішній паспорт.')
+        return redirect('get_documents')        
+
+    if request.method == 'POST':
+        form = PhotoForm(request.POST, request.FILES)       
+        if form.is_valid():
+            photo = form.cleaned_data.get('photo')
+            today = datetime.date.today()
+            month = f'{today.month:02d}'
+            day = f'{today.day:02d}'
+            photo_name = f'{request.user.pk}-{request.user.name}-{request.user.surname}-fpassport.{photo.name.split(".")[-1]}'
+            photo_path = default_storage.save(f'photos/passports/{today.year}/{month}/{day}/{photo_name}', photo)    
+
+            task = Task.objects.create(user=request.user,title='Create fp', user_data={'photo': photo_path})        
+            messages.success(request, 'Ваша заявка на створення закордонного паспорту відправлена!')
+            return redirect('get_documents')
+        else:
+            messages.error(request, form.errors)
+    else:
+        form = PhotoForm()
+    return render(request, 'passports/create_fpassport.html', { 'form': form, 
+                                                              'title': 'Заявка на створення закордонного паспорту'})
 
 
 def get_documents(request):
