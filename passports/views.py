@@ -36,9 +36,9 @@ def create_passport(request):
 
             photo = photo_form.cleaned_data.get('photo')
             today = datetime.date.today()
-            month = '0' + str(today.month) if today.month < 10 else today.month
-            day = '0' + str(today.day) if today.day < 10 else today.day
-            photo_name = f'{request.user.pk}-{request.user.name}-{request.user.surname}-passport'
+            month = f'{today.month:02d}'
+            day = f'{today.day:02d}'
+            photo_name = f'{request.user.pk}-{request.user.name}-{request.user.surname}-passport.{photo.name.split(".")[-1]}'
             photo_path = default_storage.save(f'photos/passports/{today.year}/{month}/{day}/{photo_name}', photo)    
 
             task = Task.objects.create(user=request.user,title='Create ip', user_data={'photo': photo_path})        
