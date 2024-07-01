@@ -108,10 +108,10 @@ def get_documents(request):
 
 
 @login_required
-def restore_passport(request):
-    task = Task.objects.filter(user=request.user, title="Restore ip - loss", status=0).exists()
+def restore_passport(request, title, reason, error_msg):
+    task = Task.objects.filter(user=request.user, title=title, status=0).exists()
     if task:
-        messages.error(request, 'Ви вже відправили заявку на відновлення внутрішнього паспотру через втрату.')
+        messages.error(request, error_msg)
         return redirect('get_documents')
     if not request.user.passport:
         messages.error(request, 'У вас ще нема паспорту.')
@@ -125,10 +125,10 @@ def restore_passport(request):
             today = datetime.date.today()
             month = f'{today.month:02d}'
             day = f'{today.day:02d}'
-            photo_name = f'{request.user.pk}-{request.user.name}-{request.user.surname}-passport-loss.{photo.name.split(".")[-1]}'
+            photo_name = f'{request.user.pk}-{request.user.name}-{request.user.surname}-passport-{reason}.{photo.name.split(".")[-1]}'
             photo_path = default_storage.save(f'photos/passports/{today.year}/{month}/{day}/{photo_name}', photo)    
 
-            task = Task.objects.create(user=request.user,title='Restore ip - loss', user_data={'photo': photo_path})        
+            task = Task.objects.create(user=request.user,title=title, user_data={'photo': photo_path})        
             messages.success(request, 'Ваша заявка на відновлення внутрішнього паспотру відправлена!')
             return redirect('get_documents')
         else:
@@ -138,3 +138,15 @@ def restore_passport(request):
         user_form = ReadOnlyUserForm(instance=request.user)
     return render(request, 'passports/create_fpassport.html', { 'form': form, 'user_form': user_form,
                                                               'title': 'Заявка на відновлення внутрішнього паспотру'})
+
+
+@login_required
+def restore_passport_loss(request):
+    return restore_passport(request, "Restore ip - loss", 'loss', 
+                     'Ви вже відправили заявку на відновлення внутрішнього паспотру через втрату.')
+
+
+@login_required
+def restore_passport_expiry(request):
+    return restore_passport(request, "Restore ip - expiry", 'expiry', 
+                     'Ви вже відправили заявку на відновлення внутрішнього паспотру через закінчення терміну придатності..')

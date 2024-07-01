@@ -1,4 +1,5 @@
 from authentication.forms import ReadOnlyUserForm
+import datetime
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect, get_object_or_404
@@ -6,9 +7,7 @@ from django.views.generic import ListView
 from .models import Task
 from passports.models import Passport, ForeignPassport
 from random import randint
-import datetime
 from .forms import PassportForm, ForeignPassportForm, RestorePassportForm
-
 
 
 class TaskListView(ListView):
@@ -18,7 +17,15 @@ class TaskListView(ListView):
     template_name = 'administration/task_list.html'
 
     def get_queryset(self):
-        title_filters = ('create-passport', 'create-foreign-passport', 'create-visa', 'restore-passport')
+        title_filters = ('create-passport', 
+                         'create-foreign-passport', 
+                         'create-visa', 
+                         'restore-passport-loss',
+                         'restore-fpassport-loss',
+                         'restore-passport-expiry',
+                         'restore-fpassport-expiry',
+                         'change-data'
+                         )
         d = dict(zip(title_filters, Task.TITLE_CHOICES))
         tasks = Task.objects.all().order_by('-created_at', 'status')
 
@@ -139,12 +146,12 @@ def restore_passport(request, pk):
             task.user.save()
             task.status = 1
             task.save()
-            messages.success(request, 'Успішно відновлено внутрішній паспорт!')
+            messages.success(request, 'Успішно поновлено внутрішній паспорт!')
             return redirect('tasks_list')
         else:
             messages.error(request, form.errors)
     form = RestorePassportForm(instance=new_passport)
     user_form = ReadOnlyUserForm(instance=task.user)
     return render(request, 'administration/task_form.html',
-                  {'form': form, 'user_form': user_form, 'title': 'Відновлення паспорту'})
+                  {'form': form, 'user_form': user_form, 'title': 'Поновлення паспорту'})
 

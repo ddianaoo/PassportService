@@ -28,8 +28,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'tasks_list' %}?title=restore-passport">
-                            Відновлення паспорту через втрату
+                        <a class="nav-link" href="{% url 'tasks_list' %}?title=restore-passport-loss">
+                            Відновлення внутрішнього паспорту через втрату
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'tasks_list' %}?title=restore-passport-expiry">
+                            Відновлення внутрішнього паспорту через закінчення терміну придатності
                         </a>
                     </li>
                 </ul>
@@ -80,7 +85,7 @@
                             <a href="{% url 'create_fpassport_s' task.id %}" class="btn btn-info">
                                 Перейти до оформлення
                             </a>
-                            {% elif task.title == 'Restore ip - loss' and task.status == 0 %}
+                            {% elif task.title|slice:":10" == 'Restore ip' and task.status == 0 %}
                             <a href="{% url 'restore_passport_s' task.id %}" class="btn btn-info">
                                 Перейти до відновлення
                             </a>

@@ -18,9 +18,9 @@
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                 <li><a class="dropdown-item" href="{% url 'create_passport_u' %}">Створити внутрішній паспорт</a></li>
                 <li><a class="dropdown-item" href="{% url 'create_fpassport_u' %}">Створити закордонний паспорт</a></li>
-                <li><a class="dropdown-item" href="{% url 'restore_passport' %}">Повідомити про втрату внутрішнього паспорту</a></li>
+                <li><a class="dropdown-item" href="{% url 'restore_passport_loss_u' %}">Повідомити про втрату внутрішнього паспорту</a></li>
                 <li><a class="dropdown-item" href="">Повідомити про втрату закордонного паспорту</a></li>
-                <li><a class="dropdown-item" href="">Оновити внутрішній паспорт</a></li>
+                <li><a class="dropdown-item" href="{% url 'restore_passport_expiry_u' %}">Оновити внутрішній паспорт</a></li>
                 <li><a class="dropdown-item" href="">Оновити закордонний паспорт</a></li>
                 <li><a class="dropdown-item" href="">Змінити дані паспорту</a></li>
             </ul>
