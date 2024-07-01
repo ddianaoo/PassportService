@@ -1,62 +1,96 @@
 {% extends 'base.html' %}
 
 {% block title %}
-{{ title }}:: {{ block.super }}
+{{ title }} :: {{ block.super }}
 {% endblock %}
 
 {% block content %}
-<h2 class="text-center mb-4 mt-5">{{ title }}</h2>
-<br>
+<div class="container-fluid">
+    <div class="row">
+        <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <br/>
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column">
 
-<table class="table">
-    <thead>
-        <tr>
-            <th scope="col">ID</th>
-            <th scope="col">Вид послуги</th>
-            <th scope="col">Користувач</th>
-            <th scope="col">Дані користувача</th>
-            <th scope="col">Статус</th>
-            <th scope="col">Дата створення</th>
-            <th scope="col"></th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for task in tasks %}
-        <tr>
-            <th scope="row">{{ task.id }}</th>
-            <td>{{ task.get_title_display }}</td>
-            <td>{{ task.user }}</td>
-            <td>
-                {% for k, v in task.user_data.items %}
-                {% if  k == 'photo' %}
-                <div class="d-flex align-items-start">
-                    {{k}}: 
-                    <img src="/media/{{ v }}" alt="" width="100" class="img-fluid">
-                </div>
-                {% else %}
-                {{k}} : {{v}}
-                {% endif %}
-                {% endfor %}
-            </td>
-            <td>{{ task.get_status_display }}</td>
-            <td>{{ task.created_at }}</td>
-            <td>
-                {% if task.title == 'Create ip' and task.status == 0 %}
-                <a href="{% url 'create_passport_s' task.id %}" class="btn btn-info">
-                    Перейти до оформлення
-                  </a>
-                {% elif task.title == 'Create fp' and task.status == 0 %}
-                <a href="{% url 'create_fpassport_s' task.id %}" class="btn btn-info">
-                    Перейти до оформлення
-                  </a>
-                  {% elif task.title == 'Restore ip - loss' and task.status == 0 %}
-                  <a href="{% url 'restore_passport_s' task.id %}" class="btn btn-info">
-                      Перейти до відновлення
-                    </a>
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'tasks_list' %}?title=create-passport">
+                            Створення паспорту
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'tasks_list' %}?title=create-foreign-passport">
+                            Створення закордонного паспорту
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'tasks_list' %}?title=create-visa">
+                            Створення візи
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'tasks_list' %}?title=restore-passport">
+                            Відновлення паспорту через втрату
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+            <h2 class="text-center mb-4 mt-5">{{ title }}</h2>
+            <br>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Вид послуги</th>
+                        <th scope="col">Користувач</th>
+                        <th scope="col">Дані користувача</th>
+                        <th scope="col">Статус</th>
+                        <th scope="col">Дата створення</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr>
+                        <th scope="row">{{ task.id }}</th>
+                        <td>{{ task.get_title_display }}</td>
+                        <td>{{ task.user }}</td>
+                        <td>
+                            {% for k, v in task.user_data.items %}
+                            {% if k == 'photo' %}
+                            <div class="d-flex align-items-start">
+                                {{ k }}: 
+                                <img src="/media/{{ v }}" alt="" width="100" class="img-fluid">
+                            </div>
+                            {% else %}
+                            {{ k }} : {{ v }}
+                            {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td>{{ task.get_status_display }}</td>
+                        <td>{{ task.created_at }}</td>
+                        <td>
+                            {% if task.title == 'Create ip' and task.status == 0 %}
+                            <a href="{% url 'create_passport_s' task.id %}" class="btn btn-info">
+                                Перейти до оформлення
+                            </a>
+                            {% elif task.title == 'Create fp' and task.status == 0 %}
+                            <a href="{% url 'create_fpassport_s' task.id %}" class="btn btn-info">
+                                Перейти до оформлення
+                            </a>
+                            {% elif task.title == 'Restore ip - loss' and task.status == 0 %}
+                            <a href="{% url 'restore_passport_s' task.id %}" class="btn btn-info">
+                                Перейти до відновлення
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </main>
+    </div>
+</div>
 {% endblock %}

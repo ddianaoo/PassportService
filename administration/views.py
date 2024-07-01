@@ -1,6 +1,8 @@
 from authentication.forms import ReadOnlyUserForm
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import ListView
 from .models import Task
 from passports.models import Passport, ForeignPassport
 from random import randint
@@ -8,16 +10,42 @@ import datetime
 from .forms import PassportForm, ForeignPassportForm, RestorePassportForm
 
 
-def get_tasks(request):
-    if request.user.is_staff:
+
+class TaskListView(ListView):
+    model = Task
+    context_object_name = 'tasks'
+    paginate_by = 5
+    template_name = 'administration/task_list.html'
+
+    def get_queryset(self):
+        title_filters = ('create-passport', 'create-foreign-passport', 'create-visa', 'restore-passport')
+        d = dict(zip(title_filters, Task.TITLE_CHOICES))
         tasks = Task.objects.all().order_by('-created_at', 'status')
-        return render(request, 'administration/task_list.html', {'tasks': tasks, 'title': 'Список заявок'})
-    messages.error(request, 'Дана сторінка недоступна.')
-    return redirect('home')
+
+        title = self.request.GET.get('title')
+        if title and title in title_filters:
+            tasks = tasks.filter(title=d[title][0])
+
+        status = self.request.GET.get('status')
+        if status:
+            tasks = tasks.filter(status=status)
+        
+        return tasks
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Список заявок'
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            messages.error(request, 'Дана сторінка недоступна.')
+            return redirect('home')
+        return super().dispatch(request, *args, **kwargs)
 
 
+@staff_member_required(login_url='signin')
 def create_passport(request, pk):
-    # add permissions
     task = get_object_or_404(Task, pk=pk)
     if task.status or task.user.passport:
         messages.error(request, 'Заявка від цього користувача вже опрацьована.')
@@ -50,8 +78,11 @@ def create_passport(request, pk):
                   {'form': form, 'user_form': user_form, 'title': 'Оформлення паспорту'})
 
 
+@staff_member_required(login_url='signin')
 def create_fpassport(request, pk):
-    # add permissions
+    if not request.user.is_staff:
+        messages.error(request, 'Дана сторінка недоступна.')
+        return redirect('home')
     task = get_object_or_404(Task, pk=pk)
     if task.status or task.user.foreign_passport:
         messages.error(request, 'Заявка від цього користувача вже опрацьована.')
@@ -84,9 +115,8 @@ def create_fpassport(request, pk):
                   {'form': form, 'user_form': user_form, 'title': 'Оформлення паспорту'})
 
 
-
+@staff_member_required(login_url='signin')
 def restore_passport(request, pk):
-    # add permissions
     task = get_object_or_404(Task, pk=pk)
     if task.status:
         messages.error(request, 'Заявка від цього користувача вже опрацьована.')
