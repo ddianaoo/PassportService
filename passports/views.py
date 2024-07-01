@@ -1,6 +1,8 @@
 from administration.models import Task
+from authentication.forms import ReadOnlyUserForm
 import datetime
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.files.storage import default_storage
 from django.shortcuts import render, redirect
 from .forms import AddressForm, PhotoForm
@@ -11,6 +13,7 @@ def main_page(request):
     return render(request, 'home.html')
 
 
+@login_required
 def create_passport(request):
     task = Task.objects.filter(user=request.user, title="Create ip", status=0).exists()
     if task:
@@ -21,6 +24,7 @@ def create_passport(request):
         return redirect('get_documents')
 
     if request.method == 'POST':
+        user_form = ReadOnlyUserForm(instance=request.user)
         photo_form = PhotoForm(request.POST, request.FILES)       
         address_form = AddressForm(request.POST)
 
@@ -53,11 +57,14 @@ def create_passport(request):
     else:
         address_form = AddressForm()
         photo_form = PhotoForm()
+        user_form = ReadOnlyUserForm(instance=request.user)
     return render(request, 'passports/create_passport.html', {'address_form': address_form, 
                                                               'photo_form': photo_form, 
+                                                              'user_form': user_form,
                                                               'title': 'Заявка на створення паспорту'})
 
 
+@login_required
 def create_fpassport(request):
     task = Task.objects.filter(user=request.user, title="Create fp", status=0).exists()
     if task:
@@ -71,6 +78,7 @@ def create_fpassport(request):
         return redirect('get_documents')        
 
     if request.method == 'POST':
+        user_form = ReadOnlyUserForm(instance=request.user)
         form = PhotoForm(request.POST, request.FILES)       
         if form.is_valid():
             photo = form.cleaned_data.get('photo')
@@ -86,12 +94,47 @@ def create_fpassport(request):
         else:
             messages.error(request, form.errors)
     else:
+        user_form = ReadOnlyUserForm(instance=request.user)
         form = PhotoForm()
     return render(request, 'passports/create_fpassport.html', { 'form': form, 
+                                                               'user_form': user_form,
                                                               'title': 'Заявка на створення закордонного паспорту'})
 
-
+@login_required
 def get_documents(request):
     return render(request, 'passports/get_documents.html', {'passport': request.user.passport,
                                                             'foreign_passport': request.user.foreign_passport,
                                                             'user': request.user})
+
+
+@login_required
+def restore_passport(request):
+    task = Task.objects.filter(user=request.user, title="Restore ip - loss", status=0).exists()
+    if task:
+        messages.error(request, 'Ви вже відправили заявку на відновлення внутрішнього паспотру через втрату.')
+        return redirect('get_documents')
+    if not request.user.passport:
+        messages.error(request, 'У вас ще нема паспорту.')
+        return redirect('get_documents')        
+
+    if request.method == 'POST':
+        form = PhotoForm(request.POST, request.FILES)       
+        user_form = ReadOnlyUserForm(instance=request.user)
+        if form.is_valid():
+            photo = form.cleaned_data.get('photo')
+            today = datetime.date.today()
+            month = f'{today.month:02d}'
+            day = f'{today.day:02d}'
+            photo_name = f'{request.user.pk}-{request.user.name}-{request.user.surname}-passport-loss.{photo.name.split(".")[-1]}'
+            photo_path = default_storage.save(f'photos/passports/{today.year}/{month}/{day}/{photo_name}', photo)    
+
+            task = Task.objects.create(user=request.user,title='Restore ip - loss', user_data={'photo': photo_path})        
+            messages.success(request, 'Ваша заявка на відновлення внутрішнього паспотру відправлена!')
+            return redirect('get_documents')
+        else:
+            messages.error(request, form.errors)
+    else:
+        form = PhotoForm()
+        user_form = ReadOnlyUserForm(instance=request.user)
+    return render(request, 'passports/create_fpassport.html', { 'form': form, 'user_form': user_form,
+                                                              'title': 'Заявка на відновлення внутрішнього паспотру'})

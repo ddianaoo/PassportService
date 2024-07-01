@@ -25,7 +25,6 @@ class Address(models.Model):
 
 class AbstractPassport(models.Model):
     number         = models.IntegerField(primary_key=True, validators=[validate_number,])
-    record_number  = models.CharField(max_length=14, unique=True, blank=True, validators=[validate_record_number,]) 
     authority      = models.IntegerField(blank=True, validators=[validate_authority,])
     date_of_issue  = models.DateField(blank=True, validators=[validate_issue_date])
     date_of_expiry = models.DateField(blank=True, validators=[validate_expiry_date])

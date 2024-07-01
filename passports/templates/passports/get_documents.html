@@ -36,7 +36,7 @@
                                 
                                 
                                 <p><strong>Document Number:</strong> {{ passport.number }}</p>
-                                <p><strong>Record Number:</strong> {{ passport.record_number }}</p>
+                                <p><strong>Record Number:</strong> {{ user.record_number }}</p>
                                 <p><strong>Nationality:</strong> {{ user.get_nationality_display }}</p>
                                 <p>
                                     <strong>Registration Address:</strong> 
@@ -79,7 +79,7 @@
                             <p><strong>Sex:</strong> {{ user.sex }}</p>
                             <br/>
                             <p><strong>Document Number:</strong> {{ foreign_passport.number }}</p>
-                            <p><strong>Record Number:</strong> {{ foreign_passport.record_number }}</p>
+                            <p><strong>Record Number:</strong> {{ user.record_number }}</p>
                             <p><strong>Nationality:</strong> {{ user.get_nationality_display }}</p>
                             <p><strong>Country code:</strong> {{ user.nationality }}</p>
                         </div>

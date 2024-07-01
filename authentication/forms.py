@@ -46,3 +46,20 @@ class UserLoginForm(forms.ModelForm):
                 raise ValidationError('Невірний email або пароль.')
         return self.cleaned_data    
     
+
+class ReadOnlyUserForm(forms.ModelForm):
+
+    class Meta:
+        model = CustomUser
+        fields = ('name', 'surname', 'patronymic', 'sex', 'date_of_birth', 'place_of_birth', 'nationality', 'record_number')
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
+            'surname': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
+            'patronymic': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
+            'sex': forms.Select(attrs={'class': 'form-control', 'disabled': 'true'}),
+            'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'readonly': 'readonly'}),
+            'place_of_birth': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
+            'nationality': forms.Select(attrs={'class': 'form-control', 'disabled': 'true'}),
+            'record_number': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
+        }
+    

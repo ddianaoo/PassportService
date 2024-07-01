@@ -18,7 +18,7 @@
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                 <li><a class="dropdown-item" href="{% url 'create_passport_u' %}">Створити внутрішній паспорт</a></li>
                 <li><a class="dropdown-item" href="{% url 'create_fpassport_u' %}">Створити закордонний паспорт</a></li>
-                <li><a class="dropdown-item" href="">Повідомити про втрату внутрішнього паспорту</a></li>
+                <li><a class="dropdown-item" href="{% url 'restore_passport' %}">Повідомити про втрату внутрішнього паспорту</a></li>
                 <li><a class="dropdown-item" href="">Повідомити про втрату закордонного паспорту</a></li>
                 <li><a class="dropdown-item" href="">Оновити внутрішній паспорт</a></li>
                 <li><a class="dropdown-item" href="">Оновити закордонний паспорт</a></li>
@@ -48,10 +48,11 @@
         {% if request.user.is_authenticated %}
         <span class="navbar-text">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
                 <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown7" role="button"
                    data-bs-toggle="dropdown" aria-expanded="false" style="color: #912D9B;">
-                    <i class="bi bi-person-circle"></i>  Профіль
+                    <i class="bi bi-person-circle"></i> {{request.user.surname }} {{request.user.name}}
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                     <li><a class="dropdown-item" href="" >Видалити профіль</a></li>

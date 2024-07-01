@@ -3,7 +3,9 @@ from django.db import models
 from passports.models import Address, Passport, ForeignPassport
 from validation.validate_birth_date import validate_birth_date
 from validation.validate_email import validate_email
+from validation.validate_record_number import validate_record_number
 from passports.utils import COUNTRY_CHOICES
+from random import randint
 
 
 class CustomUserManager(BaseUserManager):
@@ -37,6 +39,7 @@ class CustomUser(AbstractBaseUser):
     date_of_birth  = models.DateField(validators=[validate_birth_date,])
     place_of_birth = models.CharField(max_length=255)
     nationality    = models.CharField(max_length=2, choices=COUNTRY_CHOICES)
+    record_number  = models.CharField(max_length=14, unique=True, null=True, validators=[validate_record_number,]) 
 
     address          = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True)
     passport         = models.OneToOneField(Passport, on_delete=models.SET_NULL, null=True, related_name='user')
@@ -60,3 +63,9 @@ class CustomUser(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return self.is_superuser
+    
+    def save(self, *args, **kwargs):
+        if not self.record_number:
+            self.record_number = self.date_of_birth.strftime('%Y%m%d') + f'-{randint(1, 99999):05d}'
+        super().save(*args, **kwargs)   
+    

@@ -17,7 +17,7 @@
             <th scope="col">Дані користувача</th>
             <th scope="col">Статус</th>
             <th scope="col">Дата створення</th>
-            <th scope="col">Дії</th>
+            <th scope="col"></th>
         </tr>
     </thead>
     <tbody>
@@ -49,6 +49,10 @@
                 <a href="{% url 'create_fpassport_s' task.id %}" class="btn btn-info">
                     Перейти до оформлення
                   </a>
+                  {% elif task.title == 'Restore ip - loss' and task.status == 0 %}
+                  <a href="{% url 'restore_passport_s' task.id %}" class="btn btn-info">
+                      Перейти до відновлення
+                    </a>
                 {% endif %}
             </td>
         </tr>
