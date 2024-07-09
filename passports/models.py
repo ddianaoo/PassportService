@@ -24,10 +24,10 @@ class Address(models.Model):
 
 class AbstractPassport(models.Model):
     number         = models.IntegerField(primary_key=True, validators=[validate_number,])
-    authority      = models.IntegerField(blank=True, validators=[validate_authority,])
-    date_of_issue  = models.DateField(blank=True, validators=[validate_issue_date])
-    date_of_expiry = models.DateField(blank=True, validators=[validate_expiry_date])
-    photo          = models.ImageField(upload_to='photos/passports/%Y/%m/%d/', blank=True)
+    authority      = models.IntegerField(validators=[validate_authority,])
+    date_of_issue  = models.DateField(validators=[validate_issue_date])
+    date_of_expiry = models.DateField(validators=[validate_expiry_date])
+    photo          = models.ImageField(upload_to='photos/passports/%Y/%m/%d/')
     
     class Meta:
         abstract = True

@@ -17,12 +17,6 @@ class PassportForm(forms.ModelForm):
             'photo': forms.FileInput(attrs={'class': 'form-control'}),
         }
 
-    def clean_authority(self):
-        data = self.cleaned_data['authority']
-        if not data:
-            raise ValidationError("authority is a required field.")
-        return data        
-    
 
 class ForeignPassportForm(forms.ModelForm):
 
@@ -36,12 +30,6 @@ class ForeignPassportForm(forms.ModelForm):
             'date_of_expiry': forms.DateInput(attrs={'class': 'form-control'}),
             'photo': forms.FileInput(attrs={'class': 'form-control'}),
         }
-
-    def clean_authority(self):
-        data = self.cleaned_data['authority']
-        if not data:
-            raise ValidationError("authority is a required field.")
-        return data   
     
 
 class RestorePassportForm(forms.ModelForm):
@@ -56,12 +44,6 @@ class RestorePassportForm(forms.ModelForm):
             'date_of_expiry': forms.DateInput(attrs={'class': 'form-control'}),
             'photo': forms.FileInput(attrs={'class': 'form-control'}),
         }
-
-    def clean_authority(self):
-        data = self.cleaned_data['authority']
-        if not data:
-            raise ValidationError("authority is a required field.")
-        return data   
     
 
 class RestoreForeignPassportForm(forms.ModelForm):
@@ -76,10 +58,4 @@ class RestoreForeignPassportForm(forms.ModelForm):
             'date_of_expiry': forms.DateInput(attrs={'class': 'form-control'}),
             'photo': forms.FileInput(attrs={'class': 'form-control'}),
         }
-
-    def clean_authority(self):
-        data = self.cleaned_data['authority']
-        if not data:
-            raise ValidationError("authority is a required field.")
-        return data   
     
