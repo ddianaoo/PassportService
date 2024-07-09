@@ -8,41 +8,35 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-            <li class="nav-item"><a class="nav-link" href="{% url 'get_documents' %}">Мої документи</a></li>
-
-            <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-               data-bs-toggle="dropdown" aria-expanded="false">
-                Подати заявку
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" href="{% url 'create_passport_u' %}">Створити внутрішній паспорт</a></li>
-                <li><a class="dropdown-item" href="{% url 'create_fpassport_u' %}">Створити закордонний паспорт</a></li>
-                <li><a class="dropdown-item" href="{% url 'restore_passport_loss_u' %}">Повідомити про втрату внутрішнього паспорту</a></li>
-                <li><a class="dropdown-item" href="">Повідомити про втрату закордонного паспорту</a></li>
-                <li><a class="dropdown-item" href="{% url 'restore_passport_expiry_u' %}">Оновити внутрішній паспорт</a></li>
-                <li><a class="dropdown-item" href="">Оновити закордонний паспорт</a></li>
-                <li><a class="dropdown-item" href="">Змінити дані паспорту</a></li>
-            </ul>
-            </li>
-
-            {% if request.user.is_authenticated %}
-                <li class="nav-item"><a class="nav-link">|</a></li>
-
-                {% if request.user.is_staff %}
+            {% if request.user.is_staff %}
                 <li class="nav-item"><a class="nav-link" 
                     href="{% url 'tasks_list' %}" 
                     style="color: #912D9B;">
                     Заявки</a>
                 </li>
-                {% endif %}
+            {% else %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'get_documents' %}">Мої документи</a></li>
+
+                <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                   data-bs-toggle="dropdown" aria-expanded="false">
+                    Подати заявку
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="{% url 'create_passport_u' %}">Створити внутрішній паспорт</a></li>
+                    <li><a class="dropdown-item" href="{% url 'create_fpassport_u' %}">Створити закордонний паспорт</a></li>
+                    <li><a class="dropdown-item" href="{% url 'restore_passport_loss_u' %}">Повідомити про втрату внутрішнього паспорту</a></li>
+                    <li><a class="dropdown-item" href="{% url 'restore_fpassport_loss_u' %}">Повідомити про втрату закордонного паспорту</a></li>
+                    <li><a class="dropdown-item" href="{% url 'restore_passport_expiry_u' %}">Оновити внутрішній паспорт</a></li>
+                    <li><a class="dropdown-item" href="{% url 'restore_fpassport_expiry_u' %}">Оновити закордонний паспорт</a></li>
+                    <li><a class="dropdown-item" href="">Змінити дані паспорту</a></li>
+                </ul>
+                </li>  
             {% endif %}
         </ul>
-
-        {% if request.user.is_authenticated %}
         <span class="navbar-text">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
+        {% if request.user.is_authenticated %}
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown7" role="button"
                    data-bs-toggle="dropdown" aria-expanded="false" style="color: #912D9B;">
@@ -52,18 +46,12 @@
                     <li><a class="dropdown-item" href="" >Видалити профіль</a></li>
                 </ul>
                 </li>
-
-        <li class="nav-item">
-            <a href="{% url 'signout' %}" class="btn btn-light">Вихід</a>
-        </li>
-        </ul>
-
+                <a href="{% url 'signout' %}" class="btn btn-light">Вихід</a>
+            </ul>
         {% else %}
-        <span class="navbar-text">
             <a href="{% url 'signin' %}" class="btn btn-light">Вхід</a>
             <a href="{% url 'signup' %}" class="btn btn-light">Реєстрація</a>
-            </span>
         {% endif %}
-
+        </span>
     </div>
 </nav>

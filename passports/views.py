@@ -96,7 +96,7 @@ def create_fpassport(request):
     else:
         user_form = ReadOnlyUserForm(instance=request.user)
         form = PhotoForm()
-    return render(request, 'passports/create_fpassport.html', { 'form': form, 
+    return render(request, 'passports/index_form.html', { 'form': form, 
                                                                'user_form': user_form,
                                                               'title': 'Заявка на створення закордонного паспорту'})
 
@@ -136,7 +136,7 @@ def restore_passport(request, title, reason, error_msg):
     else:
         form = PhotoForm()
         user_form = ReadOnlyUserForm(instance=request.user)
-    return render(request, 'passports/create_fpassport.html', { 'form': form, 'user_form': user_form,
+    return render(request, 'passports/index_form.html', { 'form': form, 'user_form': user_form,
                                                               'title': 'Заявка на відновлення внутрішнього паспотру'})
 
 
@@ -149,4 +149,49 @@ def restore_passport_loss(request):
 @login_required
 def restore_passport_expiry(request):
     return restore_passport(request, "Restore ip - expiry", 'expiry', 
-                     'Ви вже відправили заявку на відновлення внутрішнього паспотру через закінчення терміну придатності..')
+                     'Ви вже відправили заявку на відновлення внутрішнього паспотру через закінчення терміну придатності.')
+
+
+@login_required
+def restore_fpassport(request,  title, reason, error_msg):
+    task = Task.objects.filter(user=request.user, title=title, status=0).exists()
+    if task:
+        messages.error(request, error_msg)
+        return redirect('get_documents')
+    if not request.user.foreign_passport:
+        messages.error(request, 'У вас ще нема закордонного паспорту.')
+        return redirect('get_documents')        
+
+    if request.method == 'POST':
+        form = PhotoForm(request.POST, request.FILES)       
+        user_form = ReadOnlyUserForm(instance=request.user)
+        if form.is_valid():
+            photo = form.cleaned_data.get('photo')
+            today = datetime.date.today()
+            month = f'{today.month:02d}'
+            day = f'{today.day:02d}'
+            photo_name = f'{request.user.pk}-{request.user.name}-{request.user.surname}-fpassport-{reason}.{photo.name.split(".")[-1]}'
+            photo_path = default_storage.save(f'photos/passports/{today.year}/{month}/{day}/{photo_name}', photo)    
+
+            task = Task.objects.create(user=request.user,title=title, user_data={'photo': photo_path})        
+            messages.success(request, 'Ваша заявка на відновлення закордонного паспотру відправлена!')
+            return redirect('get_documents')
+        else:
+            messages.error(request, form.errors)
+    else:
+        form = PhotoForm()
+        user_form = ReadOnlyUserForm(instance=request.user)
+    return render(request, 'passports/index_form.html', { 'form': form, 'user_form': user_form,
+                                                              'title': 'Заявка на відновлення закордонного паспотру'})
+
+
+@login_required
+def restore_fpassport_loss(request):
+    return restore_fpassport(request, "Restore fp - loss", 'loss', 
+                     'Ви вже відправили заявку на відновлення закордонного паспотру через втрату.')
+
+
+@login_required
+def restore_fpassport_expiry(request):
+    return restore_fpassport(request, "Restore fp - expiry", 'expiry', 
+                     'Ви вже відправили заявку на відновлення закордонного паспотру через закінчення терміну придатності.')

@@ -63,3 +63,23 @@ class RestorePassportForm(forms.ModelForm):
             raise ValidationError("authority is a required field.")
         return data   
     
+
+class RestoreForeignPassportForm(forms.ModelForm):
+
+    class Meta:
+        model = ForeignPassport
+        fields = '__all__'
+        widgets = {
+            'number': forms.NumberInput(attrs={'class': 'form-control'}),
+            'authority': forms.NumberInput(attrs={'class': 'form-control'}),
+            'date_of_issue': forms.DateInput(attrs={'class': 'form-control'}),
+            'date_of_expiry': forms.DateInput(attrs={'class': 'form-control'}),
+            'photo': forms.FileInput(attrs={'class': 'form-control'}),
+        }
+
+    def clean_authority(self):
+        data = self.cleaned_data['authority']
+        if not data:
+            raise ValidationError("authority is a required field.")
+        return data   
+    
