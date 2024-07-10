@@ -1,4 +1,3 @@
-from authentication.forms import ReadOnlyUserForm
 import datetime
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -7,9 +6,7 @@ from django.views.generic import ListView
 from .models import Task
 from passports.models import Address, Passport, ForeignPassport, Visa
 from random import randint
-from .forms import (PassportForm, ForeignPassportForm, 
-                    RestorePassportForm, RestoreForeignPassportForm,
-                    )
+from passports.forms import PassportForm, ForeignPassportForm
 
 
 class TaskListView(ListView):
@@ -77,7 +74,6 @@ def create_passport(request, pk):
                         authority=randint(1111, 9999)
     )
     if request.method == 'POST':
-        user_form = ReadOnlyUserForm(instance=task.user)
         form = PassportForm(request.POST, request.FILES, instance=passport)
         if form.is_valid():
             p = form.save()
@@ -89,21 +85,18 @@ def create_passport(request, pk):
             return redirect('tasks_list')
         else:
             messages.error(request, form.errors)
-    user_form = ReadOnlyUserForm(instance=task.user)
     form = PassportForm(instance=passport)
     return render(request, 'administration/task_form.html',
-                  {'form': form, 'user_form': user_form, 'title': 'Оформлення паспорту'})
+                  {'form': form, 'user': task.user, 'task': task, 'title': 'Оформлення паспорту'})
 
 
 @staff_member_required(login_url='signin')
 def create_fpassport(request, pk):
-    if not request.user.is_staff:
-        messages.error(request, 'Дана сторінка недоступна.')
-        return redirect('home')
     task = get_object_or_404(Task, pk=pk)
     if task.status or task.user.foreign_passport:
         messages.error(request, 'Заявка від цього користувача вже опрацьована.')
         return redirect('tasks_list')
+    
     authority=task.user.passport.authority
     today = datetime.date.today()
     ten_years_more = today + datetime.timedelta(days=10*365)
@@ -114,7 +107,6 @@ def create_fpassport(request, pk):
                         authority=authority
     )
     if request.method == 'POST':
-        user_form = ReadOnlyUserForm(instance=task.user)
         form = ForeignPassportForm(request.POST, request.FILES, instance=passport)
         if form.is_valid():
             fp = form.save()
@@ -127,9 +119,8 @@ def create_fpassport(request, pk):
         else:
             messages.error(request, form.errors)
     form = ForeignPassportForm(instance=passport)
-    user_form = ReadOnlyUserForm(instance=task.user)
     return render(request, 'administration/task_form.html',
-                  {'form': form, 'user_form': user_form, 'title': 'Оформлення паспорту'})
+                  {'form': form, 'user': task.user, 'task': task, 'title': 'Оформлення закордонного паспорту'})
 
 
 @staff_member_required(login_url='signin')
@@ -147,8 +138,7 @@ def restore_passport(request, task_pk):
                         authority=randint(1111, 9999)
     )
     if request.method == 'POST':
-        user_form = ReadOnlyUserForm(instance=task.user)
-        form = RestorePassportForm(request.POST, request.FILES, instance=new_passport)
+        form = PassportForm(request.POST, request.FILES, instance=new_passport)
         if form.is_valid():
             task.user.passport.delete()
             p = form.save()
@@ -160,10 +150,9 @@ def restore_passport(request, task_pk):
             return redirect('tasks_list')
         else:
             messages.error(request, form.errors)
-    form = RestorePassportForm(instance=new_passport)
-    user_form = ReadOnlyUserForm(instance=task.user)
+    form = PassportForm(instance=new_passport)
     return render(request, 'administration/task_form.html',
-                  {'form': form, 'user_form': user_form, 'title': 'Поновлення паспорту'})
+                  {'form': form, 'user': task.user, 'task': task, 'title': 'Поновлення паспорту'})
 
 
 @staff_member_required(login_url='signin')
@@ -181,8 +170,7 @@ def restore_fpassport(request, task_pk):
                         authority=randint(1111, 9999)
     )
     if request.method == 'POST':
-        user_form = ReadOnlyUserForm(instance=task.user)
-        form = RestoreForeignPassportForm(request.POST, request.FILES, instance=new_passport)
+        form = ForeignPassportForm(request.POST, request.FILES, instance=new_passport)
         if form.is_valid():
             visas = Visa.objects.filter(foreign_passport=task.user.foreign_passport)
             visas.delete()
@@ -198,10 +186,9 @@ def restore_fpassport(request, task_pk):
             return redirect('tasks_list')
         else:
             messages.error(request, form.errors)
-    form = RestoreForeignPassportForm(instance=new_passport)
-    user_form = ReadOnlyUserForm(instance=task.user)
+    form = ForeignPassportForm(instance=new_passport)
     return render(request, 'administration/task_form.html',
-                  {'form': form, 'user_form': user_form, 'title': 'Поновлення закордонного паспорту'})
+                  {'form': form, 'user': task.user, 'task': task, 'title': 'Поновлення закордонного паспорту'})
 
 
 @staff_member_required(login_url='signin')

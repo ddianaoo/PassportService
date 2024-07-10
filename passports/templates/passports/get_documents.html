@@ -18,7 +18,7 @@
                         {% if passport %}
                             <div class="col-md-5">
                                 {% if passport.photo %}
-                                    <img src="{{ passport.photo.url }}" alt="Passport Photo" class="img-fluid mb-5">
+                                    <img src="{{ passport.photo.url }}" style="height: 250px; width: 220px;" alt="Passport Photo" class="img-fluid mb-5">
                                 {% else %}
                                     <p>Photo: Not available</p>
                                 {% endif %}
@@ -62,7 +62,7 @@
                         {% if foreign_passport %}
                         <div class="col-md-5">
                             {% if foreign_passport.photo %}
-                                <img src="{{ foreign_passport.photo.url }}" alt="Foreign Passport Photo" class="img-fluid mb-4">
+                                <img src="{{ foreign_passport.photo.url }}" alt="Foreign Passport Photo" style="height: 250px; width: 220px;" class="img-fluid mb-4">
                             {% else %}
                                 <p>Photo: Not available</p>
                             {% endif %}

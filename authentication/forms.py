@@ -51,7 +51,7 @@ class ReadOnlyUserForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ('name', 'surname', 'patronymic', 'sex', 'date_of_birth', 'place_of_birth', 'nationality', 'record_number')
+        fields = ('name', 'surname', 'patronymic', 'sex', 'date_of_birth', 'place_of_birth', 'nationality',)
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
             'surname': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),

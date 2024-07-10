@@ -60,7 +60,6 @@
                         <th scope="col">ID</th>
                         <th scope="col">Вид послуги</th>
                         <th scope="col">Користувач</th>
-                        <th scope="col">Дані користувача</th>
                         <th scope="col">Статус</th>
                         <th scope="col">Дата створення</th>
                         <th scope="col"></th>
@@ -71,44 +70,43 @@
                     <tr>
                         <th scope="row">{{ task.id }}</th>
                         <td>{{ task.get_title_display }}</td>
-                        <td>{{ task.user }}</td>
                         <td>
-                            {% for k, v in task.user_data.items %}
-                            {% if k == 'photo' %}
+                            <p>{{ task.user }}</p>
+                            {% if task.user_data.photo %}
+                                <img src="/media/{{ task.user_data.photo }}" alt="" width="100" style="height: 100px; width: 80px;" class="img-fluid">
+                            {% elif task.user.passport.photo %}
                             <div class="d-flex align-items-start">
-                                {{ k }}: 
-                                <img src="/media/{{ v }}" alt="" width="100" class="img-fluid">
+                                <img src="{{ task.user.passport.photo.url }}" alt="" width="100" style="height: 100px; width: 80px;" class="img-fluid">
                             </div>
-                            {% elif k == 'formatted_address' %}
-                            address: {{ v }}
-                            {% elif k == 'address_id' %}
-                            {% else %}
-                            {{ k }} : {{ v }}
                             {% endif %}
-                            {% endfor %}
                         </td>
-                        <td>{{ task.get_status_display }}</td>
+                        <td>{% if task.status %}
+                            <p style="color: green;">{{ task.get_status_display }}</p>
+                            {% else %}
+                            <p style="color: red;">{{ task.get_status_display }}</p>
+                            {% endif %}
+                        </td>
                         <td>{{ task.created_at }}</td>
                         <td>
                             {% if task.title == 'Create ip' and task.status == 0 %}
                             <a href="{% url 'create_passport_s' task.id %}" class="btn btn-info">
-                                Перейти до оформлення
+                                Оформити
                             </a>
                             {% elif task.title == 'Create fp' and task.status == 0 %}
                             <a href="{% url 'create_fpassport_s' task.id %}" class="btn btn-info">
-                                Перейти до оформлення
+                                Оформити
                             </a>
                             {% elif task.title|slice:":10" == 'Restore ip' and task.status == 0 %}
                             <a href="{% url 'restore_passport_s' task.id %}" class="btn btn-info">
-                                Перейти до відновлення
+                                Оформити
                             </a>
                             {% elif task.title|slice:":10" == 'Restore fp' and task.status == 0 %}
                             <a href="{% url 'restore_fpassport_s' task.id %}" class="btn btn-info">
-                                Перейти до відновлення
+                                Оформити
                             </a>
                             {% elif task.title == 'Restore address' and task.status == 0 %}
                             <a href="{% url 'restore_address_s' task.id %}" class="btn btn-info">
-                                Перейти до оновлення
+                                Оформити
                             </a>
                             {% endif %}
                         </td>

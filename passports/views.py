@@ -78,7 +78,6 @@ def create_fpassport(request):
         return redirect('get_documents')        
 
     if request.method == 'POST':
-        user_form = ReadOnlyUserForm(instance=request.user)
         form = PhotoForm(request.POST, request.FILES)       
         if form.is_valid():
             photo = form.cleaned_data.get('photo')
@@ -94,11 +93,9 @@ def create_fpassport(request):
         else:
             messages.error(request, form.errors)
     else:
-        user_form = ReadOnlyUserForm(instance=request.user)
         form = PhotoForm()
-    return render(request, 'passports/index_form.html', { 'form': form, 
-                                                               'user_form': user_form,
-                                                              'title': 'Заявка на створення закордонного паспорту'})
+    return render(request, 'passports/index_form.html', { 'form': form, 'user': request.user,
+                                                        'title': 'Заявка на створення закордонного паспорту'})
 
 @login_required
 def get_documents(request):
@@ -119,7 +116,6 @@ def restore_passport(request, title, reason, error_msg):
 
     if request.method == 'POST':
         form = PhotoForm(request.POST, request.FILES)       
-        user_form = ReadOnlyUserForm(instance=request.user)
         if form.is_valid():
             photo = form.cleaned_data.get('photo')
             today = datetime.date.today()
@@ -135,8 +131,7 @@ def restore_passport(request, title, reason, error_msg):
             messages.error(request, form.errors)
     else:
         form = PhotoForm()
-        user_form = ReadOnlyUserForm(instance=request.user)
-    return render(request, 'passports/index_form.html', { 'form': form, 'user_form': user_form,
+    return render(request, 'passports/index_form.html', { 'form': form, 'user': request.user,
                                                               'title': 'Заявка на відновлення внутрішнього паспотру'})
 
 
@@ -164,7 +159,6 @@ def restore_fpassport(request,  title, reason, error_msg):
 
     if request.method == 'POST':
         form = PhotoForm(request.POST, request.FILES)       
-        user_form = ReadOnlyUserForm(instance=request.user)
         if form.is_valid():
             photo = form.cleaned_data.get('photo')
             today = datetime.date.today()
@@ -180,8 +174,7 @@ def restore_fpassport(request,  title, reason, error_msg):
             messages.error(request, form.errors)
     else:
         form = PhotoForm()
-        user_form = ReadOnlyUserForm(instance=request.user)
-    return render(request, 'passports/index_form.html', { 'form': form, 'user_form': user_form,
+    return render(request, 'passports/index_form.html', { 'form': form, 'user': request.user,
                                                               'title': 'Заявка на відновлення закордонного паспотру'})
 
 

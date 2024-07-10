@@ -1,5 +1,5 @@
 from django import forms
-from .models import Address
+from .models import Address, Passport, ForeignPassport
 
 
 class AddressForm(forms.ModelForm):
@@ -19,3 +19,30 @@ class AddressForm(forms.ModelForm):
 
 class PhotoForm(forms.Form):
     photo = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control'}))
+
+
+class PassportForm(forms.ModelForm):
+
+    class Meta:
+        model = Passport
+        fields = ('number', 'authority', 'date_of_issue', 'date_of_expiry')
+        widgets = {
+            'number': forms.NumberInput(attrs={'class': 'form-control'}),
+            'authority': forms.NumberInput(attrs={'class': 'form-control'}),
+            'date_of_issue': forms.DateInput(attrs={'class': 'form-control'}),
+            'date_of_expiry': forms.DateInput(attrs={'class': 'form-control'}),
+        }
+
+
+class ForeignPassportForm(forms.ModelForm):
+
+    class Meta:
+        model = ForeignPassport
+        fields = ('number', 'authority', 'date_of_issue', 'date_of_expiry')
+        widgets = {
+            'number': forms.NumberInput(attrs={'class': 'form-control'}),
+            'authority': forms.NumberInput(attrs={'class': 'form-control'}),
+            'date_of_issue': forms.DateInput(attrs={'class': 'form-control'}),
+            'date_of_expiry': forms.DateInput(attrs={'class': 'form-control'}),
+        }
+    
