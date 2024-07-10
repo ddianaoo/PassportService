@@ -15,7 +15,8 @@ class Task(models.Model):
         ('Restore fp - loss', 'restore an foreign passport due to loss'),
         ('Restore ip - expiry', 'restore an internal passport due to expiration'),
         ('Restore fp - expiry', 'restore an foreign passport due to expiration'),
-        ('Change data', 'change passport data')
+        ('Change data', 'change passport data'),
+        ('Restore address', 'restore a registration address')
     ]
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)

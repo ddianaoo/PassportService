@@ -195,3 +195,36 @@ def restore_fpassport_loss(request):
 def restore_fpassport_expiry(request):
     return restore_fpassport(request, "Restore fp - expiry", 'expiry', 
                      'Ви вже відправили заявку на відновлення закордонного паспотру через закінчення терміну придатності.')
+
+
+@login_required
+def change_address(request):
+    task = Task.objects.filter(user=request.user, title="Restore address", status=0).exists()
+    if task:
+        messages.error(request, 'Ви вже відправили заявку на оновлення адреси прописки.')
+        return redirect('get_documents')
+
+    if request.method == 'POST':     
+        address_form = AddressForm(request.POST)
+
+        if address_form.is_valid():
+            country_code = address_form.cleaned_data.get('country_code')
+            region = address_form.cleaned_data.get('region')
+            settlement = address_form.cleaned_data.get('settlement')
+            street = address_form.cleaned_data.get('street')
+            apartments = address_form.cleaned_data.get('apartments')
+            post_code = address_form.cleaned_data.get('post_code')
+
+            adr, created = Address.objects.get_or_create(country_code=country_code, region=region, settlement=settlement, 
+                                         street=street, apartments=apartments, post_code=post_code)
+
+            task = Task.objects.create(user=request.user,title='Restore address', user_data={'address_id': adr.pk})        
+            messages.success(request, 'Ваша заявка на оновлення адреси прописки відправлена!')
+            return redirect('get_documents')
+        else:
+            messages.error(request, address_form.errors)
+    else:
+        address_form = AddressForm()
+    return render(request, 'passports/address_form.html', {'address_form': address_form, 
+                                                              'title': 'Заявка на оновлення адреси прописки'})
+

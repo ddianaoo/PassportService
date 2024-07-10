@@ -5,7 +5,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView
 from .models import Task
-from passports.models import Passport, ForeignPassport, Visa
+from passports.models import Address, Passport, ForeignPassport, Visa
 from random import randint
 from .forms import (PassportForm, ForeignPassportForm, 
                     RestorePassportForm, RestoreForeignPassportForm,
@@ -26,7 +26,8 @@ class TaskListView(ListView):
                          'restore-fpassport-loss',
                          'restore-passport-expiry',
                          'restore-fpassport-expiry',
-                         'change-data'
+                         'change-data',
+                         'restore-address'
                          )
         d = dict(zip(title_filters, Task.TITLE_CHOICES))
         tasks = Task.objects.all().order_by('-created_at', 'status')
@@ -39,6 +40,18 @@ class TaskListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Список заявок'
+        tasks_with_addresses = []
+        for task in context['tasks']:
+            user_data = task.user_data
+            if 'address_id' in user_data:
+                try:
+                    address = Address.objects.get(pk=user_data['address_id'])
+                    formatted_address = f"{address.country_code}, {address.region}, {address.settlement}, {address.street}, {address.apartments}, {address.post_code}"
+                    user_data['formatted_address'] = formatted_address
+                except Address.DoesNotExist:
+                    user_data['formatted_address'] = 'Address not found'
+            tasks_with_addresses.append(task)
+        context['tasks'] = tasks_with_addresses
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -189,3 +202,22 @@ def restore_fpassport(request, task_pk):
     user_form = ReadOnlyUserForm(instance=task.user)
     return render(request, 'administration/task_form.html',
                   {'form': form, 'user_form': user_form, 'title': 'Поновлення закордонного паспорту'})
+
+
+@staff_member_required(login_url='signin')
+def restore_address(request, task_pk):
+    task = get_object_or_404(Task, pk=task_pk)
+    if task.status:
+        messages.error(request, 'Заявка від цього користувача вже опрацьована.')
+        return redirect('tasks_list')
+    addr = get_object_or_404(Address, pk=task.user_data["address_id"])
+    if request.method == 'POST':
+        task.user.address = addr
+        task.user.save()
+        task.status = 1
+        task.save()
+        messages.success(request, 'Успішно поновлено адресу прописки!')
+        return redirect('tasks_list')
+
+    return render(request, 'administration/address_form.html', 
+                  {'user': task.user, 'address': addr, 'title': 'Поновлення адреси прописки'})

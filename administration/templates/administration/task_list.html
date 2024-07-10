@@ -42,6 +42,11 @@
                             Відновлення закордонного паспорту через закінчення терміну придатності
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'tasks_list' %}?title=restore-address">
+                            Відновлення адреси прописки
+                        </a>
+                    </li>
                 </ul>
             </div>
         </nav>
@@ -74,6 +79,9 @@
                                 {{ k }}: 
                                 <img src="/media/{{ v }}" alt="" width="100" class="img-fluid">
                             </div>
+                            {% elif k == 'formatted_address' %}
+                            address: {{ v }}
+                            {% elif k == 'address_id' %}
                             {% else %}
                             {{ k }} : {{ v }}
                             {% endif %}
@@ -97,6 +105,10 @@
                             {% elif task.title|slice:":10" == 'Restore fp' and task.status == 0 %}
                             <a href="{% url 'restore_fpassport_s' task.id %}" class="btn btn-info">
                                 Перейти до відновлення
+                            </a>
+                            {% elif task.title == 'Restore address' and task.status == 0 %}
+                            <a href="{% url 'restore_address_s' task.id %}" class="btn btn-info">
+                                Перейти до оновлення
                             </a>
                             {% endif %}
                         </td>
