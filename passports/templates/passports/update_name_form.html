@@ -13,7 +13,7 @@
             <div class="col-md-6">
                 <div class="card mb-4">
                     <div class="card-header">
-                        Ваші дані для обробки
+                        Ваші дані для нового паспорту
                     </div>
                     <div class="card-body">
                         <div class="row">
@@ -25,13 +25,16 @@
                                     alt="User Photo"/>
                                     <input id="id_photo" name="photo" type="file" class="form-control-file" style="display: none;" accept="image/*">
                                 </div>
+                                <div class="form-group">
+                                    <p><strong>Name:</strong> {{ user_form.name }}</p>
+                                </div>
                                 <p><strong>Surname:</strong> {{ user.surname }}</p>
-                                <p><strong>Name:</strong> {{ user.name }}</p>
                                 <p><strong>Patronymic:</strong> {{ user.patronymic }}</p>
                             </div>
                             <div class="col-md-7">
                                 <p><strong>Sex:</strong> {{ user.sex }}</p>
                                 <p><strong>Date of Birth:</strong> {{ user.date_of_birth|date:"d/m/Y" }}</p>
+                                <br>
                                 <p><strong>Place of Birth:</strong> {{ user.place_of_birth }}</p>
                                 <p><strong>Nationality:</strong> {{ user.get_nationality_display }}</p>
                                 <p>

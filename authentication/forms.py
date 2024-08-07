@@ -62,4 +62,47 @@ class ReadOnlyUserForm(forms.ModelForm):
             'nationality': forms.Select(attrs={'class': 'form-control', 'disabled': 'true'}),
             'record_number': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
         }
+
+
+class UpdateUserNameForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ('name', )
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', }),
+        }   
+
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if name == self.instance.name:
+            raise ValidationError('The new name must be different from the current one.')
+        return name
+
+
+class UpdateUserSurnameForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ('surname',)
+        widgets = {
+            'surname': forms.TextInput(attrs={'class': 'form-control', }),
+        }   
+
+    def clean_surname(self):
+        surname = self.cleaned_data.get('surname')
+        if surname == self.instance.surname:
+            raise ValidationError('The new surname must be different from the current one.')
+        return surname
     
+
+class UpdateUserPatronymicForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ('patronymic', )
+        widgets = {
+            'patronymic': forms.TextInput(attrs={'class': 'form-control', }),
+        }   
+    def clean_patronymic(self):
+        patronymic = self.cleaned_data.get('patronymic')
+        if patronymic == self.instance.patronymic:
+            raise ValidationError('The new patronymic must be different from the current one.')
+        return patronymic       

@@ -1,5 +1,5 @@
 from administration.models import Task
-from authentication.forms import ReadOnlyUserForm
+from authentication.forms import ReadOnlyUserForm, UpdateUserNameForm
 import datetime
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -196,7 +196,10 @@ def change_address(request):
     if task:
         messages.error(request, 'Ви вже відправили заявку на оновлення адреси прописки.')
         return redirect('get_documents')
-
+    if not request.user.passport:
+        messages.error(request, 'У вас ще нема паспорту, тому неможливе оновлення адреси прописки.')
+        return redirect('get_documents')  
+    
     if request.method == 'POST':     
         address_form = AddressForm(request.POST)
 
@@ -218,6 +221,42 @@ def change_address(request):
             messages.error(request, address_form.errors)
     else:
         address_form = AddressForm()
-    return render(request, 'passports/address_form.html', {'address_form': address_form, 
+    return render(request, 'passports/update_form.html', {'form': address_form, 
                                                               'title': 'Заявка на оновлення адреси прописки'})
+
+
+@login_required
+def change_name(request):
+    task = Task.objects.filter(user=request.user, title="Change data", status=0).exists()
+    if task:
+        messages.error(request, 'Ви вже відправили заявку на оновлення даних паспорту.')
+        return redirect('get_documents')
+    if not request.user.passport:
+        messages.error(request, 'У вас ще нема паспорту, тому неможливе оновлення ваших даних.')
+        return redirect('get_documents')  
+    
+    if request.method == 'POST':     
+        photo_form = PhotoForm(request.POST, request.FILES) 
+        user_form = UpdateUserNameForm(request.POST, instance=request.user)
+
+        if user_form.is_valid() and photo_form.is_valid():
+            name = user_form.cleaned_data.get('name')
+            photo = photo_form.cleaned_data.get('photo')
+            today = datetime.date.today()
+            month = f'{today.month:02d}'
+            day = f'{today.day:02d}'
+            photo_name = f'{request.user.pk}-{request.user.name}-{request.user.surname}-passport-update-data.{photo.name.split(".")[-1]}'
+            photo_path = default_storage.save(f'photos/passports/{today.year}/{month}/{day}/{photo_name}', photo) 
+            
+            task = Task.objects.create(user=request.user, title='Change data', user_data={'photo': photo_path, 'name': name})        
+            messages.success(request, 'Ваша заявка на оновлення даних паспорту відправлена!')
+            return redirect('get_documents')
+        else:
+            messages.error(request, user_form.errors)
+            messages.error(request, photo_form.errors)
+    else:
+        user_form = UpdateUserNameForm(instance=request.user)
+        photo_form = PhotoForm()
+    return render(request, 'passports/update_name_form.html', {'user_form': user_form, 'photo_form': photo_form,
+                                                              'title': 'Заявка на оновлення даних паспорту'})
 

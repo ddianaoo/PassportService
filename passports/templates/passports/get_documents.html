@@ -6,12 +6,12 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-center mb-4 mt-5">Passport Documents</h2>
+    <h2 class="text-center mb-4 mt-5">Документи</h2>
     <div class="row">
         <div class="col-md-6">
             <div class="card mb-4">
                 <div class="card-header">
-                    Internal Passport
+                    Внутрішній Паспорт
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -23,14 +23,14 @@
                                     <p>Photo: Not available</p>
                                 {% endif %}
                                 <p><strong>Authority:</strong> {{ passport.authority }}</p>
-                                <p><strong>Date of Issue:</strong> {{ passport.date_of_issue|date:"d m Y" }}</p>
-                                <p><strong>Date of Expiry:</strong> {{ passport.date_of_expiry|date:"d m Y" }}</p>
+                                <p><strong>Date of Issue:</strong> {{ passport.date_of_issue|date:"d/m/Y" }}</p>
+                                <p><strong>Date of Expiry:</strong> {{ passport.date_of_expiry|date:"d/m/Y" }}</p>
                             </div>
                             <div class="col-md-7">
                                 <p><strong>Surname:</strong> {{ user.surname }}</p>
                                 <p><strong>Name:</strong> {{ user.name }}</p>
                                 <p><strong>Patronymic:</strong> {{ user.patronymic }}</p>
-                                <p><strong>Date of Birth:</strong> {{ user.date_of_birth|date:"d m Y" }}</p>
+                                <p><strong>Date of Birth:</strong> {{ user.date_of_birth|date:"d/m/Y" }}</p>
                                 <p><strong>Place of Birth:</strong> {{ user.place_of_birth }}</p>
                                 <p><strong>Sex:</strong> {{ user.sex }}</p>
                                 
@@ -45,7 +45,7 @@
                                 </p>
                             </div>
                         {% else %}
-                            <p>No internal passport available.</p>
+                            <p>У вас ще нема паспорту. <a href="{% url 'create_passport_u' %}">Створити</a></p>
                         {% endif %}
                     </div>
                 </div>
@@ -55,7 +55,7 @@
         <div class="col-md-6">
             <div class="card mb-4">
                 <div class="card-header">
-                    Foreign Passport
+                    Закордонний Паспорт
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -67,14 +67,13 @@
                                 <p>Photo: Not available</p>
                             {% endif %}
                             <p><strong>Authority:</strong> {{ foreign_passport.authority }}</p>
-                            <p><strong>Date of Issue:</strong> {{ foreign_passport.date_of_issue|date:"d m Y" }}</p>
-                            <p><strong>Date of Expiry:</strong> {{ foreign_passport.date_of_expiry|date:"d m Y" }}</p>
-                            <p><strong>Type:</strong> P</p>
+                            <p><strong>Date of Issue:</strong> {{ foreign_passport.date_of_issue|date:"d/m/Y" }}</p>
+                            <p><strong>Date of Expiry:</strong> {{ foreign_passport.date_of_expiry|date:"d/m/Y" }}</p>
                         </div>
                         <div class="col-md-7">
                             <p><strong>Surname:</strong> {{ user.surname }}</p>
                             <p><strong>Given Name:</strong> {{ user.name }}</p>
-                            <p><strong>Date of Birth:</strong> {{ user.date_of_birth|date:"d m Y" }}</p>
+                            <p><strong>Date of Birth:</strong> {{ user.date_of_birth|date:"d/m/Y" }}</p>
                             <p><strong>Place of Birth:</strong> {{ user.place_of_birth }}</p>
                             <p><strong>Sex:</strong> {{ user.sex }}</p>
                             <br/>
@@ -84,7 +83,7 @@
                             <p><strong>Country code:</strong> {{ user.nationality }}</p>
                         </div>
                         {% else %}
-                            <p>No foreign passport available.</p>
+                            <p>У вас ще нема закордонного паспорту. <a href="{% url 'create_fpassport_u' %}">Створити</a></p>
                         {% endif %}
                     </div>
                 </div>

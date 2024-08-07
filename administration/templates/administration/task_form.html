@@ -11,7 +11,7 @@
         <div class="col-md-6">
             <div class="card mb-4">
                 <div class="card-header">
-                    User data
+                    Дані користувача
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -21,7 +21,7 @@
                         {% elif user.passport.photo %}
                             <img src="{{ user.passport.photo.url }}" alt="Passport Photo" style="height: 250px; width: 220px;" class="img-fluid mb-4">
                         {% else %}
-                            <p>Photo: Not available</p>
+                            <p>Фото: недоступне</p>
                         {% endif %}
                         <p><strong>Nationality:</strong> {{ user.get_nationality_display }}</p>
                         <p><strong>Place of Birth:</strong> {{ user.place_of_birth }}</p>

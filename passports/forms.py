@@ -18,7 +18,7 @@ class AddressForm(forms.ModelForm):
 
 
 class PhotoForm(forms.Form):
-    photo = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control'}))
+    photo = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control-file'}))
 
 
 class PassportForm(forms.ModelForm):

@@ -208,3 +208,37 @@ def restore_address(request, task_pk):
 
     return render(request, 'administration/address_form.html', 
                   {'user': task.user, 'address': addr, 'title': 'Поновлення адреси прописки'})
+
+
+@staff_member_required(login_url='signin')
+def update_name(request, task_pk):
+    pass
+#     task = get_object_or_404(Task, pk=task_pk)
+#     if task.status:
+#         messages.error(request, 'Заявка від цього користувача вже опрацьована.')
+#         return redirect('tasks_list')
+    
+#     today = datetime.date.today()
+#     ten_years_more = today + datetime.timedelta(days=10*365)
+#     passport = Passport(date_of_issue=today, 
+#                         number=randint(10000000, 99999999),
+#                         date_of_expiry=ten_years_more, 
+#                         photo=task.user_data['photo'],
+#                         authority=randint(1111, 9999)
+#     )
+#     if request.method == 'POST':
+#         form = PassportForm(request.POST, request.FILES, instance=passport)
+#         if form.is_valid():
+#             p = form.save()
+#             task.user.passport = p
+#             task.user.save()
+#             task.status = 1
+#             task.save()
+#             messages.success(request, 'Успішно оформлено внутрішній паспорт!')
+#             return redirect('tasks_list')
+#         else:
+#             messages.error(request, form.errors)
+#     form = PassportForm(instance=passport)
+#     return render(request, 'administration/task_form.html',
+#                   {'form': form, 'user': task.user, 'task': task, 'title': 'Оформлення паспорту'})   
+

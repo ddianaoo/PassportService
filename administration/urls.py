@@ -5,6 +5,7 @@ from .views import (TaskListView,
                     restore_passport, 
                     restore_fpassport,
                     restore_address,
+                    update_name,
 )
 
 
@@ -15,4 +16,5 @@ urlpatterns = [
     path('restore-passport/<int:task_pk>/', restore_passport, name='restore_passport_s'),
     path('restore-fpassport/<int:task_pk>/', restore_fpassport, name='restore_fpassport_s'),
     path('restore-address/<int:task_pk>/', restore_address, name='restore_address_s'),
+    path('update-name/<int:task_pk>/', update_name, name='update_name_s'),
 ]
