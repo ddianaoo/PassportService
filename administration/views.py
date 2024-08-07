@@ -207,7 +207,7 @@ def restore_address(request, task_pk):
         return redirect('tasks_list')
 
     return render(request, 'administration/address_form.html', 
-                  {'user': task.user, 'address': addr, 'title': 'Поновлення адреси прописки'})
+                  {'user': task.user, 'address': addr, 'title': 'Оновлення адреси прописки'})
 
 
 @staff_member_required(login_url='signin')

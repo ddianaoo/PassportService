@@ -11,7 +11,7 @@
         {% csrf_token %}
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <div class="card mb-4">
+                <div class="card mb-2">
                     <div class="card-header">
                         Ваші дані для обробки
                     </div>
@@ -43,7 +43,14 @@
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-dark btn-block">Створити</button>
+                {% if not create_fpassport %}
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <strong>Зверніть увагу!</strong> Для відновлення відповідного документу ваш минулий документ буде видалено.
+                     Якщо це закордонний паспорт, то його буде видалено з усіма візами без автоматичного відновлення.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
+                <button type="submit" class="btn btn-dark btn-block">Надіслати</button>
             </div>
         </div>
     </form>

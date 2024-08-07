@@ -5,16 +5,65 @@
 {% endblock %}
 
 {% block content %}
-<h2 class="text-center mb-4 mt-5">{{ title }}</h2>
-<br>
-
-<div class="d-flex justify-content-center">
-    <form method="POST" action="" class="w-50" style="max-width: 700px; margin: 0 30px;" enctype="multipart/form-data">
+<div class="container mt-5">
+    <h2 class="text-center mb-4 mt-5">{{ title }}</h2>
+    <form method="POST" action="" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ user_form.as_p }}
-        {{ address_form.as_p }}
-        {{ photo_form.as_p }}
-        <button type="submit" class="btn btn-dark">Створити</button>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        Ваші дані для обробки
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <img id="imgPreview" src="/media/images/images-1.jpg"
+                                    class="img-thumbnail rounded-circle" 
+                                    style="width: 120px; height: 120px; object-fit: cover; cursor: pointer; margin-bottom: 5px;" 
+                                    alt="User Photo"/>
+                                    <input id="id_photo" name="photo" type="file" class="form-control-file" style="display: none;" accept="image/*">
+                                </div>
+                                <p><strong>Place of Birth:</strong> {{ user.place_of_birth }}</p>
+                                <p><strong>Nationality:</strong> {{ user.get_nationality_display }}</p>
+                            </div>
+                            <div class="col-md-7">
+                                <p><strong>Surname:</strong> {{ user.surname }}</p>
+                                <p><strong>Name:</strong> {{ user.name }}</p>
+                                <p><strong>Patronymic:</strong> {{ user.patronymic }}</p>
+                                <p><strong>Sex:</strong> {{ user.sex }}</p>
+                                <p><strong>Date of Birth:</strong> {{ user.date_of_birth|date:"d/m/Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="text-center mb-2">Адреса прописки</h3>
+                {{ address_form.as_p }}
+                <button type="submit" class="btn btn-dark btn-block">Створити</button>
+            </div>
+        </div>
     </form>
 </div>
+{% endblock %}
+
+{% block script %}
+<script>
+    document.getElementById('imgPreview').onclick = function() {
+        document.getElementById('id_photo').click();
+    };
+
+    document.getElementById('id_photo').onchange = function(event) {
+        const [file] = event.target.files;
+        if (file) {
+            const imgPreview = document.getElementById('imgPreview');
+            imgPreview.src = URL.createObjectURL(file);
+
+            const fileName = file.name;
+            document.getElementById('file-chosen').textContent = fileName;
+        } else {
+            document.getElementById('file-chosen').textContent = 'Файл не обрано';
+        }
+    };
+</script>
 {% endblock %}
