@@ -16,11 +16,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-5">
-                            {% if user.passport.photo %}
-                                <img src="{{ user.passport.photo.url }}" alt="Passport Photo" class="img-fluid mb-5">
-                            {% else %}
-                                <p>Photo: Not available</p>
-                            {% endif %}
+                            <img src="{{ user.passport.photo.url }}" alt="Passport Photo" class="img-fluid mb-5">
                             <p><strong>Authority:</strong> {{ user.passport.authority }}</p>
                             <p><strong>Date of Issue:</strong> {{ user.passport.date_of_issue|date:"d m Y" }}</p>
                             <p><strong>Date of Expiry:</strong> {{ user.passport.date_of_expiry|date:"d m Y" }}</p>
@@ -72,6 +68,7 @@
             </div>
         </div>
     </div>
+
     <div class="row justify-content-center">
         <div class="col-md-6">
             <form method="POST" action="">

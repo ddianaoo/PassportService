@@ -20,7 +20,7 @@
                         {% if user.passport.photo %}
                             <img src="{{ user.passport.photo.url }}" alt="Passport Photo" class="img-fluid mb-5">
                         {% else %}
-                            <p>Photo: Not available</p>
+                        <img  src="/media/images/images-1.jpg" alt="Passport Photo" style="height: 250px; width: 220px;" class="img-fluid mb-4">
                         {% endif %}
                         <p><strong>Authority:</strong> {{ user.passport.authority }}</p>
                         <p><strong>Date of Issue:</strong> {{ user.passport.date_of_issue|date:"d m Y" }}</p>
@@ -42,6 +42,7 @@
         </div>
     </div>
 </div>
+<h3 class="text-center mb-2">Адреса прописки</h3>
 <div class="d-flex justify-content-center">
     <form method="POST" action="" class="w-50" style="max-width: 700px; margin: 0 30px;">
         {% csrf_token %}

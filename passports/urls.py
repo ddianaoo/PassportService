@@ -9,6 +9,8 @@ from .views import (main_page,
                     restore_fpassport_expiry,
                     change_address,
                     change_name,
+                    change_surname,
+                    change_patronymic
 )
 
 
@@ -23,4 +25,6 @@ urlpatterns = [
     path('restore-fpassport-expiry/', restore_fpassport_expiry, name='restore_fpassport_expiry_u',),
     path('change-address/', change_address, name='change_address_u',),
     path('change-name/', change_name, name='change_name_u',),
+    path('change-surname/', change_surname, name='change_surname_u',),
+    path('change-patronymic/', change_patronymic, name='change_patronymic_u',),
 ]

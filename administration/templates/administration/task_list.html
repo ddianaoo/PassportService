@@ -43,10 +43,25 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'tasks_list' %}?title=restore-address">
-                            Відновлення адреси прописки
+                        <a class="nav-link" href="{% url 'tasks_list' %}?title=change-address">
+                            Оновлення адреси прописки
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'tasks_list' %}?title=change-name">
+                            Зміна імені користувача
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'tasks_list' %}?title=change-surname">
+                            Зміна прізвища користувача
+                        </a>
+                    </li>   
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'tasks_list' %}?title=change-patronymic">
+                            Зміна по батькові користувача
+                        </a>
+                    </li>                  
                 </ul>
             </div>
         </nav>
@@ -73,11 +88,11 @@
                         <td>
                             <p>{{ task.user }}</p>
                             {% if task.user_data.photo %}
-                                <img src="/media/{{ task.user_data.photo }}" alt="" width="100" style="height: 100px; width: 80px;" class="img-fluid">
+                                <img src="/media/{{ task.user_data.photo }}" alt="" width="100" style="height: 90px; width: 80px;" class="img-fluid">
                             {% elif task.user.passport.photo %}
                             <div class="d-flex align-items-start">
-                                <img src="{{ task.user.passport.photo.url }}" alt="" width="100" style="height: 100px; width: 80px;" class="img-fluid">
-                            </div>
+                                <img src="{{ task.user.passport.photo.url }}" alt="" width="100" style="height: 90px; width: 80px;" class="img-fluid">
+                            </div>                          
                             {% endif %}
                         </td>
                         <td>{% if task.status %}
@@ -88,24 +103,8 @@
                         </td>
                         <td>{{ task.created_at }}</td>
                         <td>
-                            {% if task.title == 'Create ip' and task.status == 0 %}
-                            <a href="{% url 'create_passport_s' task.id %}" class="btn btn-info">
-                                Оформити
-                            </a>
-                            {% elif task.title == 'Create fp' and task.status == 0 %}
-                            <a href="{% url 'create_fpassport_s' task.id %}" class="btn btn-info">
-                                Оформити
-                            </a>
-                            {% elif task.title|slice:":10" == 'Restore ip' and task.status == 0 %}
-                            <a href="{% url 'restore_passport_s' task.id %}" class="btn btn-info">
-                                Оформити
-                            </a>
-                            {% elif task.title|slice:":10" == 'Restore fp' and task.status == 0 %}
-                            <a href="{% url 'restore_fpassport_s' task.id %}" class="btn btn-info">
-                                Оформити
-                            </a>
-                            {% elif task.title == 'Restore address' and task.status == 0 %}
-                            <a href="{% url 'restore_address_s' task.id %}" class="btn btn-info">
+                            {% if task.status == 0 %}
+                            <a href="{% url task.path task.id %}" class="btn btn-info">
                                 Оформити
                             </a>
                             {% endif %}
