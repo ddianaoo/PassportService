@@ -210,11 +210,11 @@ def change_address_for_user(request, task_pk):
                   {'user': task.user, 'address': addr, 'title': 'Оновлення адреси прописки'})
 
 
-def handle_forms_of_updating_name(request, task, passport_form, fpassport_form=None):
-    """Handles the passport form submission and saves the new passport(s)."""
+def handle_user_field_update(request, task, passport_form, field_name, new_value, fpassport_form=None):
+    """Handles updating a specific field on the user object and saving the new passport(s)."""
     if passport_form.is_valid() and (fpassport_form is None or fpassport_form.is_valid()):
         task.user.passport.delete()
-        task.user.name = task.user_data['name']
+        setattr(task.user, field_name, new_value)
         task.user.passport = passport_form.save()
 
         if fpassport_form:
@@ -226,7 +226,7 @@ def handle_forms_of_updating_name(request, task, passport_form, fpassport_form=N
         task.status = 1
         task.save()
 
-        messages.success(request, 'Успішно поновлено ім`я!')
+        messages.success(request, f'Успішно поновлено {field_name} користувача!')
         return redirect('tasks_list')
     else:
         messages.error(request, passport_form.errors)
@@ -235,7 +235,7 @@ def handle_forms_of_updating_name(request, task, passport_form, fpassport_form=N
 
 
 @staff_member_required(login_url='signin')
-def change_name_for_user(request, task_pk):
+def change_user_field(request, task_pk, field_name, new_value):
     task = get_object_or_404(Task, pk=task_pk)
     if task.status:
         messages.error(request, 'Заявка від цього користувача вже опрацьована.')
@@ -246,13 +246,14 @@ def change_name_for_user(request, task_pk):
     if not task.user.foreign_passport:
         if request.method == 'POST':
             passport_form = PassportForm(request.POST, instance=new_passport)
-            return handle_forms_of_updating_name(request, task, passport_form)
+            return handle_user_field_update(request, task, passport_form, field_name, new_value)
         passport_form = PassportForm(instance=new_passport)
         return render(request, 'administration/change_name_form.html', {
             'user': task.user,
             'task': task,
             'passport_form': passport_form,
-            'title': 'Переоформлення імені користувача у документах'
+            'field_name': field_name,
+            'title': f'Переоформлення {field_name} користувача у документах'
         })
 
     new_fpassport = create_passport(task, ForeignPassport)
@@ -260,7 +261,7 @@ def change_name_for_user(request, task_pk):
     if request.method == 'POST':
         passport_form = PassportForm(request.POST, instance=new_passport)
         fpassport_form = ForeignPassportForm(request.POST, instance=new_fpassport)
-        return handle_forms_of_updating_name(request, task, passport_form, fpassport_form)
+        return handle_user_field_update(request, task, passport_form, field_name, new_value, fpassport_form)
 
     passport_form = PassportForm(instance=new_passport)
     fpassport_form = ForeignPassportForm(instance=new_fpassport)
@@ -269,16 +270,25 @@ def change_name_for_user(request, task_pk):
         'task': task,
         'passport_form': passport_form,
         'fpassport_form': fpassport_form,
-        'title': 'Переоформлення імені користувача у документах'
+        'field_name': field_name,
+        'title': f'Переоформлення {field_name} користувача у документах'
     })
 
 
 @staff_member_required(login_url='signin')
+def change_name_for_user(request, task_pk):
+    task = get_object_or_404(Task, pk=task_pk)
+    return change_user_field(request, task_pk, 'name', task.user_data['name'])
+
+
+@staff_member_required(login_url='signin')
 def change_surname_for_user(request, task_pk):
-    pass
+    task = get_object_or_404(Task, pk=task_pk)
+    return change_user_field(request, task_pk, 'surname', task.user_data['surname'])
 
 
 @staff_member_required(login_url='signin')
 def change_patronymic_for_user(request, task_pk):
-    pass
-    
+    task = get_object_or_404(Task, pk=task_pk)
+    return change_user_field(request, task_pk, 'patronymic', task.user_data['patronymic'])
+

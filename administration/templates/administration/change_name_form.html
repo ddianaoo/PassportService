@@ -62,13 +62,25 @@
                 <div class="card-body text-center">
                     <div class="row">
                         <div class="col-md-5">
-                            <p><strong>Old Name:</strong> {{ user.name }}</p>
+                            {% if field_name == 'name' %}
+                                <p><strong>Old Name:</strong> {{ user.name }}</p>
+                            {% elif field_name == 'surname' %}
+                                <p><strong>Old Surname:</strong> {{ user.surname }}</p>
+                                {% elif field_name == 'patronymic' %}
+                                <p><strong>Old Patronymic:</strong> {{ user.patronymic }}</p>
+                            {% endif %}
                         </div>
                         <div class="col-md-2 d-flex align-items-center justify-content-center">
                             <i class="fas fa-arrow-right fa-2x"></i>
                         </div>
                         <div class="col-md-5">
-                            <p><strong>New Name:</strong> {{ task.user_data.name }}</p>
+                            {% if field_name == 'name' %}
+                                <p><strong>New Name:</strong> {{ task.user_data.name }}</p>
+                            {% elif field_name == 'surname' %}
+                                <p><strong>New Surname:</strong> {{ task.user_data.surname }}</p>
+                                {% elif field_name == 'patronymic' %}
+                                <p><strong>New Patronymic:</strong> {{ task.user_data.patronymic }}</p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
