@@ -17,11 +17,7 @@
                     <div class="row">
                         {% if passport %}
                             <div class="col-md-5">
-                                {% if passport.photo %}
-                                    <img src="{{ passport.photo.url }}" style="height: 250px; width: 220px;" alt="Passport Photo" class="img-fluid mb-5">
-                                {% else %}
-                                    <p>Photo: Not available</p>
-                                {% endif %}
+                                <img src="{{ passport.photo.url }}" style="height: 220px; width: 190px;" alt="Passport Photo" class="img-fluid mb-5">
                                 <p><strong>Authority:</strong> {{ passport.authority }}</p>
                                 <p><strong>Date of Issue:</strong> {{ passport.date_of_issue|date:"d/m/Y" }}</p>
                                 <p><strong>Date of Expiry:</strong> {{ passport.date_of_expiry|date:"d/m/Y" }}</p>
@@ -61,11 +57,7 @@
                     <div class="row">
                         {% if foreign_passport %}
                         <div class="col-md-5">
-                            {% if foreign_passport.photo %}
-                                <img src="{{ foreign_passport.photo.url }}" alt="Foreign Passport Photo" style="height: 250px; width: 220px;" class="img-fluid mb-4">
-                            {% else %}
-                                <p>Photo: Not available</p>
-                            {% endif %}
+                            <img src="{{ foreign_passport.photo.url }}" alt="Foreign Passport Photo" style="height: 220px; width: 190px;" class="img-fluid mb-5">
                             <p><strong>Authority:</strong> {{ foreign_passport.authority }}</p>
                             <p><strong>Date of Issue:</strong> {{ foreign_passport.date_of_issue|date:"d/m/Y" }}</p>
                             <p><strong>Date of Expiry:</strong> {{ foreign_passport.date_of_expiry|date:"d/m/Y" }}</p>

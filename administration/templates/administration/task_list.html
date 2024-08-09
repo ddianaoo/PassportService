@@ -96,9 +96,9 @@
                             {% endif %}
                         </td>
                         <td>{% if task.status %}
-                            <p style="color: green;">{{ task.get_status_display }}</p>
+                            <p style="color: green;">завершено</p>
                             {% else %}
-                            <p style="color: red;">{{ task.get_status_display }}</p>
+                            <p style="color: red;">в процесі</p>
                             {% endif %}
                         </td>
                         <td>{{ task.created_at }}</td>

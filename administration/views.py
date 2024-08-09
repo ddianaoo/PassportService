@@ -76,25 +76,31 @@ class TaskListView(ListView):
         return super().dispatch(request, *args, **kwargs)
 
 
+def create_passport(task, model):
+    """Creates a new passport (internal or foreign) for the user."""
+    today = datetime.date.today()
+    ten_years_more = today + datetime.timedelta(days=10*365+2)
+    new_passport = model(
+        date_of_issue=today,
+        number=randint(10000000, 99999999),
+        date_of_expiry=ten_years_more,
+        photo=task.user_data['photo'],
+    )
+    return new_passport
+
+
 @staff_member_required(login_url='signin')
-def create_passport(request, task_pk):
+def create_ipassport_for_user(request, task_pk):
     task = get_object_or_404(Task, pk=task_pk)
     if task.status or task.user.passport:
         messages.error(request, 'Заявка від цього користувача вже опрацьована.')
         return redirect('tasks_list')
-
-    today = datetime.date.today()
-    ten_years_more = today + datetime.timedelta(days=10*365)
-    passport = Passport(date_of_issue=today, 
-                        number=randint(10000000, 99999999),
-                        date_of_expiry=ten_years_more, 
-                        photo=task.user_data['photo'],
-    )
+    
+    passport = create_passport(task, Passport)
     if request.method == 'POST':
-        form = PassportForm(request.POST, request.FILES, instance=passport)
+        form = PassportForm(request.POST, instance=passport)
         if form.is_valid():
-            p = form.save()
-            task.user.passport = p
+            task.user.passport = form.save()
             task.user.save()
             task.status = 1
             task.save()
@@ -108,25 +114,17 @@ def create_passport(request, task_pk):
 
 
 @staff_member_required(login_url='signin')
-def create_fpassport(request, task_pk):
+def create_fpassport_for_user(request, task_pk):
     task = get_object_or_404(Task, pk=task_pk)
     if task.status or task.user.foreign_passport:
         messages.error(request, 'Заявка від цього користувача вже опрацьована.')
         return redirect('tasks_list')
     
-    today = datetime.date.today()
-    ten_years_more = today + datetime.timedelta(days=10*365)
-    passport = ForeignPassport(date_of_issue=today, 
-                        number=randint(10000000, 99999999),
-                        date_of_expiry=ten_years_more, 
-                        photo=task.user_data['photo'],
-                        authority=task.user.passport.authority
-    )
+    passport = create_passport(task, ForeignPassport)
     if request.method == 'POST':
-        form = ForeignPassportForm(request.POST, request.FILES, instance=passport)
+        form = ForeignPassportForm(request.POST, instance=passport)
         if form.is_valid():
-            fp = form.save()
-            task.user.foreign_passport = fp
+            task.user.foreign_passport = form.save()
             task.user.save()
             task.status = 1
             task.save()
@@ -140,25 +138,18 @@ def create_fpassport(request, task_pk):
 
 
 @staff_member_required(login_url='signin')
-def restore_passport(request, task_pk):
+def restore_ipassport_for_user(request, task_pk):
     task = get_object_or_404(Task, pk=task_pk)
     if task.status:
         messages.error(request, 'Заявка від цього користувача вже опрацьована.')
         return redirect('tasks_list')
-    today = datetime.date.today()
-    ten_years_more = today + datetime.timedelta(days=10*365+2)
-    new_passport = Passport(date_of_issue=today, 
-                        number=randint(10000000, 99999999),
-                        date_of_expiry=ten_years_more, 
-                        photo=task.user_data['photo'],
-                        authority=task.user.passport.authority
-    )
+
+    new_passport = create_passport(task, Passport)
     if request.method == 'POST':
-        form = PassportForm(request.POST, request.FILES, instance=new_passport)
+        form = PassportForm(request.POST, instance=new_passport)
         if form.is_valid():
             task.user.passport.delete()
-            p = form.save()
-            task.user.passport = p
+            task.user.passport = form.save()
             task.user.save()
             task.status = 1
             task.save()
@@ -173,30 +164,21 @@ def restore_passport(request, task_pk):
 
 
 @staff_member_required(login_url='signin')
-def restore_fpassport(request, task_pk):
+def restore_fpassport_for_user(request, task_pk):
     task = get_object_or_404(Task, pk=task_pk)
     if task.status:
         messages.error(request, 'Заявка від цього користувача вже опрацьована.')
         return redirect('tasks_list')
-    today = datetime.date.today()
-    ten_years_more = today + datetime.timedelta(days=10*365+2)
-    new_passport = ForeignPassport(date_of_issue=today, 
-                        number=randint(10000000, 99999999),
-                        date_of_expiry=ten_years_more, 
-                        photo=task.user_data['photo'],
-                        authority=task.user.foreign_passport.authority
-    )
+
+    new_passport = create_passport(task, ForeignPassport)
     if request.method == 'POST':
-        form = ForeignPassportForm(request.POST, request.FILES, instance=new_passport)
+        form = ForeignPassportForm(request.POST, instance=new_passport)
         if form.is_valid():
             visas = Visa.objects.filter(foreign_passport=task.user.foreign_passport)
             visas.delete()
             task.user.foreign_passport.delete()
-
-            fp = form.save()
-            task.user.foreign_passport = fp
+            task.user.foreign_passport = form.save()
             task.user.save()
-
             task.status = 1
             task.save()
             messages.success(request, 'Успішно поновлено закордонний паспорт!')
@@ -210,7 +192,7 @@ def restore_fpassport(request, task_pk):
 
 
 @staff_member_required(login_url='signin')
-def change_address(request, task_pk):
+def change_address_for_user(request, task_pk):
     task = get_object_or_404(Task, pk=task_pk)
     if task.status:
         messages.error(request, 'Заявка від цього користувача вже опрацьована.')
@@ -228,100 +210,75 @@ def change_address(request, task_pk):
                   {'user': task.user, 'address': addr, 'title': 'Оновлення адреси прописки'})
 
 
-@staff_member_required(login_url='signin')
-def change_name_passport(request, task):
-    today = datetime.date.today()
-    ten_years_more = today + datetime.timedelta(days=10*365+2)
-    new_passport = Passport(date_of_issue=today, 
-                        number=randint(10000000, 99999999),
-                        date_of_expiry=ten_years_more, 
-                        photo=task.user_data['photo'],
-                        authority=task.user.passport.authority
-    )
-    if request.method == 'POST':
-        passport_form = PassportForm(request.POST, instance=new_passport)
-        if passport_form.is_valid():
-            task.user.passport.delete()
-            task.user.name = task.user_data['name']
-            p = passport_form.save()
-            task.user.passport = p
-            task.user.save()
-            task.status = 1
-            task.save()
-            messages.success(request, 'Успішно поновлено внутрішній паспорт!')
-            return redirect('tasks_list')
-        else:
-            messages.error(request, passport_form.errors)
-    passport_form = PassportForm(instance=new_passport)
-    return render(request, 'administration/change_name_form.html', 
-                  {'user': task.user, 'task': task, 
-                   'passport_form': passport_form, 'title': 'Переоформлення імені користувача у документах'})   
+def handle_forms_of_updating_name(request, task, passport_form, fpassport_form=None):
+    """Handles the passport form submission and saves the new passport(s)."""
+    if passport_form.is_valid() and (fpassport_form is None or fpassport_form.is_valid()):
+        task.user.passport.delete()
+        task.user.name = task.user_data['name']
+        task.user.passport = passport_form.save()
 
-
-@staff_member_required(login_url='signin')
-def change_name_all_passports(request, task):
-    today = datetime.date.today()
-    ten_years_more = today + datetime.timedelta(days=10*365+2)
-    new_passport = Passport(date_of_issue=today, 
-                        number=randint(10000000, 99999999),
-                        date_of_expiry=ten_years_more, 
-                        photo=task.user_data['photo'],
-                        authority=task.user.passport.authority
-    )
-    new_fpassport = ForeignPassport(date_of_issue=today, 
-                        number=randint(10000000, 99999999),
-                        date_of_expiry=ten_years_more, 
-                        photo=task.user_data['photo'],
-                        authority=task.user.foreign_passport.authority
-    )
-    if request.method == 'POST':
-        passport_form = PassportForm(request.POST, instance=new_passport)
-        fpassport_form = ForeignPassportForm(request.POST, instance=new_fpassport)
-        if passport_form.is_valid() and fpassport_form.is_valid():
-            task.user.passport.delete()
-            task.user.name = task.user_data['name']
-            p = passport_form.save()
-            task.user.passport = p
-
-            visas = Visa.objects.filter(foreign_passport=task.user.foreign_passport)
-            visas.delete()
-
+        if fpassport_form:
+            Visa.objects.filter(foreign_passport=task.user.foreign_passport).delete()
             task.user.foreign_passport.delete()
-            fp = fpassport_form.save()
-            task.user.foreign_passport = fp            
-            task.user.save()
+            task.user.foreign_passport = fpassport_form.save()
 
-            task.status = 1
-            task.save()
-            messages.success(request, 'Успішно поновлено внутрішній паспорт!')
-            return redirect('tasks_list')
-        else:
-            messages.error(request, passport_form.errors)
+        task.user.save()
+        task.status = 1
+        task.save()
+
+        messages.success(request, 'Успішно поновлено ім`я!')
+        return redirect('tasks_list')
+    else:
+        messages.error(request, passport_form.errors)
+        if fpassport_form:
             messages.error(request, fpassport_form.errors)
-    passport_form = PassportForm(instance=new_passport)
-    fpassport_form = ForeignPassportForm(instance=new_fpassport)
-    return render(request, 'administration/change_name_form.html', 
-                  {'user': task.user, 'task': task, 'fpassport_form': fpassport_form,
-                   'passport_form': passport_form, 'title': 'Переоформлення імені користувача у документах'})       
 
 
 @staff_member_required(login_url='signin')
-def change_name(request, task_pk):
+def change_name_for_user(request, task_pk):
     task = get_object_or_404(Task, pk=task_pk)
     if task.status:
         messages.error(request, 'Заявка від цього користувача вже опрацьована.')
         return redirect('tasks_list')
+
+    new_passport = create_passport(task, Passport)
+
     if not task.user.foreign_passport:
-        return change_name_passport(request, task)
-    return change_name_all_passports(request, task)
+        if request.method == 'POST':
+            passport_form = PassportForm(request.POST, instance=new_passport)
+            return handle_forms_of_updating_name(request, task, passport_form)
+        passport_form = PassportForm(instance=new_passport)
+        return render(request, 'administration/change_name_form.html', {
+            'user': task.user,
+            'task': task,
+            'passport_form': passport_form,
+            'title': 'Переоформлення імені користувача у документах'
+        })
+
+    new_fpassport = create_passport(task, ForeignPassport)
+
+    if request.method == 'POST':
+        passport_form = PassportForm(request.POST, instance=new_passport)
+        fpassport_form = ForeignPassportForm(request.POST, instance=new_fpassport)
+        return handle_forms_of_updating_name(request, task, passport_form, fpassport_form)
+
+    passport_form = PassportForm(instance=new_passport)
+    fpassport_form = ForeignPassportForm(instance=new_fpassport)
+    return render(request, 'administration/change_name_form.html', {
+        'user': task.user,
+        'task': task,
+        'passport_form': passport_form,
+        'fpassport_form': fpassport_form,
+        'title': 'Переоформлення імені користувача у документах'
+    })
 
 
 @staff_member_required(login_url='signin')
-def change_surname(request, task_pk):
+def change_surname_for_user(request, task_pk):
     pass
 
 
 @staff_member_required(login_url='signin')
-def change_patronymic(request, task_pk):
+def change_patronymic_for_user(request, task_pk):
     pass
     

@@ -16,7 +16,10 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-5">
-                            <img src="{{ user.passport.photo.url }}" alt="Passport Photo" class="img-fluid mb-5">
+                            <img src="{{ user.passport.photo.url }}" 
+                            alt="Passport Photo" 
+                            style="height: 220px; width: 190px;"
+                            class="img-fluid mb-4">
                             <p><strong>Authority:</strong> {{ user.passport.authority }}</p>
                             <p><strong>Date of Issue:</strong> {{ user.passport.date_of_issue|date:"d m Y" }}</p>
                             <p><strong>Date of Expiry:</strong> {{ user.passport.date_of_expiry|date:"d m Y" }}</p>
