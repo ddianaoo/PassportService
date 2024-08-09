@@ -1,0 +1,18 @@
+<script>
+    document.getElementById('imgPreview').onclick = function() {
+        document.getElementById('id_photo').click();
+    };
+
+    document.getElementById('id_photo').onchange = function(event) {
+        const [file] = event.target.files;
+        if (file) {
+            const imgPreview = document.getElementById('imgPreview');
+            imgPreview.src = URL.createObjectURL(file);
+
+            const fileName = file.name;
+            document.getElementById('file-chosen').textContent = fileName;
+        } else {
+            document.getElementById('file-chosen').textContent = 'Файл не обрано';
+        }
+    };
+</script>

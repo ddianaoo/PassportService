@@ -16,36 +16,12 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-5">
-                        {% if task.user_data.photo %}
                             <img src="/media/{{ task.user_data.photo }}" 
                             alt="User Photo" 
                             style="height: 220px; width: 190px;"
                             class="img-fluid mb-4">
-                        {% else %}
-                            <img src="/media/images/images-1.jpg"
-                            alt="User Photo" 
-                            style="height: 150px; width: 125px;"
-                            class="img-fluid mb-4">
-                        {% endif %}
-                        <p><strong>Authority:</strong> {{ user.passport.authority }}</p>
-                        <p><strong>Date of Issue:</strong> {{ user.passport.date_of_issue|date:"d/m/Y" }}</p>
-                        <p><strong>Date of Expiry:</strong> {{ user.passport.date_of_expiry|date:"d/m/Y" }}</p>
-                        </div>
-                        <div class="col-md-7">
-                            <p><strong>Surname:</strong> {{ user.surname }}</p>
-                            <p><strong>Name:</strong> {{ user.name }}</p>
-                            <p><strong>Patronymic:</strong> {{ user.patronymic }}</p>
-                            <p><strong>Date of Birth:</strong> {{ user.date_of_birth|date:"d/m/Y" }}</p>
-                            <p><strong>Place of Birth:</strong> {{ user.place_of_birth }}</p>
-                            <p><strong>Sex:</strong> {{ user.sex }}</p>
-                            <p><strong>Document Number:</strong> {{ user.passport.number }}</p>
-                            <p><strong>Record Number:</strong> {{ user.record_number }}</p>
-                            <p><strong>Nationality:</strong> {{ user.get_nationality_display }}</p>
-                            <p>
-                                <strong>Registration Address:</strong><br>
-                                {{ user.address.country_code }}, {{ user.address.region }}, {{ user.address.settlement }}, 
-                                {{ user.address.street }}, {{ user.address.apartments }}, {{ user.address.post_code }}
-                            </p>
+                            {% include 'passports/inc/_user_card.html' %}
+                            {% include 'passports/inc/_address.html' %}
                         </div>
                     </div>
                 </div>

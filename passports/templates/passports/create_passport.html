@@ -25,15 +25,7 @@
                                     alt="User Photo"/>
                                     <input id="id_photo" name="photo" type="file" class="form-control-file" style="display: none;" accept="image/*">
                                 </div>
-                                <p><strong>Place of Birth:</strong> {{ user.place_of_birth }}</p>
-                                <p><strong>Nationality:</strong> {{ user.get_nationality_display }}</p>
-                            </div>
-                            <div class="col-md-7">
-                                <p><strong>Surname:</strong> {{ user.surname }}</p>
-                                <p><strong>Name:</strong> {{ user.name }}</p>
-                                <p><strong>Patronymic:</strong> {{ user.patronymic }}</p>
-                                <p><strong>Sex:</strong> {{ user.sex }}</p>
-                                <p><strong>Date of Birth:</strong> {{ user.date_of_birth|date:"d/m/Y" }}</p>
+                                {% include './inc/_user_card.html' %}
                             </div>
                         </div>
                     </div>
@@ -48,22 +40,5 @@
 {% endblock %}
 
 {% block script %}
-<script>
-    document.getElementById('imgPreview').onclick = function() {
-        document.getElementById('id_photo').click();
-    };
-
-    document.getElementById('id_photo').onchange = function(event) {
-        const [file] = event.target.files;
-        if (file) {
-            const imgPreview = document.getElementById('imgPreview');
-            imgPreview.src = URL.createObjectURL(file);
-
-            const fileName = file.name;
-            document.getElementById('file-chosen').textContent = fileName;
-        } else {
-            document.getElementById('file-chosen').textContent = 'Файл не обрано';
-        }
-    };
-</script>
+    {% include './inc/_preview_photo.html' %}
 {% endblock %}

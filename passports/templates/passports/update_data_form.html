@@ -49,11 +49,7 @@
                                 <br>
                                 <p><strong>Place of Birth:</strong> {{ user.place_of_birth }}</p>
                                 <p><strong>Nationality:</strong> {{ user.get_nationality_display }}</p>
-                                <p>
-                                    <strong>Registration Address:</strong><br>
-                                    {{ user.address.country_code }}, {{ user.address.region }}, {{ user.address.settlement }}, 
-                                    {{ user.address.street }}, {{ user.address.apartments }}, {{ user.address.post_code }}
-                                </p>
+                                {% include './inc/_address.html' %}
                             </div>
                         </div>
                     </div>
@@ -66,22 +62,5 @@
 {% endblock %}
 
 {% block script %}
-<script>
-    document.getElementById('imgPreview').onclick = function() {
-        document.getElementById('id_photo').click();
-    };
-
-    document.getElementById('id_photo').onchange = function(event) {
-        const [file] = event.target.files;
-        if (file) {
-            const imgPreview = document.getElementById('imgPreview');
-            imgPreview.src = URL.createObjectURL(file);
-
-            const fileName = file.name;
-            document.getElementById('file-chosen').textContent = fileName;
-        } else {
-            document.getElementById('file-chosen').textContent = 'Файл не обрано';
-        }
-    };
-</script>
+    {% include './inc/_preview_photo.html' %}
 {% endblock %}

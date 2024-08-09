@@ -8,18 +8,16 @@ from django.shortcuts import render, redirect
 from .forms import AddressForm, PhotoForm
 from .models import Address
 import uuid
+from passport_service.decorators import client_login_required
 
 
 def main_page(request):
     return render(request, 'home.html')
 
 
-@login_required
+@client_login_required
 def get_documents(request):
-    context = {'passport': request.user.passport, 
-               'foreign_passport': request.user.foreign_passport, 
-               'user': request.user}
-    return render(request, 'passports/get_documents.html', context=context)
+    return render(request, 'passports/get_documents.html', {'user': request.user})
 
 
 def get_photo_path(photo, user, task_title):
@@ -66,7 +64,7 @@ def get_address(address_form):
     return adr, created
 
 
-@login_required
+@client_login_required
 def create_passport(request):
     task_title = "create an internal passport"
     user = request.user
@@ -102,7 +100,7 @@ def create_passport(request):
                                                               'title': 'Заява на створення паспорту'})
 
 
-@login_required
+@client_login_required
 def create_fpassport(request):
     task_title = "create a foreign passport"
     user = request.user
@@ -133,7 +131,7 @@ def create_fpassport(request):
                                                         'title': 'Заявка на створення закордонного паспорту'})
 
 
-@login_required
+@client_login_required
 def restore_passport(request, title, error_msg):
     user = request.user
     task = Task.objects.filter(user=user, title=title, status=0).exists()
@@ -160,19 +158,19 @@ def restore_passport(request, title, error_msg):
                                                               'title': 'Заява на відновлення внутрішнього паспотру'})
 
 
-@login_required
+@client_login_required
 def restore_passport_loss(request):
     return restore_passport(request, "restore an internal passport due to loss", 
                      'Ви вже відправили заявку на відновлення внутрішнього паспотру через втрату.')
 
 
-@login_required
+@client_login_required
 def restore_passport_expiry(request):
     return restore_passport(request, "restore an internal passport due to expiry",
                      'Ви вже відправили заяву на відновлення внутрішнього паспотру через закінчення терміну придатності.')
 
 
-@login_required
+@client_login_required
 def restore_fpassport(request,  title, error_msg):
     user = request.user
     task = Task.objects.filter(user=user, title=title, status=0).exists()
@@ -199,19 +197,19 @@ def restore_fpassport(request,  title, error_msg):
                                                               'title': 'Заява на відновлення закордонного паспотру'})
 
 
-@login_required
+@client_login_required
 def restore_fpassport_loss(request):
     return restore_fpassport(request, "restore a foreign passport due to loss",
                      'Ви вже відправили заяву на відновлення закордонного паспотру через втрату.')
 
 
-@login_required
+@client_login_required
 def restore_fpassport_expiry(request):
     return restore_fpassport(request, "restore a foreign passport due to expiry",
                      'Ви вже відправили заяву на відновлення закордонного паспотру через закінчення терміну придатності.')
 
 
-@login_required
+@client_login_required
 def change_address(request):
     task_title = 'change registation address'
     task = Task.objects.filter(user=request.user, title=task_title, status=0).exists()
@@ -268,17 +266,17 @@ def change_data(request, task_title, UserDataForm, field):
                                                               'title': 'Заява на оновлення даних паспорту'})    
 
 
-@login_required
+@client_login_required
 def change_name(request):
     return change_data(request, "change user name", UpdateUserNameForm, 'name')
 
 
-@login_required
+@client_login_required
 def change_surname(request):
     return change_data(request, "change user surname", UpdateUserSurnameForm, 'surname')
 
 
-@login_required
+@client_login_required
 def change_patronymic(request):
     return change_data(request, "change user patronymic", UpdateUserPatronymicForm, 'patronymic')
 

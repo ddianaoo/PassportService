@@ -248,7 +248,7 @@ def change_user_field(request, task_pk, field_name, new_value):
             passport_form = PassportForm(request.POST, instance=new_passport)
             return handle_user_field_update(request, task, passport_form, field_name, new_value)
         passport_form = PassportForm(instance=new_passport)
-        return render(request, 'administration/change_name_form.html', {
+        return render(request, 'administration/change_data_form.html', {
             'user': task.user,
             'task': task,
             'passport_form': passport_form,
@@ -265,7 +265,7 @@ def change_user_field(request, task_pk, field_name, new_value):
 
     passport_form = PassportForm(instance=new_passport)
     fpassport_form = ForeignPassportForm(instance=new_fpassport)
-    return render(request, 'administration/change_name_form.html', {
+    return render(request, 'administration/change_data_form.html', {
         'user': task.user,
         'task': task,
         'passport_form': passport_form,
