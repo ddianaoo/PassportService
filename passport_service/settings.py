@@ -40,9 +40,20 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'passports',
     'rest_framework',
+    'rest_framework.authtoken',
+    'djoser',
     'authentication',
     'administration',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication', 
+    ),
+        'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.AllowAny',
+    ),
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -134,3 +145,13 @@ AUTH_USER_MODEL = 'authentication.CustomUser'
 
 LOGIN_URL = 'signin'
 LOGIN_REDIRECT_URL = 'signin' 
+
+DJOSER = {
+    "LOGIN_FIELD": "email",
+    'USER_CREATE_PASSWORD_RETYPE': True,
+    "SERIALIZERS": {
+        "user_create": "authentication.serializers.UserCreateSerializer",
+        "current_user": "authentication.serializers.UserListSerializer",
+        "user": "authentication.serializers.UserListSerializer",
+    },
+}
