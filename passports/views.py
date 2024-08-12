@@ -43,7 +43,7 @@ def get_photo_path(photo, user, task_title):
     return photo_path  
 
 
-def get_address(address_form):
+def get_address(form_data):
     """
     Retrieve or create an address based on the provided form data.
 
@@ -53,12 +53,12 @@ def get_address(address_form):
     Returns:
         Tuple[models.Model, bool]: The Address object and a boolean indicating whether it was created.
     """
-    country_code = address_form.cleaned_data.get('country_code')
-    region = address_form.cleaned_data.get('region')
-    settlement = address_form.cleaned_data.get('settlement')
-    street = address_form.cleaned_data.get('street')
-    apartments = address_form.cleaned_data.get('apartments')
-    post_code = address_form.cleaned_data.get('post_code')
+    country_code = form_data.get('country_code')
+    region = form_data.get('region')
+    settlement = form_data.get('settlement')
+    street = form_data.get('street')
+    apartments = form_data.get('apartments')
+    post_code = form_data.get('post_code')
     adr, created = Address.objects.get_or_create(country_code=country_code, region=region, settlement=settlement, 
                                          street=street, apartments=apartments, post_code=post_code)
     return adr, created
@@ -81,7 +81,7 @@ def create_passport(request):
         address_form = AddressForm(request.POST)
 
         if address_form.is_valid() and photo_form.is_valid():
-            adr, created = get_address(address_form)
+            adr, created = get_address(address_form.cleaned_data)
             request.user.address = adr
             request.user.save()
             photo = photo_form.cleaned_data.get('photo')
@@ -223,7 +223,7 @@ def change_address(request):
     if request.method == 'POST':     
         address_form = AddressForm(request.POST)
         if address_form.is_valid():
-            adr, created = get_address(address_form)
+            adr, created = get_address(address_form.cleaned_data)
             task = Task.objects.create(user=request.user, title=task_title, user_data={'address_id': adr.pk})        
             messages.success(request, 'Ваша заява на оновлення адреси прописки відправлена!')
             return redirect('get_documents')
