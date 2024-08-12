@@ -1,11 +1,7 @@
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from rest_framework import serializers
 from authentication.models import CustomUser
-from passports.serializers import (
-    AddressRetrieveSerializer, 
-    PassportRetrieveSerializer,
-    ForeignPassportRetrieveSerializer
-)
+from passports.serializers import AddressRetrieveSerializer
 
 
 class UserCreateSerializer(BaseUserCreateSerializer):
@@ -17,8 +13,6 @@ class UserCreateSerializer(BaseUserCreateSerializer):
                   
 class UserListSerializer(serializers.ModelSerializer):
     address = AddressRetrieveSerializer()
-    passport = PassportRetrieveSerializer()
-    foreign_passport = ForeignPassportRetrieveSerializer()
     class Meta:
         model = CustomUser
         fields = ('id', 'name', 'surname', 'patronymic', 'email', 
