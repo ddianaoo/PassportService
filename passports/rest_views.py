@@ -2,11 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import (
-    AddressCreateSerializer, 
+    CreateAddressSerializer, 
     PhotoSerializer, 
-    DocumentsRetrieveSerializer, 
-    PassportRetrieveSerializer,
-    ForeignPassportRetrieveSerializer
+    RetrieveDocumentsSerializer, 
+    RetrieveInternalPassportSerializer,
+    RetrieveForeignPassportSerializer,
+    RestorePassportSerializer
 )
 from administration.models import Task
 from .views import get_photo_path, get_address 
@@ -16,7 +17,7 @@ class InternalPassportDetailAPIView(APIView):
     def get(self, request):
         passport = request.user.passport
         if passport:
-            user_serializer = PassportRetrieveSerializer(passport, context={'request': request})
+            user_serializer = RetrieveInternalPassportSerializer(passport, context={'request': request})
             return Response(user_serializer.data, status=status.HTTP_200_OK)
         else:
             return Response({"detail": "Internal passport not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -32,7 +33,7 @@ class InternalPassportDetailAPIView(APIView):
             return Response({"detail": "You already have an internal passport."},
                             status=status.HTTP_400_BAD_REQUEST)
         
-        address_serializer = AddressCreateSerializer(data=request.data)
+        address_serializer = CreateAddressSerializer(data=request.data)
         photo_serializer = PhotoSerializer(data=request.data)
         is_address_valid = address_serializer.is_valid()
         is_photo_valid = photo_serializer.is_valid()
@@ -58,12 +59,35 @@ class InternalPassportDetailAPIView(APIView):
                 
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         
+    def put(self, request):
+        user = request.user
+
+        serializer = RestorePassportSerializer(data=request.data)
+        if serializer.is_valid():
+            task_reason = serializer.validated_data.get('reason')
+            task_title = f"restore an internal passport due to {task_reason}"
+
+            if Task.objects.filter(user=user, title=task_title, status=0).exists():
+                return Response({"detail": f"You have already sent an application for restoring an internal passport due to {task_reason}."},
+                                status=status.HTTP_400_BAD_REQUEST)
+            if not user.passport:
+                return Response({"detail": "You don't have an internal passport yet."},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            photo = serializer.validated_data.get('photo')
+            photo_path = get_photo_path(photo, user, task_title)
+            task = Task.objects.create(user=user, title=task_title, user_data={'photo': photo_path})
+            return Response({"detail": f"Your request for restoring an internal passport due to {task_reason} has been sent."},
+                            status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
 
 class ForeignPassportDetailAPIView(APIView):
     def get(self, request):
         foreign_passport = request.user.foreign_passport
         if foreign_passport:
-            user_serializer = ForeignPassportRetrieveSerializer(foreign_passport, context={'request': request})
+            user_serializer = RetrieveForeignPassportSerializer(foreign_passport, context={'request': request})
             return Response(user_serializer.data, status=status.HTTP_200_OK)
         else:
             return Response({"detail": "Foreign passport not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -92,9 +116,32 @@ class ForeignPassportDetailAPIView(APIView):
         else:
             return Response(photo_serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
 
+    def put(self, request):
+        user = request.user
+
+        serializer = RestorePassportSerializer(data=request.data)
+        if serializer.is_valid():
+            task_reason = serializer.validated_data.get('reason')
+            task_title = f"restore a foreign passport due to {task_reason}"
+
+            if Task.objects.filter(user=user, title=task_title, status=0).exists():
+                return Response({"detail": f"You have already sent an application for restoring a foreign passport due to {task_reason}."},
+                                status=status.HTTP_400_BAD_REQUEST)
+            if not user.foreign_passport:
+                return Response({"detail": "You don't have a foreign passport yet."},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            photo = serializer.validated_data.get('photo')
+            photo_path = get_photo_path(photo, user, task_title)
+            task = Task.objects.create(user=user, title=task_title, user_data={'photo': photo_path})
+            return Response({"detail": f"Your request for restoring a foreign passport due to {task_reason} has been sent."},
+                            status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
 
 class GetDocumentsAPIView(APIView):
     def get(self, request):
-        user_serializer = DocumentsRetrieveSerializer(request.user, context={'request': request})
+        user_serializer = RetrieveDocumentsSerializer(request.user, context={'request': request})
         return Response(user_serializer.data, status=status.HTTP_200_OK)
     

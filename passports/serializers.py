@@ -4,13 +4,13 @@ from authentication.models import CustomUser
 from django.conf import settings
 
 
-class AddressCreateSerializer(serializers.ModelSerializer):
+class CreateAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
         fields = ['country_code', 'region', 'settlement', 'street', 'apartments', 'post_code']
 
 
-class AddressRetrieveSerializer(serializers.ModelSerializer):
+class RetrieveAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
         fields = ['id', 'country_code', 'region', 'settlement', 'street', 'apartments', 'post_code']
@@ -20,7 +20,7 @@ class PhotoSerializer(serializers.Serializer):
     photo = serializers.ImageField()
 
 
-class PassportRetrieveSerializer(serializers.ModelSerializer):
+class RetrieveInternalPassportSerializer(serializers.ModelSerializer):
     photo = serializers.SerializerMethodField()
     
     name = serializers.CharField(source='user.name')
@@ -32,7 +32,7 @@ class PassportRetrieveSerializer(serializers.ModelSerializer):
     nationality = serializers.CharField(source='user.get_nationality_display')
     record_number = serializers.CharField(source='user.record_number')
 
-    registration_address = AddressRetrieveSerializer(source='user.address')
+    registration_address = RetrieveAddressSerializer(source='user.address')
 
     class Meta:
         model = Passport
@@ -47,7 +47,7 @@ class PassportRetrieveSerializer(serializers.ModelSerializer):
         return None
 
 
-class ForeignPassportRetrieveSerializer(serializers.ModelSerializer):
+class RetrieveForeignPassportSerializer(serializers.ModelSerializer):
     photo = serializers.SerializerMethodField()
 
     name = serializers.CharField(source='user.name')
@@ -73,16 +73,16 @@ class ForeignPassportRetrieveSerializer(serializers.ModelSerializer):
         return None
 
 
-class DocumentsRetrieveSerializer(serializers.ModelSerializer):
-    internal_passport = PassportRetrieveSerializer(source='passport')
-    foreign_passport = ForeignPassportRetrieveSerializer()
+class RetrieveDocumentsSerializer(serializers.ModelSerializer):
+    internal_passport = RetrieveInternalPassportSerializer(source='passport')
+    foreign_passport = RetrieveForeignPassportSerializer()
 
     class Meta:
         model = CustomUser
         fields = ('internal_passport', 'foreign_passport', )
 
 
-class PassportCreateSerializer(serializers.ModelSerializer):
+class CreateInternalPassportSerializer(serializers.ModelSerializer):
     number = serializers.IntegerField(required=False)
     photo = serializers.SerializerMethodField(required=False)
 
@@ -98,7 +98,7 @@ class PassportCreateSerializer(serializers.ModelSerializer):
         return None
     
 
-class ForeignPassportCreateSerializer(serializers.ModelSerializer):
+class CreateForeignPassportSerializer(serializers.ModelSerializer):
     number = serializers.IntegerField(required=False)
     photo = serializers.SerializerMethodField(required=False)
     
@@ -112,3 +112,8 @@ class ForeignPassportCreateSerializer(serializers.ModelSerializer):
         if obj.photo and request:
             return request.build_absolute_uri(obj.photo.url)
         return None
+
+
+class RestorePassportSerializer(serializers.Serializer):
+    reason = serializers.ChoiceField(choices=[('loss', 'Loss'), ('expiry', 'Expiry')])
+    photo = serializers.ImageField()
