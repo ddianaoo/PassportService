@@ -12,7 +12,15 @@ from administration.models import Task
 from .views import get_photo_path, get_address 
 
 
-class CreatePassportAPIView(APIView):
+class InternalPassportDetailAPIView(APIView):
+    def get(self, request):
+        passport = request.user.passport
+        if passport:
+            user_serializer = PassportRetrieveSerializer(passport, context={'request': request})
+            return Response(user_serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"detail": "Internal passport not found."}, status=status.HTTP_404_NOT_FOUND)
+
     def post(self, request):
         user = request.user
         task_title = "create an internal passport"
@@ -51,7 +59,15 @@ class CreatePassportAPIView(APIView):
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         
 
-class CreateForeignPassportAPIView(APIView):
+class ForeignPassportDetailAPIView(APIView):
+    def get(self, request):
+        foreign_passport = request.user.foreign_passport
+        if foreign_passport:
+            user_serializer = ForeignPassportRetrieveSerializer(foreign_passport, context={'request': request})
+            return Response(user_serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"detail": "Foreign passport not found."}, status=status.HTTP_404_NOT_FOUND)
+        
     def post(self, request):
         user = request.user
         task_title = "create a foreign passport"
@@ -82,24 +98,3 @@ class GetDocumentsAPIView(APIView):
         user_serializer = DocumentsRetrieveSerializer(request.user, context={'request': request})
         return Response(user_serializer.data, status=status.HTTP_200_OK)
     
-
-class GetInternalPassportAPIView(APIView):
-    def get(self, request):
-        passport = request.user.passport
-        if passport:
-            user_serializer = PassportRetrieveSerializer(passport, context={'request': request})
-            return Response(user_serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response({"detail": "Internal passport not found."}, status=status.HTTP_404_NOT_FOUND)
-    
-
-class GetForeignPassportAPIView(APIView):
-    def get(self, request):
-        foreign_passport = request.user.foreign_passport
-        if foreign_passport:
-            user_serializer = ForeignPassportRetrieveSerializer(foreign_passport, context={'request': request})
-            return Response(user_serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response({"detail": "Foreign passport not found."}, status=status.HTTP_404_NOT_FOUND)
-
-

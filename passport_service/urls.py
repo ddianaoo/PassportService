@@ -26,7 +26,7 @@ urlpatterns = [
     path('auth/', include('authentication.urls')),
     path('', include('passports.urls')),
     path('api/v1/auth/', include('authentication.rest_urls')),        
-    path('api/v1/', include('passports.rest_urls')),   
+    path('api/v1/my-documents/', include('passports.rest_urls')),   
     path('api/v1/staff/', include('administration.rest_urls')),   
 ]
 

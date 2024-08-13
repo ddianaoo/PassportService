@@ -34,8 +34,10 @@ class CreateInternalPassportByStaffAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        passport = Passport()
-        serializer = PassportCreateSerializer(instance=passport, data=request.data)
+        passport = Passport(photo=task.user_data.get('photo'))
+        serializer = PassportCreateSerializer(instance=passport, 
+                                              data=request.data, 
+                                              context={'request': request})
         if serializer.is_valid():
             serializer.save()
             task.user.passport = passport
@@ -55,8 +57,10 @@ class CreateForeignPassportForUserAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        passport = ForeignPassport()
-        serializer = ForeignPassportCreateSerializer(instance=passport, data=request.data)
+        passport = ForeignPassport(photo=task.user_data.get('photo'))
+        serializer = ForeignPassportCreateSerializer(instance=passport, 
+                                                     data=request.data, 
+                                                     context={'request': request})
         if serializer.is_valid():
             serializer.save()
             task.user.foreign_passport = passport

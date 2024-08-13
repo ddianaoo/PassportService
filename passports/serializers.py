@@ -84,15 +84,31 @@ class DocumentsRetrieveSerializer(serializers.ModelSerializer):
 
 class PassportCreateSerializer(serializers.ModelSerializer):
     number = serializers.IntegerField(required=False)
+    photo = serializers.SerializerMethodField(required=False)
+
     class Meta:
         model = Passport
         fields = ('number', 'authority', 'date_of_issue', 'date_of_expiry', 
             'photo', )
         
+    def get_photo(self, obj):
+        request = self.context.get('request')
+        if obj.photo and request:
+            return request.build_absolute_uri(obj.photo.url)
+        return None
+    
 
 class ForeignPassportCreateSerializer(serializers.ModelSerializer):
     number = serializers.IntegerField(required=False)
+    photo = serializers.SerializerMethodField(required=False)
+    
     class Meta:
         model = ForeignPassport
         fields = ('number', 'authority', 'date_of_issue', 'date_of_expiry', 
             'photo', )
+        
+    def get_photo(self, obj):
+        request = self.context.get('request')
+        if obj.photo and request:
+            return request.build_absolute_uri(obj.photo.url)
+        return None
