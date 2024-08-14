@@ -4,7 +4,8 @@ from .rest_views import (TaskListAPIView,
                          CreateForeignPassportForUserAPIView,
                          RestoreInternalPassportAPIView,
                          RestoreForeignPassportAPIView,
-                         ChangeAddressForUserAPIView
+                         ChangeAddressForUserAPIView,
+                         ChangeUserFieldForUserAPIView
 )                         
 from rest_framework.routers import DefaultRouter
 
@@ -19,4 +20,5 @@ urlpatterns = [
     path('restore-internal-passport/<int:task_pk>/', RestoreInternalPassportAPIView.as_view(), name='restore_ipassport_s_api'),
     path('restore-foreign-passport/<int:task_pk>/', RestoreForeignPassportAPIView.as_view(), name='restore_fpassport_s_api'),
     path('change-address/<int:task_pk>/', ChangeAddressForUserAPIView.as_view(), name='change_address_s_api'),    
+    path('change-data/<int:task_pk>/', ChangeUserFieldForUserAPIView.as_view(), name='change_data_s_api'),    
 ]

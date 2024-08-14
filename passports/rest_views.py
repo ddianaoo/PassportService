@@ -8,10 +8,14 @@ from .serializers import (
     RetrieveInternalPassportSerializer,
     RetrieveForeignPassportSerializer,
     RestorePassportSerializer,
-    RetrieveAddressSerializer
+    RetrieveAddressSerializer,
 )
 from administration.models import Task
 from .views import get_photo_path, get_address 
+from authentication.serializers import (
+    ChangeUserDataSerializer,
+    UserListSerializer
+)
 
 
 class InternalPassportDetailAPIView(APIView):
@@ -79,7 +83,7 @@ class InternalPassportDetailAPIView(APIView):
             photo_path = get_photo_path(photo, user, task_title)
             task = Task.objects.create(user=user, title=task_title, user_data={'photo': photo_path})
             return Response({"detail": f"Your request for restoring an internal passport due to {task_reason} has been sent."},
-                            status=status.HTTP_201_CREATED)
+                            status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
@@ -139,7 +143,7 @@ class ForeignPassportDetailAPIView(APIView):
             photo_path = get_photo_path(photo, user, task_title)
             task = Task.objects.create(user=user, title=task_title, user_data={'photo': photo_path})
             return Response({"detail": f"Your request for restoring a foreign passport due to {task_reason} has been sent."},
-                            status=status.HTTP_201_CREATED)
+                            status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
@@ -175,6 +179,45 @@ class UserAddressAPIView(APIView):
             adr, created = get_address(address_serializer.validated_data)
             Task.objects.create(user=request.user, title=task_title, user_data={'address_id': adr.pk})   
             return Response({"detail": "Your request to update the registration address has been submitted."},
-                            status=status.HTTP_201_CREATED)
+                            status=status.HTTP_200_OK)
         else:
             return Response(address_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChangeUserDataAPIView(APIView):
+    def get(self, request):
+        user_serializer = UserListSerializer(request.user)
+        return Response(user_serializer.data, status=status.HTTP_200_OK)
+    
+    def patch(self, request):
+        user = request.user
+        if not user.passport:
+            return Response({"detail": "You must have an internal passport to change the data."},
+                            status=status.HTTP_400_BAD_REQUEST)        
+        
+        user_serializer = ChangeUserDataSerializer(data=request.data)
+        photo_serializer = PhotoSerializer(data=request.data)
+        is_user_valid = user_serializer.is_valid()
+        is_photo_valid = photo_serializer.is_valid()
+        
+        if is_user_valid and is_photo_valid:
+            field = user_serializer.validated_data.get('field')
+            task_title = f"change user {field}"
+            if Task.objects.filter(user=user, title=task_title, status=0).exists():
+                return Response({"detail": f"You have already sent an application for changing the {field}."},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            value = user_serializer.validated_data.get('value')
+            photo = photo_serializer.validated_data.get('photo')
+            photo_path = get_photo_path(photo, user, task_title)
+            user_data={'photo': photo_path, field: value}
+            task = Task.objects.create(user=user, title=task_title, user_data=user_data)
+            return Response({"detail": f"Your request for changing the {field} has been sent."},
+                            status=status.HTTP_200_OK)
+        else:
+            errors = {}
+            if not is_user_valid:
+                errors["user_errors"] = user_serializer.errors
+            if not is_photo_valid:
+                errors["photo_errors"] = photo_serializer.errors
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)

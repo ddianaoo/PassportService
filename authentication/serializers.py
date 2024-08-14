@@ -18,3 +18,11 @@ class UserListSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'surname', 'patronymic', 'email', 
                    'sex', 'date_of_birth', 'place_of_birth', 'nationality',
                    'record_number', 'address', 'passport', 'foreign_passport')
+
+
+class ChangeUserDataSerializer(serializers.Serializer):
+    field = serializers.ChoiceField(choices=[('name', 'name'), 
+                                             ('surname', 'surname'),
+                                             ('patronymic', 'patronymic'),
+                                             ])
+    value = serializers.CharField()
