@@ -16,9 +16,12 @@ from authentication.serializers import (
     ChangeUserDataSerializer,
     UserListSerializer
 )
+from .permissions import IsClient
 
 
 class InternalPassportDetailAPIView(APIView):
+    permission_classes = [IsClient]
+
     def get(self, request):
         passport = request.user.passport
         if passport:
@@ -83,11 +86,10 @@ class InternalPassportDetailAPIView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-    def patch(self, request):
-        pass
-        
 
 class ForeignPassportDetailAPIView(APIView):
+    permission_classes = [IsClient]
+
     def get(self, request):
         foreign_passport = request.user.foreign_passport
         if foreign_passport:
@@ -145,12 +147,16 @@ class ForeignPassportDetailAPIView(APIView):
         
 
 class GetDocumentsAPIView(APIView):
+    permission_classes = [IsClient]
+
     def get(self, request):
         user_serializer = RetrieveDocumentsSerializer(request.user, context={'request': request})
         return Response(user_serializer.data, status=status.HTTP_200_OK)
     
 
 class UserAddressAPIView(APIView):
+    permission_classes = [IsClient]
+
     def get(self, request):
         address = request.user.address
         if address:
@@ -181,6 +187,8 @@ class UserAddressAPIView(APIView):
 
 
 class ChangeUserDataAPIView(APIView):
+    permission_classes = [IsClient]
+    
     def get(self, request):
         user_serializer = UserListSerializer(request.user)
         return Response(user_serializer.data, status=status.HTTP_200_OK)
