@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'authentication',
     'administration',
     'django_filters',
+    'debug_toolbar',
 ]
 
 REST_FRAMEWORK = {
@@ -69,7 +70,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
+
+INTERNAL_IPS = ['127.0.0.1']
 
 ROOT_URLCONF = 'passport_service.urls'
 
@@ -161,3 +165,69 @@ DJOSER = {
         "user": "authentication.serializers.UserListSerializer",
     },
 }
+
+
+FORMATTERS = {
+    "verbose": {
+        "format": "[{asctime:s}] {levelname} {threadName} {thread:d} {module} {filename} {lineno:d} {name} {funcName} {process:d} {message}",
+        "style": "{",
+    },
+    "simple": {
+        "format": "[{asctime:s}] {levelname} {filename} {lineno:d} {message}",
+        "style": "{",
+    },
+}
+
+HANDLERS = {
+    "console_handler": {
+        "class": "logging.StreamHandler",
+        "formatter": "simple",
+    },
+    "my_handler": {
+        "class": "logging.handlers.RotatingFileHandler",
+        "filename": f"{BASE_DIR}/logs/passport_service.log",
+        "mode": "a",
+        "encoding": "utf-8",
+        "formatter": "simple",
+        "backupCount": 5,
+        "maxBytes": 1024 * 1024 * 5,  # 5 MB
+    },
+    "my_handler_detailed": {
+        "class": "logging.handlers.RotatingFileHandler",
+        "filename": f"{BASE_DIR}/logs/passport_service_detailed.log",
+        "mode": "a",
+        "formatter": "verbose",
+        "backupCount": 5,
+        "maxBytes": 1024 * 1024 * 5,  # 5 MB
+    },
+}
+
+LOGGERS = {
+    "django": {
+        "handlers": ["console_handler", "my_handler_detailed"],
+        "level": "INFO",
+        "propagate": False,
+    },
+    "django.request": {
+        "handlers": ["my_handler"],
+        "level": "WARNING",
+        "propagate": False,
+    },
+}
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": FORMATTERS,
+    "handlers": HANDLERS,
+    "loggers": LOGGERS,
+}
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
