@@ -7,7 +7,8 @@ from .serializers import (
     RetrieveDocumentsSerializer, 
     RetrieveInternalPassportSerializer,
     RetrieveForeignPassportSerializer,
-    RestorePassportSerializer
+    RestorePassportSerializer,
+    RetrieveAddressSerializer
 )
 from administration.models import Task
 from .views import get_photo_path, get_address 
@@ -82,6 +83,9 @@ class InternalPassportDetailAPIView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
+    def patch(self, request):
+        pass
+        
 
 class ForeignPassportDetailAPIView(APIView):
     def get(self, request):
@@ -145,3 +149,32 @@ class GetDocumentsAPIView(APIView):
         user_serializer = RetrieveDocumentsSerializer(request.user, context={'request': request})
         return Response(user_serializer.data, status=status.HTTP_200_OK)
     
+
+class UserAddressAPIView(APIView):
+    def get(self, request):
+        address = request.user.address
+        if address:
+            user_serializer = RetrieveAddressSerializer(address, context={'request': request})
+            return Response(user_serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"detail": "Registration address not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    def put(self, request):
+        task_title = 'change registation address'
+
+        if Task.objects.filter(user=request.user, title=task_title, status=0).exists():
+            return Response({"detail": "You have already submitted a request to update your registration address."},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if not request.user.passport:
+            return Response({"detail": "You do not have a passport, so updating the address is not possible."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        address_serializer = CreateAddressSerializer(data=request.data)
+
+        if address_serializer.is_valid():
+            adr, created = get_address(address_serializer.validated_data)
+            Task.objects.create(user=request.user, title=task_title, user_data={'address_id': adr.pk})   
+            return Response({"detail": "Your request to update the registration address has been submitted."},
+                            status=status.HTTP_201_CREATED)
+        else:
+            return Response(address_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

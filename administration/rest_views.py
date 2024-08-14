@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from passports.models import Passport, ForeignPassport, Visa
+from passports.models import Address, Passport, ForeignPassport, Visa
 from .views import create_passport
 from rest_framework.permissions import IsAdminUser
 
@@ -136,3 +136,29 @@ class RestoreForeignPassportAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChangeAddressForUserAPIView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def put(self, request, task_pk):
+        task = get_object_or_404(Task, pk=task_pk)
+        if task.status:
+            return Response({"detail": "This user's request has already been processed."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        address_id = task.user_data.get("address_id")
+        if not address_id:
+            return Response({"detail": "No address ID found in the task data."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        addr = get_object_or_404(Address, pk=address_id)
+        task.user.address = addr
+        task.user.save()
+        task.status = 1
+        task.save()
+
+        return Response({"detail": "The registration address has been successfully updated."},
+                        status=status.HTTP_200_OK)
+    
+
