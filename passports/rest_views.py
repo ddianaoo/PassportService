@@ -45,14 +45,10 @@ class InternalPassportDetailAPIView(APIView):
         
         if is_address_valid and is_photo_valid:
             adr, created = get_address(address_serializer.validated_data)
-            request.user.address = adr
-            request.user.save()
-
             photo = photo_serializer.validated_data.get('photo')
             photo_path = get_photo_path(photo, user, task_title)
-
-            task = Task.objects.create(user=user, title=task_title, user_data={'photo': photo_path})
-            
+            user_data = {'photo': photo_path, 'address_id': adr.pk}
+            task = Task.objects.create(user=user, title=task_title, user_data=user_data)
             return Response({"detail": "Your request for creating an internal passport has been sent."},
                             status=status.HTTP_201_CREATED)
         else:

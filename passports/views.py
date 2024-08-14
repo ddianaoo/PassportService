@@ -82,11 +82,10 @@ def create_passport(request):
 
         if address_form.is_valid() and photo_form.is_valid():
             adr, created = get_address(address_form.cleaned_data)
-            request.user.address = adr
-            request.user.save()
             photo = photo_form.cleaned_data.get('photo')
             photo_path = get_photo_path(photo, user, task_title)
-            task = Task.objects.create(user=user, title=task_title, user_data={'photo': photo_path})        
+            user_data = {'photo': photo_path, 'address_id': adr.pk}
+            task = Task.objects.create(user=user, title=task_title, user_data=user_data)        
             messages.success(request, 'Ваша заява на створення внутрішнього паспорту відправлена!')
             return redirect('get_documents')
         else:

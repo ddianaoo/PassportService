@@ -97,10 +97,12 @@ def create_ipassport_for_user(request, task_pk):
         return redirect('tasks_list')
     
     passport = create_passport(task, Passport)
+    address = get_object_or_404(Address, pk=task.user_data['address_id'])
     if request.method == 'POST':
         form = PassportForm(request.POST, instance=passport)
         if form.is_valid():
             task.user.passport = form.save()
+            task.user.address = address
             task.user.save()
             task.status = 1
             task.save()
@@ -109,8 +111,8 @@ def create_ipassport_for_user(request, task_pk):
         else:
             messages.error(request, form.errors)
     form = PassportForm(instance=passport)
-    return render(request, 'administration/task_form.html',
-                  {'form': form, 'user': task.user, 'task': task, 'title': 'Оформлення паспорту'})
+    return render(request, 'administration/task_form.html', {'form': form, 
+            'user': task.user, 'address': address, 'task': task, 'title': 'Оформлення паспорту'})
 
 
 @staff_member_required(login_url='signin')

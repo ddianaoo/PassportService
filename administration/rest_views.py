@@ -40,6 +40,7 @@ class CreateInternalPassportByStaffAPIView(APIView):
                                               data=request.data, 
                                               context={'request': request})
         if serializer.is_valid():
+            task.user.address = get_object_or_404(Address, pk=task.user_data['address_id'])
             serializer.save()
             task.user.passport = passport
             task.user.save()

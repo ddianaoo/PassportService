@@ -28,7 +28,15 @@
                             class="img-fluid mb-4">
                         {% endif %}
                             {% include 'passports/inc/_user_card.html' %}
-                            {% include 'passports/inc/_address.html' %}
+                            {% if user.address %}
+                                {% include 'passports/inc/_address.html' %}
+                            {% else %}
+                            <p>
+                                <strong>Address:</strong><br>
+                                {{ address.country_code }}, {{ address.region }}, {{ address.settlement }}, 
+                                {{ address.street }}, {{ address.apartments }}, {{ address.post_code }}
+                            </p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
