@@ -9,36 +9,31 @@ class UserSelfAPITests(APITestCase):
     def setUp(self):
         self.user = CustomUserFactory(
             email="test@test.com",
-            name="Test",
-            surname="Test",
-            patronymic="Testovich",
-            date_of_birth=datetime.date(2000, 1, 1),
-            record_number="20000101-33509",
-            nationality="UA",
-            sex="M",
-            place_of_birth="Kharkiv",
+            passport=None,
+            foreign_passport=None,
+            address=None
         )
         self.path = "/api/auth/users/me/"
 
     def test_user_retreive_data_successful(self):
         self.client.force_authenticate(self.user)
         response = self.client.get(path=self.path)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-        {
-	        "id": ANY,
-	        "name": "Test",
-	        "surname": "Test",
-	        "patronymic": "Testovich",
-	        "email": "test@test.com",
-	        "sex": "M",
-	        "date_of_birth": "2000-01-01",
-	        "place_of_birth": "Kharkiv",
-	        "nationality": "UA",
-	        "record_number": "20000101-33509",
-	        "address": None,
-	        "passport": None,
-	        "foreign_passport": None
+        self.assertEqual({
+            "id": ANY,
+            "name": self.user.name,
+            "surname": self.user.surname,
+            "patronymic": self.user.patronymic,
+            "email": self.user.email,
+            "sex": self.user.sex,
+            "date_of_birth": str(self.user.date_of_birth),
+            "place_of_birth": self.user.place_of_birth,
+            "nationality": self.user.nationality,
+            "record_number": self.user.record_number,
+            "address": None,
+            "passport": None,
+            "foreign_passport": None
         },
             response.json(),
         )

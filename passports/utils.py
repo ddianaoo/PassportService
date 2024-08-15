@@ -247,3 +247,5 @@ COUNTRY_CHOICES = [
     ('ZM', 'Zambia'),
     ('ZW', 'Zimbabwe'),
 ]
+
+COUNTRY_CHOICES_DICT = dict(COUNTRY_CHOICES)

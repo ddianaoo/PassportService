@@ -13,7 +13,6 @@ class UserLoginAPITests(APITestCase):
     def test_login_successful(self):
         self.user.set_password("Test1234")
         self.user.save()
-        sleep(6)
         response = self.client.post(
             path=self.path,
             data={
