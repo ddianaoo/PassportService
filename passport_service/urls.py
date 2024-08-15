@@ -25,9 +25,9 @@ urlpatterns = [
     path('staff/', include('administration.urls')),
     path('auth/', include('authentication.urls')),
     path('', include('passports.urls')),
-    path('api/v1/auth/', include('authentication.rest_urls')),        
-    path('api/v1/my-documents/', include('passports.rest_urls')),   
-    path('api/v1/staff/', include('administration.rest_urls')),   
+    path('api/auth/', include('authentication.rest_urls')),        
+    path('api/my-documents/', include('passports.rest_urls')),   
+    path('api/staff/', include('administration.rest_urls')),   
 ]
 
 if settings.DEBUG:

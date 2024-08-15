@@ -164,6 +164,11 @@ DJOSER = {
         "current_user": "authentication.serializers.UserListSerializer",
         "user": "authentication.serializers.UserListSerializer",
     },
+    "PERMISSIONS": {
+        "current_user": ["authentication.permissions.IsAdminOrReadOnly",],
+        "user": ["authentication.permissions.IsAdminOrReadOnly",],
+        "user_delete": ["authentication.permissions.IsAdminOrReadOnly",]
+    },
 }
 
 

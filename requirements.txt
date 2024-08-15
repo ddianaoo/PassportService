@@ -1,8 +1,12 @@
 asgiref==3.8.1
 Django==5.0.6
+django-debug-toolbar==4.4.6
 django-filter==24.3
 djangorestframework==3.15.1
+djoser==2.2.3
+factory-boy==3.3.0
+Faker==27.0.0
 pillow==10.3.0
 python-decouple==3.8
 sqlparse==0.5.0
-djoser==2.2.3
+
