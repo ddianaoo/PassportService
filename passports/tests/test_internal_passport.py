@@ -1,15 +1,13 @@
 from administration.factories import TaskFactory
 from authentication.factories import CustomUserFactory
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.conf import settings
+import os
 from passports.utils import COUNTRY_CHOICES_DICT
-import datetime
-from django.utils import timezone
 from passports.factories import AddressFactory, PassportFactory
 from rest_framework import status
 from rest_framework.test import APITestCase
 from unittest.mock import ANY
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.conf import settings
-import os
 
 
 class InternalPassportDetailAPITests(APITestCase):
@@ -24,14 +22,18 @@ class InternalPassportDetailAPITests(APITestCase):
             apartments="88",
             post_code=61070
         )
-        passport = PassportFactory(
-            photo='',
-        )
         self.user = CustomUserFactory(
             email="test@test.com",
             address=address,
-            passport=passport,
+            passport=PassportFactory(photo=''),
             foreign_passport=None,
+        )
+        self.admin = CustomUserFactory(
+            email="admin@test.com",
+            address=None,
+            passport=None,
+            foreign_passport=None,
+            is_staff=True
         )
         self.user_nationality = COUNTRY_CHOICES_DICT[self.user.nationality]
         self.user_without_passport = CustomUserFactory(
@@ -53,11 +55,11 @@ class InternalPassportDetailAPITests(APITestCase):
         self.loss_reason = "loss"
         self.expiry_reason = "expiry"
 
+
     # GET METHOD
     def test_get_internal_passport_successful(self):
         self.client.force_authenticate(self.user)
         response = self.client.get(path=self.path)
-
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual({
             "number": ANY,
@@ -83,7 +85,7 @@ class InternalPassportDetailAPITests(APITestCase):
                 "post_code": self.user.address.post_code
             }
         },
-            response.json(),
+            response.json()
         )
 
     def test_get_internal_passport_no_data(self):
@@ -91,7 +93,7 @@ class InternalPassportDetailAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(
             {"detail": "Internal passport not found."},
-            response.json(),
+            response.json()
         )
 
     def test_get_internal_passport_not_logged_in(self):
@@ -100,31 +102,41 @@ class InternalPassportDetailAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(
             {"detail": "Authentication credentials were not provided."},
-            response.json(),
+            response.json()
+        )
+
+    def test_get_internal_passport_admin_logged_in_forbidden(self):
+        self.client.force_authenticate(self.admin)
+        response = self.client.get(path=self.path)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(
+            {"detail": "You do not have permission to perform this action."},
+            response.json()
         )
 
     # POST METHOD
     def test_create_internal_passport_successful(self):
         with open(self.image_path, 'rb') as f:
             self.valid_photo = SimpleUploadedFile('create_ip.png', f.read(), content_type='image/png')
-        response = self.client.post(path=self.path,
-           data={
-            **self.valid_address_data,
-            'photo': self.valid_photo
-        },
-           format='multipart',                         
+        response = self.client.post(
+            path=self.path,
+            data={
+                **self.valid_address_data,
+                'photo': self.valid_photo
+            },
+            format='multipart'                        
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(
             {"detail": "Your request for creating an internal passport has been sent."},
-            response.json(),
+            response.json()
         )
 
     def test_create_internal_passport_without_photo(self):
         response = self.client.post(
             path=self.path,
             data=self.valid_address_data,
-            format='json', 
+            format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -136,17 +148,18 @@ class InternalPassportDetailAPITests(APITestCase):
         invalid_country_code = "Ukraine"
         with open(self.image_path, 'rb') as f:
             self.valid_photo = SimpleUploadedFile('create_ip.png', f.read(), content_type='image/png')
-        response = self.client.post(path=self.path,
-           data={
-	        "country_code": invalid_country_code,
-	        "region": "Kharkiv region",
-	        "settlement": "Kharkiv",
-	        "street": "Zoryana 4",
-	        "apartments": "11",
-	        "post_code": 61070,
-            'photo': self.valid_photo
-        },
-           format='multipart',                         
+        response = self.client.post(
+            path=self.path,
+            data={
+	            "country_code": invalid_country_code,
+	            "region": "Kharkiv region",
+	            "settlement": "Kharkiv",
+	            "street": "Zoryana 4",
+	            "apartments": "11",
+	            "post_code": 61070,
+                'photo': self.valid_photo
+            },
+            format='multipart'                       
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -160,17 +173,18 @@ class InternalPassportDetailAPITests(APITestCase):
     def test_create_internal_passport_incorrect_address_post_code(self):
         with open(self.image_path, 'rb') as f:
             self.valid_photo = SimpleUploadedFile('create_ip.png', f.read(), content_type='image/png')
-        response = self.client.post(path=self.path,
-           data={
-	        "country_code": "UA",
-	        "region": "Kharkiv region",
-	        "settlement": "Kharkiv",
-	        "street": "Zoryana 4",
-	        "apartments": "11",
-	        "post_code": 100003,
-            'photo': self.valid_photo
-        },
-           format='multipart',                         
+        response = self.client.post(
+            path=self.path,
+            data={
+	            "country_code": "UA",
+	            "region": "Kharkiv region",
+	            "settlement": "Kharkiv",
+	            "street": "Zoryana 4",
+	            "apartments": "11",
+	            "post_code": 100003,
+                'photo': self.valid_photo
+            },
+            format='multipart'                      
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -182,11 +196,7 @@ class InternalPassportDetailAPITests(APITestCase):
         ) 
 
     def test_create_internal_passport_without_any_data(self):
-        response = self.client.post(
-            path=self.path,
-            data={},
-            format='json', 
-        )
+        response = self.client.post(path=self.path, data={})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             {'address_errors': {
@@ -206,23 +216,22 @@ class InternalPassportDetailAPITests(APITestCase):
         task = TaskFactory(
             user=self.user_without_passport, 
             title='create an internal passport', 
-            status=0, 
-            user_data={}
+            status=0
         )
         response = self.client.post(path=self.path, data={})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            {"detail": "You have already sent an application for the creation of an internal passport."},
-            response.json(),
+            {"detail": "You have already sent a request for creating an internal passport."},
+            response.json()
         )
 
-    def test_create_internal_passport_passport_already_stored(self):
+    def test_create_internal_passport_already_stored(self):
         self.client.force_authenticate(self.user)
         response = self.client.post(path=self.path, data={})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             {"detail": "You already have an internal passport."},
-            response.json(),
+            response.json()
         )
 
     def test_create_internal_passport_not_logged_in(self):
@@ -231,7 +240,16 @@ class InternalPassportDetailAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(
             {"detail": "Authentication credentials were not provided."},
-            response.json(),
+            response.json()
+        )
+
+    def test_create_internal_passport_admin_logged_in_forbidden(self):
+        self.client.force_authenticate(self.admin)
+        response = self.client.post(path=self.path, data={})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(
+            {"detail": "You do not have permission to perform this action."},
+            response.json()
         )
 
     # PUT METHOD
@@ -239,144 +257,149 @@ class InternalPassportDetailAPITests(APITestCase):
         self.client.force_authenticate(self.user)
         with open(self.image_path, 'rb') as f:
             self.valid_photo = SimpleUploadedFile('create_ip.png', f.read(), content_type='image/png')
-        response = self.client.put(path=self.path,
-           data={
-            'reason': self.loss_reason,
-            'photo': self.valid_photo
-        },
-           format='multipart',                         
+        response = self.client.put(
+            path=self.path,
+            data={
+                'reason': self.loss_reason,
+                'photo': self.valid_photo
+            },
+            format='multipart'                   
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             {"detail": f"Your request for restoring an internal passport due to {self.loss_reason} has been sent."},
-            response.json(),
+            response.json()
         )
 
     def test_restore_internal_passport_due_to_expiry_successful(self):
         self.client.force_authenticate(self.user)
         with open(self.image_path, 'rb') as f:
             self.valid_photo = SimpleUploadedFile('create_ip.png', f.read(), content_type='image/png')
-        response = self.client.put(path=self.path,
-           data={
-            'reason': self.expiry_reason,
-            'photo': self.valid_photo
-        },
-           format='multipart',                         
+        response = self.client.put(
+            path=self.path,
+            data={
+                'reason': self.expiry_reason,
+                'photo': self.valid_photo
+            },
+            format='multipart'                      
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             {"detail": f"Your request for restoring an internal passport due to {self.expiry_reason} has been sent."},
-            response.json(),
+            response.json()
         )
 
     def test_restore_internal_passport_due_to_loss_task_already_stored(self):
+        self.client.force_authenticate(self.user)
         task_title = f"restore an internal passport due to {self.loss_reason}"
         task = TaskFactory(
-            user=self.user_without_passport, 
+            user=self.user, 
             title=task_title, 
-            status=0, 
-            user_data={}
+            status=0
         )
         with open(self.image_path, 'rb') as f:
             self.valid_photo = SimpleUploadedFile('create_ip.png', f.read(), content_type='image/png')
-        response = self.client.put(path=self.path,
-           data={
-            'reason': self.loss_reason,
-            'photo': self.valid_photo
-        },
-           format='multipart',                         
+        response = self.client.put(
+            path=self.path,
+            data={
+                'reason': self.loss_reason,
+                'photo': self.valid_photo
+            },
+            format='multipart'                       
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            {"detail": f"You have already sent an application for restoring an internal passport due to {self.loss_reason}."},
-            response.json(),
+            {"detail": f"You have already sent a request for restoring an internal passport due to {self.loss_reason}."},
+            response.json()
         )
 
     def test_restore_internal_passport_due_to_expiry_task_already_stored(self):
+        self.client.force_authenticate(self.user)
         task_title = f"restore an internal passport due to {self.expiry_reason}"
         task = TaskFactory(
-            user=self.user_without_passport, 
+            user=self.user, 
             title=task_title, 
-            status=0, 
-            user_data={}
+            status=0
         )
         with open(self.image_path, 'rb') as f:
             self.valid_photo = SimpleUploadedFile('create_ip.png', f.read(), content_type='image/png')
-        response = self.client.put(path=self.path,
-           data={
-            'reason': self.expiry_reason,
-            'photo': self.valid_photo
-        },
-           format='multipart',                         
+        response = self.client.put(
+            path=self.path,
+            data={
+                'reason': self.expiry_reason,
+                'photo': self.valid_photo
+            },
+            format='multipart'                       
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            {"detail": f"You have already sent an application for restoring an internal passport due to {self.expiry_reason}."},
-            response.json(),
+            {"detail": f"You have already sent a request for restoring an internal passport due to {self.expiry_reason}."},
+            response.json()
         )
 
     def test_restore_internal_passport_no_pasport(self):
         with open(self.image_path, 'rb') as f:
             self.valid_photo = SimpleUploadedFile('create_ip.png', f.read(), content_type='image/png')
-        response = self.client.put(path=self.path,
-           data={
-            'reason': self.loss_reason,
-            'photo': self.valid_photo
-        },
-           format='multipart',                         
+        response = self.client.put(
+            path=self.path,
+            data={
+                'reason': self.loss_reason,
+                'photo': self.valid_photo
+            },
+            format='multipart'                         
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             {"detail": "You don't have an internal passport yet."},
-            response.json(),
+            response.json()
         )
 
     def test_restore_internal_passport_no_photo(self):
-        with open(self.image_path, 'rb') as f:
-            self.valid_photo = SimpleUploadedFile('create_ip.png', f.read(), content_type='image/png')
-        response = self.client.put(path=self.path,
-           data={
-            'reason': self.loss_reason,
-        },
-           format='multipart',                         
+        self.client.force_authenticate(self.user)
+        response = self.client.put(
+            path=self.path,
+            data={'reason': self.loss_reason},
+            format='json'                       
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             {"photo": ["No file was submitted."]},
-            response.json(),
+            response.json()
         )
 
     def test_restore_internal_passport_no_reason(self):
+        self.client.force_authenticate(self.user)
         with open(self.image_path, 'rb') as f:
             self.valid_photo = SimpleUploadedFile('create_ip.png', f.read(), content_type='image/png')
-        response = self.client.put(path=self.path,
-           data={
-            'photo': self.valid_photo
-        },
-           format='multipart',                         
+        response = self.client.put(
+            path=self.path,
+            data={'photo': self.valid_photo},
+            format='multipart'                        
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             {"reason": ["This field is required."]},
-            response.json(),
+            response.json()
         )
 
     def test_restore_internal_passport_incorrect_reason(self):
+        self.client.force_authenticate(self.user)
         invalid_reason = "job"
         with open(self.image_path, 'rb') as f:
             self.valid_photo = SimpleUploadedFile('create_ip.png', f.read(), content_type='image/png')
-        response = self.client.put(path=self.path,
-           data={
-            'reason': invalid_reason,
-            'photo': self.valid_photo
-        },
-           format='multipart',                         
+        response = self.client.put(
+            path=self.path,
+            data={
+                'reason': invalid_reason,
+                'photo': self.valid_photo
+            },
+            format='multipart'                        
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             {"reason": [f"\"{invalid_reason}\" is not a valid choice."]
             },
-            response.json(),
+            response.json()
         )
 
     def test_restore_internal_passport_not_logged_in(self):
@@ -385,5 +408,14 @@ class InternalPassportDetailAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(
             {"detail": "Authentication credentials were not provided."},
-            response.json(),
+            response.json()
+        )
+
+    def test_restore_internal_passport_admin_logged_in_forbidden(self):
+        self.client.force_authenticate(self.admin)
+        response = self.client.put(path=self.path, data={})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(
+            {"detail": "You do not have permission to perform this action."},
+            response.json()
         )

@@ -1,5 +1,4 @@
 from authentication.factories import CustomUserFactory
-import datetime
 from rest_framework import status
 from rest_framework.test import APITestCase
 from unittest.mock import ANY

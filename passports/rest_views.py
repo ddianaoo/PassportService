@@ -35,7 +35,7 @@ class InternalPassportDetailAPIView(APIView):
         task_title = "create an internal passport"
         
         if Task.objects.filter(user=user, title=task_title, status=0).exists():
-            return Response({"detail": "You have already sent an application for the creation of an internal passport."},
+            return Response({"detail": "You have already sent a request for creating an internal passport."},
                             status=status.HTTP_400_BAD_REQUEST)
         if user.passport:
             return Response({"detail": "You already have an internal passport."},
@@ -72,7 +72,7 @@ class InternalPassportDetailAPIView(APIView):
             task_title = f"restore an internal passport due to {task_reason}"
 
             if Task.objects.filter(user=user, title=task_title, status=0).exists():
-                return Response({"detail": f"You have already sent an application for restoring an internal passport due to {task_reason}."},
+                return Response({"detail": f"You have already sent a request for restoring an internal passport due to {task_reason}."},
                                 status=status.HTTP_400_BAD_REQUEST)
             if not user.passport:
                 return Response({"detail": "You don't have an internal passport yet."},
@@ -103,7 +103,7 @@ class ForeignPassportDetailAPIView(APIView):
         task_title = "create a foreign passport"
 
         if Task.objects.filter(user=user, title=task_title, status=0).exists():
-            return Response({"detail": "You have already sent an application for creating a foreign passport."},
+            return Response({"detail": "You have already sent a request for creating a foreign passport."},
                             status=status.HTTP_400_BAD_REQUEST)
         if user.foreign_passport:
             return Response({"detail": "You already have a foreign passport."},
@@ -117,7 +117,7 @@ class ForeignPassportDetailAPIView(APIView):
             photo = photo_serializer.validated_data.get('photo')
             photo_path = get_photo_path(photo, user, task_title)
             task = Task.objects.create(user=user, title=task_title, user_data={'photo': photo_path})
-            return Response({"detail": "Your application for creating a foreign passport has been sent."},
+            return Response({"detail": "Your request for creating a foreign passport has been sent."},
                             status=status.HTTP_201_CREATED)
         else:
             return Response(photo_serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
@@ -131,7 +131,7 @@ class ForeignPassportDetailAPIView(APIView):
             task_title = f"restore a foreign passport due to {task_reason}"
 
             if Task.objects.filter(user=user, title=task_title, status=0).exists():
-                return Response({"detail": f"You have already sent an application for restoring a foreign passport due to {task_reason}."},
+                return Response({"detail": f"You have already sent a request for restoring a foreign passport due to {task_reason}."},
                                 status=status.HTTP_400_BAD_REQUEST)
             if not user.foreign_passport:
                 return Response({"detail": "You don't have a foreign passport yet."},
@@ -208,7 +208,7 @@ class ChangeUserDataAPIView(APIView):
             field = user_serializer.validated_data.get('field')
             task_title = f"change user {field}"
             if Task.objects.filter(user=user, title=task_title, status=0).exists():
-                return Response({"detail": f"You have already sent an application for changing the {field}."},
+                return Response({"detail": f"You have already sent a request for changing the {field}."},
                                 status=status.HTTP_400_BAD_REQUEST)
 
             value = user_serializer.validated_data.get('value')
