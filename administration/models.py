@@ -26,3 +26,6 @@ class Task(models.Model):
     status = models.IntegerField(choices=STATUS_CHOICES, default=0)
     user_data = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"<Task {self.id}: `{self.title}`>"

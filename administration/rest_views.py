@@ -13,7 +13,7 @@ from rest_framework.permissions import IsAdminUser
 
 
 class TaskListAPIView(ReadOnlyModelViewSet):
-    queryset = Task.objects.all().order_by('-created_at', 'status')
+    queryset = Task.objects.all().order_by('status', '-created_at')
     serializer_class = TaskSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TaskFilter
