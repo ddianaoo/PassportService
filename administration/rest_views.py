@@ -34,13 +34,13 @@ class CreateInternalPassportByStaffAPIView(APIView):
                 {"detail": "Request has already been processed or the user already has a passport."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        passport = Passport(photo=task.user_data.get('photo'))
+
+        passport = Passport(photo=task.user_data.get("photo"))
         serializer = CreateInternalPassportSerializer(instance=passport, 
                                               data=request.data, 
                                               context={'request': request})
         if serializer.is_valid():
-            task.user.address = get_object_or_404(Address, pk=task.user_data['address_id'])
+            task.user.address = get_object_or_404(Address, pk=task.user_data.get("address_id"))
             serializer.save()
             task.user.passport = passport
             task.user.save()
@@ -53,10 +53,10 @@ class CreateInternalPassportByStaffAPIView(APIView):
 class RestoreInternalPassportAPIView(APIView):    
     permission_classes = [IsAdminUser]
 
-    def post(self, request, task_pk):
-        task_title = "restore an internal passport"
+    def put(self, request, task_pk):
+        task_titles = ["restore an internal passport due to loss", "restore an internal passport due to expiry"]
         task = get_object_or_404(Task, pk=task_pk)
-        if task_title not in task.title:
+        if task.title not in task_titles:
             return Response({"detail": "The task with this id and title wasn`t found."}, 
                             status=status.HTTP_404_NOT_FOUND)
         if task.status:
@@ -64,8 +64,13 @@ class RestoreInternalPassportAPIView(APIView):
                 {"detail": "Request has already been processed."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
-        passport = Passport(photo=task.user_data.get('photo'))
+        if not task.user.passport:
+            return Response(
+                {"detail": "User doesn`t have an internal passport to update it yet."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        passport = Passport(photo=task.user_data.get("photo"))
         serializer = CreateInternalPassportSerializer(instance=passport, 
                                                       data=request.data,
                                                       context={'request': request})
@@ -95,8 +100,13 @@ class CreateForeignPassportForUserAPIView(APIView):
                 {"detail": "Request has already been processed or the user already has a foreign passport."},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        if not task.user.passport:
+            return Response(
+                {"detail": "Before creating a foreign passport, the user must have an internal passport."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
-        passport = ForeignPassport(photo=task.user_data.get('photo'))
+        passport = ForeignPassport(photo=task.user_data.get("photo"))
         serializer = CreateForeignPassportSerializer(instance=passport, 
                                                      data=request.data, 
                                                      context={'request': request})
@@ -113,10 +123,10 @@ class CreateForeignPassportForUserAPIView(APIView):
 class RestoreForeignPassportAPIView(APIView):
     permission_classes = [IsAdminUser]
 
-    def post(self, request, task_pk):
-        task_title = "restore a foreign passport"
+    def put(self, request, task_pk):
+        task_titles = ["restore a foreign passport due to loss", "restore a foreign passport due to expiry"]
         task = get_object_or_404(Task, pk=task_pk)
-        if task_title not in task.title:
+        if task.title not in task_titles:
             return Response({"detail": "The task with this id and title wasn`t found."}, 
                             status=status.HTTP_404_NOT_FOUND)
         if task.status:
@@ -124,8 +134,13 @@ class RestoreForeignPassportAPIView(APIView):
                 {"detail": "This user's request has already been processed."},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        if not task.user.foreign_passport:
+            return Response(
+                {"detail": "User doesn`t have a foreign passport to update it yet."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        passport = ForeignPassport(photo=task.user_data.get('photo')) 
+        passport = ForeignPassport(photo=task.user_data.get("photo")) 
         serializer = CreateForeignPassportSerializer(instance=passport, 
                                                      data=request.data, 
                                                      context={'request': request})
@@ -141,7 +156,7 @@ class RestoreForeignPassportAPIView(APIView):
             task.status = 1
             task.save()
 
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -149,7 +164,7 @@ class RestoreForeignPassportAPIView(APIView):
 class ChangeAddressForUserAPIView(APIView):
     permission_classes = [IsAdminUser]
 
-    def put(self, request, task_pk):
+    def patch(self, request, task_pk):
         task_title = "change registation address"
         task = get_object_or_404(Task, pk=task_pk)
         if task_title != task.title:
@@ -158,12 +173,11 @@ class ChangeAddressForUserAPIView(APIView):
         if task.status:
             return Response({"detail": "This user's request has already been processed."},
                             status=status.HTTP_400_BAD_REQUEST)
-        address_id = task.user_data.get("address_id")
-        if not address_id:
-            return Response({"detail": "No address ID found in the task data."},
-                            status=status.HTTP_400_BAD_REQUEST)
+        if not task.user.passport:
+            return Response({"detail": "Before updating the address, the user must have an internal passport with the address of registration."},
+                            status=status.HTTP_400_BAD_REQUEST)            
 
-        addr = get_object_or_404(Address, pk=address_id)
+        addr = get_object_or_404(Address, pk=task.user_data.get("address_id"))
         task.user.address = addr
         task.user.save()
         task.status = 1
@@ -192,13 +206,14 @@ class ChangeUserFieldForUserAPIView(APIView):
 
         return Response({'detail': f'The user {field_name} has been successfully updated.'}, status=status.HTTP_200_OK)
 
-    def put(self, request, task_pk):
+    def patch(self, request, task_pk):
         task = get_object_or_404(Task, pk=task_pk)
         if task.status:
             return Response(
-                {"detail": "Request has already been processed."},
+                {"detail": "This user's request has already been processed."},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        field_name = ''
         for key in ['name', 'surname', 'patronymic']:
             new_value = task.user_data.get(key)
             if new_value:
@@ -208,8 +223,11 @@ class ChangeUserFieldForUserAPIView(APIView):
         if task_title != task.title:
             return Response({"detail": "The task with this id and title wasn`t found."}, 
                             status=status.HTTP_404_NOT_FOUND)
-
-        new_ipassport = Passport(photo=task.user_data.get('photo')) 
+        if not task.user.passport:
+            return Response({"detail": f"Before updating the {field_name}, the user must have an internal passport."},
+                            status=status.HTTP_400_BAD_REQUEST)                 
+        
+        new_ipassport = Passport(photo=task.user_data.get("photo")) 
         ipassport_serializer = CreateInternalPassportSerializer(instance=new_ipassport, 
                                                       data=request.data.get('internal_passport'),
                                                       context={'request': request})
@@ -218,7 +236,7 @@ class ChangeUserFieldForUserAPIView(APIView):
                 return self.handle_user_field_update(task, ipassport_serializer, field_name, new_value)
             return Response(ipassport_serializer.errors, status=status.HTTP_400_BAD_REQUEST)       
 
-        new_fpassport = ForeignPassport(photo=task.user_data.get('photo')) 
+        new_fpassport = ForeignPassport(photo=task.user_data.get("photo")) 
         fpassport_serializer = CreateForeignPassportSerializer(instance=new_fpassport, 
                                                                data=request.data.get('foreign_passport'),
                                                                context={'request': request})

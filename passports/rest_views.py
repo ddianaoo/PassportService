@@ -165,7 +165,7 @@ class UserAddressAPIView(APIView):
         else:
             return Response({"detail": "Registration address not found."}, status=status.HTTP_404_NOT_FOUND)
 
-    def put(self, request):
+    def patch(self, request):
         task_title = 'change registation address'
 
         if Task.objects.filter(user=request.user, title=task_title, status=0).exists():

@@ -309,7 +309,7 @@ class TaskListAPITests(APITestCase):
             response.json()
         )
 
-    def test_patch_detail_task_not_allowed(self):
+    def test_get_detail_task_patch_method_not_allowed(self):
         response = self.client.patch(path=f"{self.path}{self.task5.pk}/")
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
         self.assertEqual(
@@ -317,7 +317,7 @@ class TaskListAPITests(APITestCase):
             response.json()
         )
 
-    def test_put_detail_task_not_allowed(self):
+    def test_get_detail_task_put_method_not_allowed(self):
         response = self.client.put(path=f"{self.path}{self.task5.pk}/")
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
         self.assertEqual(
@@ -325,7 +325,7 @@ class TaskListAPITests(APITestCase):
             response.json()
         )        
 
-    def test_delete_detail_task_not_allowed(self):
+    def test_get_detail_task_delete_method_not_allowed(self):
         response = self.client.delete(path=f"{self.path}{self.task5.pk}/")
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
         self.assertEqual(

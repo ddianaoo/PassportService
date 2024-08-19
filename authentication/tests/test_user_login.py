@@ -1,7 +1,6 @@
 from authentication.factories import CustomUserFactory
 from rest_framework import status
 from rest_framework.test import APITestCase
-from time import sleep
 from unittest.mock import ANY
 
 

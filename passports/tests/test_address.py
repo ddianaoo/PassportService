@@ -92,10 +92,10 @@ class UserAddressAPITests(APITestCase):
             response.json()
         )
 
-    # PUT METHOD
+    # PATCH METHOD
     def test_change_address_successful(self):
         self.client.force_authenticate(self.user)
-        response = self.client.put(
+        response = self.client.patch(
             path=self.path,
             data={**self.valid_address_data},
             format='json'                       
@@ -113,7 +113,7 @@ class UserAddressAPITests(APITestCase):
             title='change registation address', 
             status=0
         )
-        response = self.client.put(path=self.path, data={})
+        response = self.client.patch(path=self.path, data={})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             {"detail": "You have already submitted a request to update your registration address."},
@@ -121,7 +121,7 @@ class UserAddressAPITests(APITestCase):
         )
 
     def test_change_address_no_pasport(self):
-        response = self.client.put(path=self.path, data={})
+        response = self.client.patch(path=self.path, data={})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             {"detail": "You do not have a passport, so updating the address is not possible."},
@@ -130,7 +130,7 @@ class UserAddressAPITests(APITestCase):
 
     def test_change_address_no_data(self):
         self.client.force_authenticate(self.user)
-        response = self.client.put(path=self.path,data={})
+        response = self.client.patch(path=self.path,data={})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual({
             'country_code': ['This field is required.'], 
@@ -146,7 +146,7 @@ class UserAddressAPITests(APITestCase):
     def test_change_address_incorrect_address_country_code(self):
         self.client.force_authenticate(self.user)
         invalid_country_code = "Ukraine"
-        response = self.client.put(
+        response = self.client.patch(
             path=self.path,
             data={
 	            "country_code": invalid_country_code,
@@ -166,7 +166,7 @@ class UserAddressAPITests(APITestCase):
 
     def test_change_address_incorrect_address_post_code(self):
         self.client.force_authenticate(self.user)
-        response = self.client.put(
+        response = self.client.patch(
             path=self.path,
             data={
 	            "country_code": "UA",
@@ -186,7 +186,7 @@ class UserAddressAPITests(APITestCase):
 
     def test_change_address_not_logged_in(self):
         self.client.force_authenticate(user=None)
-        response = self.client.put(path=self.path, data={})
+        response = self.client.patch(path=self.path, data={})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(
             {"detail": "Authentication credentials were not provided."},
@@ -195,7 +195,7 @@ class UserAddressAPITests(APITestCase):
 
     def test_change_address_admin_logged_in_forbidden(self):
         self.client.force_authenticate(self.admin)
-        response = self.client.put(path=self.path, data={})
+        response = self.client.patch(path=self.path, data={})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             {"detail": "You do not have permission to perform this action."},
