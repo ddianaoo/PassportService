@@ -27,7 +27,8 @@ urlpatterns = [
     path('', include('passports.urls')),
     path('api/auth/', include('authentication.rest_urls')),        
     path('api/my-documents/', include('passports.rest_urls')),   
-    path('api/staff/', include('administration.rest_urls')),   
+    path('api/staff/', include('administration.rest_urls')),
+    path('', include('django_prometheus.urls')),   
 ]
 
 if settings.DEBUG:
