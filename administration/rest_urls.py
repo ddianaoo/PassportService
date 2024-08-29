@@ -1,4 +1,5 @@
 from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from .rest_views import (TaskListAPIView, 
                          CreateInternalPassportByStaffAPIView, 
                          CreateForeignPassportForUserAPIView,
@@ -7,7 +8,7 @@ from .rest_views import (TaskListAPIView,
                          ChangeAddressForUserAPIView,
                          ChangeUserFieldForUserAPIView
 )                         
-from rest_framework.routers import DefaultRouter
+
 
 
 router = DefaultRouter()

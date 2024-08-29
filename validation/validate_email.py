@@ -1,5 +1,5 @@
-from django.core.exceptions import ValidationError
 import re
+from django.core.exceptions import ValidationError
 
 
 def validate_email(email: str):

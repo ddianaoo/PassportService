@@ -1,5 +1,6 @@
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from rest_framework import serializers
+
 from authentication.models import CustomUser
 from passports.serializers import RetrieveAddressSerializer
 

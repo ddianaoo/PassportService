@@ -1,9 +1,10 @@
-from authentication.factories import CustomUserFactory
-from passports.utils import COUNTRY_CHOICES_DICT
-from passports.factories import AddressFactory, PassportFactory, ForeignPassportFactory
 from rest_framework import status
 from rest_framework.test import APITestCase
 from unittest.mock import ANY
+
+from authentication.factories import CustomUserFactory
+from passports.utils import COUNTRY_CHOICES_DICT
+from passports.factories import AddressFactory, PassportFactory, ForeignPassportFactory
 
 
 class GetDocumentsAPITests(APITestCase):

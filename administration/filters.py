@@ -1,4 +1,5 @@
 import django_filters
+
 from .models import Task
 from rest_framework.exceptions import ParseError
 from .utils import TITLE_NAMES_AND_SLUGS

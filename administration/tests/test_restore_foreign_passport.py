@@ -1,11 +1,12 @@
-from administration.factories import TaskFactory
-from authentication.factories import CustomUserFactory
 from django.utils import timezone
-from passports.factories import AddressFactory, PassportFactory, ForeignPassportFactory, VisaFactory
-from passports.models import Visa, ForeignPassport
 from rest_framework import status
 from rest_framework.test import APITestCase
-from unittest.mock import ANY
+from unittest.mock import ANY, patch
+
+from administration.factories import TaskFactory
+from authentication.factories import CustomUserFactory
+from passports.factories import AddressFactory, PassportFactory, ForeignPassportFactory, VisaFactory
+from passports.models import Visa, ForeignPassport
 
 
 class RestoreForeignPassportByStaffAPITests(APITestCase):
@@ -53,19 +54,14 @@ class RestoreForeignPassportByStaffAPITests(APITestCase):
                                     "photo": "1-surname22-name22-restore-a-foreign-passport.jpg"
                                 }
        )
-        self.wrong_task_title = TaskFactory(user=self.user,
-                                title="change registation address", 
-                                status=0,
-                                user_data={"address_id": self.address.id}                              
-                                )
         self.valid_data = {
                 "authority": 6666,
                 "date_of_issue": str(timezone.now().date()),
 			    "date_of_expiry": str(timezone.now().date() + timezone.timedelta(days=365*10+2))
             }
 
-
-    def test_restore_foreign_passport_loss_successful(self):
+    @patch('administration.tasks.send_notification.delay')
+    def test_restore_foreign_passport_loss_successful(self, mock_send_notification):
         response = self.client.put(
             path=f"{self.path}{self.task_passport_loss.pk}/",
             data=self.valid_data,
@@ -89,8 +85,10 @@ class RestoreForeignPassportByStaffAPITests(APITestCase):
         check_old_passport = ForeignPassport.objects.filter(number=self.foreign_passport.number).exists()
         self.assertFalse(check_old_passport)
         self.assertEqual(self.task_passport_loss.status, 1)
+        mock_send_notification.assert_called_once()
 
-    def test_restore_foreign_passport_expiry_successful(self):
+    @patch('administration.tasks.send_notification.delay')
+    def test_restore_foreign_passport_expiry_successful(self, mock_send_notification):
         response = self.client.put(
             path=f"{self.path}{self.task_passport_expiry.pk}/",
             data=self.valid_data,
@@ -114,27 +112,18 @@ class RestoreForeignPassportByStaffAPITests(APITestCase):
         check_old_passport = ForeignPassport.objects.filter(number=self.foreign_passport.number).exists()
         self.assertFalse(check_old_passport)
         self.assertEqual(self.task_passport_expiry.status, 1)
-
-    def test_restore_foreign_passport_user_doesnt_have_foreign_passport(self):
-        self.user.foreign_passport = None
-        self.user.save()
-        response = self.client.put(
-            path=f"{self.path}{self.task_passport_expiry.pk}/",
-            data=self.valid_data,
-            format='json'
-        )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-            "detail": "User doesn`t have a foreign passport to update it yet."
-            },
-            response.json()
-        )
+        mock_send_notification.assert_called_once()
 
     def test_restore_foreign_passport_task_already_processed(self):
-        self.task_passport_expiry.status = 1
-        self.task_passport_expiry.save()
+        task_done = TaskFactory(user=self.user,
+                                title="restore a foreign passport due to loss",
+                                status=1,
+                                user_data={
+                                    "photo": "1-surname22-name22-restore-a-foreign-passport.jpg"
+                                }
+       )
         response = self.client.put(
-            path=f"{self.path}{self.task_passport_expiry.pk}/",
+            path=f"{self.path}{task_done.pk}/",
             data=self.valid_data,
             format='json'
         )
@@ -145,8 +134,13 @@ class RestoreForeignPassportByStaffAPITests(APITestCase):
         )
 
     def test_restore_foreign_passport_wrong_task(self):
+        wrong_task= TaskFactory(user=self.user,
+                                title="change registation address", 
+                                status=0,
+                                user_data={"address_id": self.address.id}                              
+        )
         response = self.client.put(
-            path=f"{self.path}{self.wrong_task_title.pk}/",
+            path=f"{self.path}{wrong_task.pk}/",
             data=self.valid_data,
             format='json'
         )

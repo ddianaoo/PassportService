@@ -1,6 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+
+from administration.models import Task
+from authentication.serializers import (
+    ChangeUserDataSerializer,
+    UserListSerializer
+)
 from .serializers import (
     CreateAddressSerializer, 
     PhotoSerializer, 
@@ -10,12 +16,7 @@ from .serializers import (
     RestorePassportSerializer,
     RetrieveAddressSerializer,
 )
-from administration.models import Task
 from .views import get_photo_path, get_address 
-from authentication.serializers import (
-    ChangeUserDataSerializer,
-    UserListSerializer
-)
 from .permissions import IsClient
 
 

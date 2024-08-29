@@ -1,9 +1,11 @@
+import datetime
+from random import randint
+
 import factory.django
 import factory.fuzzy
+
 from .models import CustomUser
-import datetime
 from passports.factories import AddressFactory, PassportFactory, ForeignPassportFactory 
-from random import randint
 
 
 class CustomUserFactory(factory.django.DjangoModelFactory):

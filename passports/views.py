@@ -1,14 +1,15 @@
-from administration.models import Task
-from authentication.forms import UpdateUserNameForm, UpdateUserSurnameForm, UpdateUserPatronymicForm
 import datetime
+import uuid
+
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.core.files.storage import default_storage
 from django.shortcuts import render, redirect
+
+from administration.models import Task
+from authentication.forms import UpdateUserNameForm, UpdateUserSurnameForm, UpdateUserPatronymicForm
+from passport_service.decorators import client_login_required
 from .forms import AddressForm, PhotoForm
 from .models import Address
-import uuid
-from passport_service.decorators import client_login_required
 
 
 def main_page(request):

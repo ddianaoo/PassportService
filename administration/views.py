@@ -1,11 +1,13 @@
 import datetime
+from random import randint
+
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView
+
 from .models import Task
 from passports.models import Address, Passport, ForeignPassport, Visa
-from random import randint
 from passports.forms import PassportForm, ForeignPassportForm
 
 

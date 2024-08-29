@@ -1,10 +1,11 @@
-from administration.factories import TaskFactory
-from authentication.factories import CustomUserFactory
 from django.utils import timezone
-from passports.factories import AddressFactory, PassportFactory
 from rest_framework import status
 from rest_framework.test import APITestCase
-from unittest.mock import ANY
+from unittest.mock import ANY, patch
+
+from administration.factories import TaskFactory
+from authentication.factories import CustomUserFactory
+from passports.factories import AddressFactory
 
 
 class CreateInternalPassportByStaffAPITests(APITestCase):
@@ -44,11 +45,6 @@ class CreateInternalPassportByStaffAPITests(APITestCase):
                                     "photo": "1-surname22-name22-create-an-internal-passport.jpg"
                                 }
        )
-        self.wrong_task = TaskFactory(user=self.user,
-                                title="change registation address", 
-                                status=0,
-                                user_data={"address_id": self.address.id}                              
-                                )
         self.valid_data = {
                 "authority": 6666,
                 "date_of_issue": str(timezone.now().date()),
@@ -56,7 +52,8 @@ class CreateInternalPassportByStaffAPITests(APITestCase):
             }
 
 
-    def test_create_internal_passport_successful(self):
+    @patch('administration.tasks.send_notification.delay')
+    def test_create_internal_passport_successful(self, mock_send_notification):
         response = self.client.post(
             path=f"{self.path}{self.task.pk}/",
             data=self.valid_data,
@@ -77,38 +74,36 @@ class CreateInternalPassportByStaffAPITests(APITestCase):
         self.assertEqual(self.user.address.id, self.address.id)
         self.assertEqual(self.user.passport.number, response.data['number'])
         self.assertEqual(self.task.status, 1)
-
-    def test_create_internal_passport_user_already_has_passport(self):
-        self.user.passport = PassportFactory()
-        self.user.save()
-        response = self.client.post(
-            path=f"{self.path}{self.task.pk}/",
-            data=self.valid_data,
-            format='json'
-        )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-            "detail": "Request has already been processed or the user already has a passport."},
-            response.json()
-        )
+        mock_send_notification.assert_called_once()
 
     def test_create_internal_passport_task_already_processed(self):
-        self.task.status = 1
-        self.task.save()
+        task_done = TaskFactory(user=self.user,
+                                title="create an internal passport",
+                                status=1,
+                                user_data={
+                                    "address_id": self.address.id, 
+                                    "photo": "1-surname22-name22-create-an-internal-passport.jpg"
+                                }
+       )
         response = self.client.post(
-            path=f"{self.path}{self.task.pk}/",
+            path=f"{self.path}{task_done.pk}/",
             data=self.valid_data,
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual({
-            "detail": "Request has already been processed or the user already has a passport."},
+            "detail": "Request has already been processed."},
             response.json()
         )
 
     def test_create_internal_passport_wrong_task(self):
+        wrong_task = TaskFactory(user=self.user,
+                                title="change registation address", 
+                                status=0,
+                                user_data={"address_id": self.address.id}                              
+                                )
         response = self.client.post(
-            path=f"{self.path}{self.wrong_task.pk}/",
+            path=f"{self.path}{wrong_task.pk}/",
             data=self.valid_data,
             format='json'
         )

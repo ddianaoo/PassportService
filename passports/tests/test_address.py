@@ -1,9 +1,10 @@
+from rest_framework import status
+from rest_framework.test import APITestCase
+from unittest.mock import ANY, patch
+
 from administration.factories import TaskFactory
 from authentication.factories import CustomUserFactory
 from passports.factories import AddressFactory, PassportFactory
-from rest_framework import status
-from rest_framework.test import APITestCase
-from unittest.mock import ANY
 
 
 class UserAddressAPITests(APITestCase):
@@ -37,8 +38,7 @@ class UserAddressAPITests(APITestCase):
             foreign_passport=None,
             is_staff=True
         )
-        self.client.force_authenticate(self.user_without_address)
-
+        self.client.force_authenticate(self.user)
         self.valid_address_data = {
 	        "country_code": "UA",
 	        "region": "Kharkiv region",
@@ -50,7 +50,6 @@ class UserAddressAPITests(APITestCase):
 
     # GET METHOD
     def test_get_address_successful(self):
-        self.client.force_authenticate(self.user)
         response = self.client.get(path=self.path)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -67,6 +66,7 @@ class UserAddressAPITests(APITestCase):
         )
 
     def test_get_address_no_data(self):
+        self.client.force_authenticate(self.user_without_address)
         response = self.client.get(path=self.path)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(
@@ -93,8 +93,8 @@ class UserAddressAPITests(APITestCase):
         )
 
     # PATCH METHOD
-    def test_change_address_successful(self):
-        self.client.force_authenticate(self.user)
+    @patch('administration.tasks.send_notification.delay')
+    def test_change_address_successful(self, mock_send_notification):
         response = self.client.patch(
             path=self.path,
             data={**self.valid_address_data},
@@ -105,9 +105,9 @@ class UserAddressAPITests(APITestCase):
             {"detail": "Your request to update the registration address has been submitted."},
             response.json()
         )
+        mock_send_notification.assert_called_once()
 
     def test_change_address_task_already_stored(self):
-        self.client.force_authenticate(self.user)
         task = TaskFactory(
             user=self.user, 
             title='change registation address', 
@@ -121,6 +121,7 @@ class UserAddressAPITests(APITestCase):
         )
 
     def test_change_address_no_pasport(self):
+        self.client.force_authenticate(self.user_without_address)
         response = self.client.patch(path=self.path, data={})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -129,7 +130,6 @@ class UserAddressAPITests(APITestCase):
         )
 
     def test_change_address_no_data(self):
-        self.client.force_authenticate(self.user)
         response = self.client.patch(path=self.path,data={})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual({
@@ -144,7 +144,6 @@ class UserAddressAPITests(APITestCase):
         )
 
     def test_change_address_incorrect_address_country_code(self):
-        self.client.force_authenticate(self.user)
         invalid_country_code = "Ukraine"
         response = self.client.patch(
             path=self.path,
@@ -165,7 +164,6 @@ class UserAddressAPITests(APITestCase):
         ) 
 
     def test_change_address_incorrect_address_post_code(self):
-        self.client.force_authenticate(self.user)
         response = self.client.patch(
             path=self.path,
             data={

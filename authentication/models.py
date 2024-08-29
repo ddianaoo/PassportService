@@ -1,11 +1,13 @@
+from random import randint
+
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
+
 from passports.models import Address, Passport, ForeignPassport
+from passports.utils import COUNTRY_CHOICES
 from validation.validate_birth_date import validate_birth_date
 from validation.validate_email import validate_email
 from validation.validate_record_number import validate_record_number
-from passports.utils import COUNTRY_CHOICES
-from random import randint
 
 
 class CustomUserManager(BaseUserManager):

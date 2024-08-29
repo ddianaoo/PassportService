@@ -1,7 +1,8 @@
-from authentication.factories import CustomUserFactory
 from rest_framework import status
 from rest_framework.test import APITestCase
 from unittest.mock import ANY
+
+from authentication.factories import CustomUserFactory
 
 
 class UserLoginAPITests(APITestCase):

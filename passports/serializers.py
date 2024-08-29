@@ -1,7 +1,6 @@
 from rest_framework import serializers
-from .models import Address, Passport, ForeignPassport
 from authentication.models import CustomUser
-from django.conf import settings
+from .models import Address, Passport, ForeignPassport
 
 
 class CreateAddressSerializer(serializers.ModelSerializer):

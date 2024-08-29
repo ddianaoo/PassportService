@@ -1,7 +1,8 @@
-from authentication.factories import CustomUserFactory
 from django.utils import timezone
 import factory
 import factory.fuzzy
+
+from authentication.factories import CustomUserFactory
 from .models import Task
 from . import signals
 

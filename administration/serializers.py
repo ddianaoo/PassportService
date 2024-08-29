@@ -1,7 +1,8 @@
 from rest_framework import serializers
-from .models import Task
-from authentication.serializers import UserListSerializer
 from django.conf import settings
+
+from authentication.serializers import UserListSerializer
+from .models import Task
 from passports.serializers import RetrieveAddressSerializer
 from passports.models import Address
 

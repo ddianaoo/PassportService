@@ -1,5 +1,5 @@
-from authentication.models import CustomUser
 from django.db import models
+from authentication.models import CustomUser
 
 
 class Task(models.Model):

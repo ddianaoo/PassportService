@@ -1,13 +1,15 @@
-from administration.factories import TaskFactory
-from authentication.factories import CustomUserFactory
+import os
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.conf import settings
-import os
-from passports.utils import COUNTRY_CHOICES_DICT
-from passports.factories import AddressFactory, PassportFactory
+
 from rest_framework import status
 from rest_framework.test import APITestCase
-from unittest.mock import ANY
+from unittest.mock import ANY, patch
+
+from administration.factories import TaskFactory
+from authentication.factories import CustomUserFactory
+from passports.utils import COUNTRY_CHOICES_DICT
+from passports.factories import AddressFactory, PassportFactory
 
 
 class InternalPassportDetailAPITests(APITestCase):
@@ -115,7 +117,8 @@ class InternalPassportDetailAPITests(APITestCase):
         )
 
     # POST METHOD
-    def test_create_internal_passport_successful(self):
+    @patch('administration.tasks.send_notification.delay')
+    def test_create_internal_passport_successful(self, mock_send_notification):
         with open(self.image_path, 'rb') as f:
             self.valid_photo = SimpleUploadedFile('create_ip.png', f.read(), content_type='image/png')
         response = self.client.post(
@@ -131,6 +134,7 @@ class InternalPassportDetailAPITests(APITestCase):
             {"detail": "Your request for creating an internal passport has been sent."},
             response.json()
         )
+        mock_send_notification.assert_called_once()
 
     def test_create_internal_passport_without_photo(self):
         response = self.client.post(
@@ -253,7 +257,8 @@ class InternalPassportDetailAPITests(APITestCase):
         )
 
     # PUT METHOD
-    def test_restore_internal_passport_due_to_loss_successful(self):
+    @patch('administration.tasks.send_notification.delay')
+    def test_restore_internal_passport_due_to_loss_successful(self, mock_send_notification):
         self.client.force_authenticate(self.user)
         with open(self.image_path, 'rb') as f:
             self.valid_photo = SimpleUploadedFile('create_ip.png', f.read(), content_type='image/png')
@@ -270,8 +275,10 @@ class InternalPassportDetailAPITests(APITestCase):
             {"detail": f"Your request for restoring an internal passport due to {self.loss_reason} has been sent."},
             response.json()
         )
+        mock_send_notification.assert_called_once()
 
-    def test_restore_internal_passport_due_to_expiry_successful(self):
+    @patch('administration.tasks.send_notification.delay')
+    def test_restore_internal_passport_due_to_expiry_successful(self, mock_send_notification):
         self.client.force_authenticate(self.user)
         with open(self.image_path, 'rb') as f:
             self.valid_photo = SimpleUploadedFile('create_ip.png', f.read(), content_type='image/png')
@@ -288,6 +295,7 @@ class InternalPassportDetailAPITests(APITestCase):
             {"detail": f"Your request for restoring an internal passport due to {self.expiry_reason} has been sent."},
             response.json()
         )
+        mock_send_notification.assert_called_once()
 
     def test_restore_internal_passport_due_to_loss_task_already_stored(self):
         self.client.force_authenticate(self.user)

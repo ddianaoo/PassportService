@@ -1,10 +1,11 @@
+import random
 from django.db import models
+
 from validation.validate_authority import validate_authority
 from validation.validate_expiry_date import validate_expiry_date
 from validation.validate_issue_date import validate_issue_date
 from validation.validate_number import validate_number
 from validation.validate_post_code import validate_post_code
-import random
 from .utils import COUNTRY_CHOICES
 
 

@@ -1,7 +1,8 @@
-from authentication.factories import CustomUserFactory
 from rest_framework import status
 from rest_framework.test import APITestCase
 from unittest.mock import ANY
+
+from authentication.factories import CustomUserFactory
 
 
 class UserSelfAPITests(APITestCase):
@@ -14,7 +15,7 @@ class UserSelfAPITests(APITestCase):
         )
         self.path = "/api/auth/users/me/"
 
-    def test_user_retreive_data_successful(self):
+    def test_user_get_data_successful(self):
         self.client.force_authenticate(self.user)
         response = self.client.get(path=self.path)
 
@@ -37,7 +38,7 @@ class UserSelfAPITests(APITestCase):
             response.json(),
         )
 
-    def test_user_retreive_data_not_logged_in(self):
+    def test_user_get_data_not_logged_in(self):
         response = self.client.get(path=self.path)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(
@@ -45,7 +46,7 @@ class UserSelfAPITests(APITestCase):
             response.json(),
         )
 
-    def test_user_update_all_fields_forbidden(self):
+    def test_user_put_forbidden(self):
         self.client.force_authenticate(self.user)
         response = self.client.put(
             path=self.path,
@@ -72,7 +73,7 @@ class UserSelfAPITests(APITestCase):
             response.json(),
         )
 
-    def test_user_update_one_field__forbidden(self):
+    def test_user_patch_forbidden(self):
         self.client.force_authenticate(self.user)
         response = self.client.patch(
             path=self.path,

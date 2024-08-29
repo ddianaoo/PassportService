@@ -1,9 +1,10 @@
+from rest_framework import status
+from rest_framework.test import APITestCase
+from unittest.mock import patch
+
 from administration.factories import TaskFactory
 from authentication.factories import CustomUserFactory
 from passports.factories import AddressFactory, PassportFactory
-from rest_framework import status
-from rest_framework.test import APITestCase
-from unittest.mock import ANY
 
 
 class ChangeAddressByStaffAPITests(APITestCase):
@@ -42,23 +43,15 @@ class ChangeAddressByStaffAPITests(APITestCase):
             is_staff=True
         )
         self.client.force_authenticate(self.admin)
-
-        self.wrong_task_title = TaskFactory(user=self.user,
-                                title="create an internal passport",
-                                status=0,
-                                user_data={
-                                    "address_id": self.updated_address.id, 
-                                    "photo": "1-surname22-name22-create-an-internal-passport.jpg"
-                                }
-       )
         self.task = TaskFactory(user=self.user,
                                 title="change registation address", 
                                 status=0,
                                 user_data={"address_id": self.updated_address.id}                              
-                                )
+        )
 
 
-    def test_change_address_successful(self):
+    @patch('administration.tasks.send_notification.delay')
+    def test_change_address_successful(self, mock_send_notification):
         response = self.client.patch(path=f"{self.path}{self.task.pk}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual({"detail": "The registration address has been successfully updated."},
@@ -68,21 +61,15 @@ class ChangeAddressByStaffAPITests(APITestCase):
         self.task.refresh_from_db()
         self.assertEqual(self.user.address.id, self.updated_address.id)
         self.assertEqual(self.task.status, 1)
-
-    def test_change_address_user_doesnt_have_passport(self):
-        self.user.passport = None
-        self.user.save()
-        response = self.client.patch(path=f"{self.path}{self.task.pk}/")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-            "detail": "Before updating the address, the user must have an internal passport with the address of registration."},
-            response.json()
-        )
+        mock_send_notification.assert_called_once()
 
     def test_change_address_task_already_processed(self):
-        self.task.status = 1
-        self.task.save()
-        response = self.client.patch(path=f"{self.path}{self.task.pk}/")
+        task_done = TaskFactory(user=self.user,
+                                title="change registation address", 
+                                status=1,
+                                user_data={"address_id": self.updated_address.id}                              
+        )
+        response = self.client.patch(path=f"{self.path}{task_done.pk}/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual({
             "detail": "This user's request has already been processed."},
@@ -90,7 +77,15 @@ class ChangeAddressByStaffAPITests(APITestCase):
         )
 
     def test_change_address_wrong_task(self):
-        response = self.client.patch(path=f"{self.path}{self.wrong_task_title.pk}/")
+        wrong_task = TaskFactory(user=self.user,
+                                title="create an internal passport",
+                                status=0,
+                                user_data={
+                                    "address_id": self.updated_address.id, 
+                                    "photo": "1-surname22-name22-create-an-internal-passport.jpg"
+                                }
+       )
+        response = self.client.patch(path=f"{self.path}{wrong_task.pk}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual({
             "detail": "The task with this id and title wasn`t found."

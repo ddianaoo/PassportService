@@ -29,9 +29,9 @@ class CreateInternalPassportByStaffAPIView(APIView):
         if task_title != task.title:
             return Response({"detail": "The task with this id and title wasn`t found."}, 
                             status=status.HTTP_404_NOT_FOUND)
-        if task.status or task.user.passport:
+        if task.status:
             return Response(
-                {"detail": "Request has already been processed or the user already has a passport."},
+                {"detail": "Request has already been processed."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -64,11 +64,6 @@ class RestoreInternalPassportAPIView(APIView):
                 {"detail": "Request has already been processed."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        if not task.user.passport:
-            return Response(
-                {"detail": "User doesn`t have an internal passport to update it yet."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
         
         passport = Passport(photo=task.user_data.get("photo"))
         serializer = CreateInternalPassportSerializer(instance=passport, 
@@ -95,14 +90,9 @@ class CreateForeignPassportForUserAPIView(APIView):
         if task_title != task.title:
             return Response({"detail": "The task with this id and title wasn`t found."}, 
                             status=status.HTTP_404_NOT_FOUND)
-        if task.status or task.user.foreign_passport:
+        if task.status:
             return Response(
-                {"detail": "Request has already been processed or the user already has a foreign passport."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        if not task.user.passport:
-            return Response(
-                {"detail": "Before creating a foreign passport, the user must have an internal passport."},
+                {"detail": "Request has already been processed."},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -132,11 +122,6 @@ class RestoreForeignPassportAPIView(APIView):
         if task.status:
             return Response(
                 {"detail": "This user's request has already been processed."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        if not task.user.foreign_passport:
-            return Response(
-                {"detail": "User doesn`t have a foreign passport to update it yet."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -172,10 +157,7 @@ class ChangeAddressForUserAPIView(APIView):
                             status=status.HTTP_404_NOT_FOUND)
         if task.status:
             return Response({"detail": "This user's request has already been processed."},
-                            status=status.HTTP_400_BAD_REQUEST)
-        if not task.user.passport:
-            return Response({"detail": "Before updating the address, the user must have an internal passport with the address of registration."},
-                            status=status.HTTP_400_BAD_REQUEST)            
+                            status=status.HTTP_400_BAD_REQUEST)        
 
         addr = get_object_or_404(Address, pk=task.user_data.get("address_id"))
         task.user.address = addr
@@ -222,10 +204,7 @@ class ChangeUserFieldForUserAPIView(APIView):
         task_title = f"change user {field_name}"
         if task_title != task.title:
             return Response({"detail": "The task with this id and title wasn`t found."}, 
-                            status=status.HTTP_404_NOT_FOUND)
-        if not task.user.passport:
-            return Response({"detail": f"Before updating the {field_name}, the user must have an internal passport."},
-                            status=status.HTTP_400_BAD_REQUEST)                 
+                            status=status.HTTP_404_NOT_FOUND)           
         
         new_ipassport = Passport(photo=task.user_data.get("photo")) 
         ipassport_serializer = CreateInternalPassportSerializer(instance=new_ipassport, 

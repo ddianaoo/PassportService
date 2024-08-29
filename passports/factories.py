@@ -1,12 +1,14 @@
+import os
+import random
+
 import factory
+import factory.fuzzy
 from django.utils import timezone
+from django.conf import settings
+
+from authentication.models import CustomUser
 from .models import Address, Passport, ForeignPassport, Visa
 from .utils import COUNTRY_CHOICES
-import random
-from authentication.models import CustomUser
-import factory.fuzzy
-from django.conf import settings
-import os
 
 
 class AddressFactory(factory.django.DjangoModelFactory):

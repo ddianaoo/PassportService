@@ -1,11 +1,13 @@
+import os
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
 from authentication.models import CustomUser
 from .models import Task
 from .tasks import send_notification
 from .utils import DICT_TITLES_SLUGS
 
-HOST = "http://127.0.0.1:8000"
+HOST = os.environ.get('LOCAL_URL')
 
 
 @receiver(post_save, sender=Task)
