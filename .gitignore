@@ -5,4 +5,5 @@ db.sqlite3
 *DS_Store
 /media
 /logs
+/htmlcov
 .coverage
