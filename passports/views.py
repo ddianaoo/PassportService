@@ -21,7 +21,7 @@ def get_documents(request):
     return render(request, 'passports/get_documents.html', {'user': request.user})
 
 
-def get_photo_path(photo, user, task_title):
+def get_photo_path(photo, user, task_title, folder='passports'):
     """
     Generate a unique file path for the user's photo, incorporating a UUID to ensure uniqueness.
 
@@ -40,7 +40,7 @@ def get_photo_path(photo, user, task_title):
     unique_id = uuid.uuid4().hex
     extension = photo.name.split(".")[-1]
     photo_name = f'{user.id}-{user.surname}-{user.name}-{task_title}-{unique_id}.{extension}'
-    photo_path = default_storage.save(f'photos/passports/{today.year}/{month}/{day}/{photo_name}', photo)  
+    photo_path = default_storage.save(f'photos/{folder}/{today.year}/{month}/{day}/{photo_name}', photo)  
     return photo_path  
 
 

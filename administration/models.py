@@ -5,12 +5,15 @@ from authentication.models import CustomUser
 class Task(models.Model):
     STATUS_CHOICES = [
         (0, 'in progress'),
-        (1, 'completed')
+        (1, 'completed'),
+        (2, 'rejected')
     ]
     TITLE_CHOICES = [
         ('create an internal passport', 'Створення внутрішнього паспорту'),
         ('create a foreign passport', 'Створення закордонного паспорту'),
         ('create a visa', 'Створення візи'),
+        ('extend a visa', 'Подовження візи'),
+        ('restore a visa due to loss', 'Відновлення візи'),
         ('restore an internal passport due to loss', 'Відновлення внутрішнього паспорту через втрату'),
         ('restore a foreign passport due to loss', 'Відновлення закордонного паспорту через втрату'),
         ('restore an internal passport due to expiry', 'Відновлення внутрішнього паспорту через закінчення терміну дії'),

@@ -73,15 +73,16 @@ class Visa(models.Model):
 
     foreign_passport = models.ForeignKey(ForeignPassport, related_name='visas', on_delete=models.CASCADE)
     place_of_issue   = models.CharField(max_length=50)
-    date_of_issue  = models.DateField(blank=True, validators=[validate_issue_date])
-    date_of_expiry = models.DateField(blank=True, validators=[validate_expiry_date])
-    photo            = models.ImageField(upload_to='photos/visas/%Y/%m/%d/', blank=True)
-    type             = models.CharField(max_length=50, choices=TYPE_CHOICES, default='Tourist') 
+    date_of_issue    = models.DateField(validators=[validate_issue_date])
+    date_of_expiry   = models.DateField(validators=[validate_expiry_date])
+    photo            = models.ImageField(upload_to='photos/visas/%Y/%m/%d/')
+    type             = models.CharField(max_length=50, choices=TYPE_CHOICES) 
     country          = models.CharField(max_length=2, choices=COUNTRY_CHOICES)
-    entry_amount     = models.CharField(max_length=4, choices=ENTRY_CHOICES, default='1')
+    entry_amount     = models.CharField(max_length=4, choices=ENTRY_CHOICES)
+    is_active        = models.BooleanField(default=True)
     
     def __str__(self):
-        return f"Visa to {self.country}.Expiration date: {self.expiry_date})"
+        return f"Visa to {self.country}. Expiration date: {self.date_of_expiry})"
     
 
     def save(self, *args, **kwargs):

@@ -1,20 +1,26 @@
+import datetime
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.viewsets import ViewSet
 
 from administration.models import Task
 from authentication.serializers import (
     ChangeUserDataSerializer,
     UserListSerializer
 )
+from .models import Visa
 from .serializers import (
-    CreateAddressSerializer, 
+    AddressSerializer, 
     PhotoSerializer, 
     RetrieveDocumentsSerializer, 
     RetrieveInternalPassportSerializer,
     RetrieveForeignPassportSerializer,
     RestorePassportSerializer,
-    RetrieveAddressSerializer,
+    VisaSerializer,
+    CreateVisaSerializer,
+    ExtendVisaSerializer
 )
 from .views import get_photo_path, get_address 
 from .permissions import IsClient
@@ -42,7 +48,7 @@ class InternalPassportDetailAPIView(APIView):
             return Response({"detail": "You already have an internal passport."},
                             status=status.HTTP_400_BAD_REQUEST)
         
-        address_serializer = CreateAddressSerializer(data=request.data)
+        address_serializer = AddressSerializer(data=request.data)
         photo_serializer = PhotoSerializer(data=request.data)
         is_address_valid = address_serializer.is_valid()
         is_photo_valid = photo_serializer.is_valid()
@@ -161,7 +167,7 @@ class UserAddressAPIView(APIView):
     def get(self, request):
         address = request.user.address
         if address:
-            user_serializer = RetrieveAddressSerializer(address, context={'request': request})
+            user_serializer = AddressSerializer(address, context={'request': request})
             return Response(user_serializer.data, status=status.HTTP_200_OK)
         else:
             return Response({"detail": "Registration address not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -176,7 +182,7 @@ class UserAddressAPIView(APIView):
             return Response({"detail": "You do not have a passport, so updating the address is not possible."},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        address_serializer = CreateAddressSerializer(data=request.data)
+        address_serializer = AddressSerializer(data=request.data)
 
         if address_serializer.is_valid():
             adr, created = get_address(address_serializer.validated_data)
@@ -187,7 +193,7 @@ class UserAddressAPIView(APIView):
             return Response(address_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ChangeUserDataAPIView(APIView):
+class UserDataAPIView(APIView):
     permission_classes = [IsClient]
     
     def get(self, request):
@@ -226,3 +232,108 @@ class ChangeUserDataAPIView(APIView):
             if not is_photo_valid:
                 errors["photo_errors"] = photo_serializer.errors
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class VisaViewSet(ViewSet):
+    permission_classes = [IsClient]
+
+    def get_queryset(self, request):
+        return Visa.objects.filter(foreign_passport=request.user.foreign_passport, is_active=True).order_by('-is_active')
+    
+    def list(self, request):
+        serializer = VisaSerializer(self.get_queryset(request), many=True, context={'request': request})
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        item = get_object_or_404(self.get_queryset(request), pk=pk)
+        serializer = VisaSerializer(item, context={'request': request})
+        return Response(serializer.data)
+    
+    def create(self, request):
+        user = request.user
+        task_title = "create a visa"
+        if not user.foreign_passport:
+            return Response({"detail": "You must have a foreign passport to create a visa."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = CreateVisaSerializer(data=request.data)
+
+        if serializer.is_valid():
+            visa_type = serializer.validated_data.get('type')
+            country = serializer.validated_data.get('country')
+            entry_amount = serializer.validated_data.get('entry_amount')
+            check_task = Task.objects.filter(
+                user=user, 
+                title=task_title, 
+                status=0, 
+                user_data__visa_country=country
+            )
+            if check_task.exists():
+                return Response({"detail": f"You have already sent a request for creating a visa of {country}."},
+                            status=status.HTTP_400_BAD_REQUEST)
+            old_visa = Visa.objects.filter(
+                foreign_passport=user.foreign_passport,
+                type=visa_type, 
+                country=country, 
+                entry_amount=entry_amount,
+                is_active=True
+            )
+            if old_visa.exists() and old_visa.date_of_expiry > datetime.date.today() + datetime.timedelta(days=30):
+                return Response({"detail": f"You have already have a visa of {country}."},
+                            status=status.HTTP_400_BAD_REQUEST)          
+
+            photo = serializer.validated_data.get('photo')
+            photo_path = get_photo_path(photo, user, task_title, 'visas')
+            user_data = {'photo': photo_path, 'visa_country': country, 'visa_type': visa_type, 'visa_entry_amount': entry_amount}
+            task = Task.objects.create(user=user, title=task_title, user_data=user_data)
+            return Response({"detail": "Your request for creating a visa has been sent."},
+                            status=status.HTTP_201_CREATED)
+        else:  
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def patch(self, request, pk):
+        user = request.user
+        task_title = "extend a visa"
+        visa = get_object_or_404(self.get_queryset(request), pk=pk)
+        if not visa.is_active:
+            return Response({"detail": "Only an active visa can be extended."},
+                            status=status.HTTP_400_BAD_REQUEST) 
+        if Task.objects.filter(user=user, title=task_title, status=0, user_data__visa_id=pk).exists():
+            return Response({"detail": f"You have already sent a request for extending a visa of {visa.country}."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        visa_serializer = ExtendVisaSerializer(data=request.data)
+        if visa_serializer.is_valid():
+            reason = visa_serializer.validated_data.get('reason')
+            extension_date = visa_serializer.validated_data.get('extension_date')
+            if extension_date <= visa.date_of_expiry:
+                return Response({"detail": "The extension date must be greater than the expiration date."},
+                            status=status.HTTP_400_BAD_REQUEST)               
+            user_data = {'visa_id': pk,'visa_extension_reason': reason, 'visa_extension_date': str(extension_date)}
+            task = Task.objects.create(user=user, title=task_title, user_data=user_data)
+            return Response({"detail": "Your request for extending a visa has been sent."},
+                            status=status.HTTP_201_CREATED)
+        else:
+            return Response(visa_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    def put(self, request, pk):
+        user = request.user
+        task_title = "restore a visa due to loss"
+        visa = get_object_or_404(self.get_queryset(request), pk=pk)
+        if not visa.is_active:
+            return Response({"detail": "Only an active visa can be restored."},
+                            status=status.HTTP_400_BAD_REQUEST) 
+        if Task.objects.filter(user=user, title=task_title, status=0, user_data__visa_id=pk).exists():
+            return Response({"detail": f"You have already sent a request for restoring a visa of {visa.country}."},
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = PhotoSerializer(data=request.data)
+        if serializer.is_valid():
+            photo = serializer.validated_data.get('photo')
+            photo_path = get_photo_path(photo, user, task_title, 'visas')
+            task = Task.objects.create(user=user, title=task_title, user_data={'photo': photo_path, 'visa_id': pk})
+            return Response({"detail": "Your request for restoring a visa due to loss has been sent."},
+                            status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+

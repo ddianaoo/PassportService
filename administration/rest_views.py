@@ -1,9 +1,13 @@
+from datetime import datetime, date
 from administration.models import Task
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import TaskFilter
 from .serializers import TaskSerializer
 from rest_framework.viewsets import ReadOnlyModelViewSet
-from passports.serializers import CreateInternalPassportSerializer, CreateForeignPassportSerializer
+from passports.serializers import (CreateInternalPassportSerializer, 
+                                   CreateForeignPassportSerializer, 
+                                   VisaSerializer,
+                                   RestoreVisaSerializer)
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -19,8 +23,12 @@ class TaskListAPIView(ReadOnlyModelViewSet):
     filterset_class = TaskFilter
     permission_classes = [IsAdminUser]
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
-class CreateInternalPassportByStaffAPIView(APIView):
+class CreateInternalPassportAPIView(APIView):
     permission_classes = [IsAdminUser]
 
     def post(self, request, task_pk):
@@ -66,9 +74,11 @@ class RestoreInternalPassportAPIView(APIView):
             )
         
         passport = Passport(photo=task.user_data.get("photo"))
-        serializer = CreateInternalPassportSerializer(instance=passport, 
-                                                      data=request.data,
-                                                      context={'request': request})
+        serializer = CreateInternalPassportSerializer(
+            instance=passport, 
+            data=request.data,
+            context={'request': request}
+        )
         if serializer.is_valid():
             task.user.passport.delete()
             task.user.passport = serializer.save()
@@ -81,7 +91,7 @@ class RestoreInternalPassportAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-class CreateForeignPassportForUserAPIView(APIView):
+class CreateForeignPassportAPIView(APIView):
     permission_classes = [IsAdminUser]
 
     def post(self, request, task_pk):
@@ -146,7 +156,7 @@ class RestoreForeignPassportAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ChangeAddressForUserAPIView(APIView):
+class ChangeUserAddressAPIView(APIView):
     permission_classes = [IsAdminUser]
 
     def patch(self, request, task_pk):
@@ -169,7 +179,7 @@ class ChangeAddressForUserAPIView(APIView):
                         status=status.HTTP_200_OK)
     
 
-class ChangeUserFieldForUserAPIView(APIView):
+class ChangeUserFieldAPIView(APIView):
     permission_classes = [IsAdminUser]
 
     def handle_user_field_update(self, task, passport_serializer, field_name, new_value, fpassport_serializer=None):
@@ -229,4 +239,126 @@ class ChangeUserFieldForUserAPIView(APIView):
             errors['foreign_passport'] = fpassport_serializer.errors
 
         return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CreateVisaAPIView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, task_pk):
+        task_title = "create a visa"
+        task = get_object_or_404(Task, pk=task_pk)
+        if task_title != task.title:
+            return Response({"detail": "The task with this id and title wasn`t found."}, 
+                            status=status.HTTP_404_NOT_FOUND)
+        if task.status:
+            return Response(
+                {"detail": "Request has already been processed."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        visa = Visa(
+            photo=task.user_data.get("photo"),
+            type=task.user_data.get("visa_type"),
+            country=task.user_data.get("visa_country"),
+            entry_amount=task.user_data.get("visa_entry_amount"),
+            foreign_passport=task.user.foreign_passport
+        )
+        serializer = VisaSerializer(
+            instance=visa, 
+            data=request.data, 
+            context={'request': request}
+        )
+        if serializer.is_valid():
+            old_visa = Visa.objects.filter(
+                foreign_passport=task.user.foreign_passport,
+                type=visa.type, 
+                country=visa.country, 
+                entry_amount=visa.entry_amount,
+                is_active=True
+            ).first()
+            if old_visa:
+                old_visa.is_active = False
+                old_visa.save()
+            serializer.save()
+            task.status = 1
+            task.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ExtendVisaExtentionAPIView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def patch(self, request, task_pk):
+        task_title = "extend a visa"
+        task = get_object_or_404(Task, pk=task_pk)
+        if task_title != task.title:
+            return Response({"detail": "The task with this id and title wasn`t found."}, 
+                            status=status.HTTP_404_NOT_FOUND)
+        if task.status:
+            return Response(
+                {"detail": "Request has already been processed."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        visa = Visa.objects.get(pk=task.user_data.get("visa_id"))
+        visa.date_of_expiry = date.fromisoformat(task.user_data.get("visa_extension_date"))
+        visa.save()
+        task.status = 1
+        task.save()
+        return Response({"detail": "You successfully accepted the visa extension."}, status=status.HTTP_200_OK)
+    
+
+class RejectTaskAPIView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def patch(self, request, task_pk):
+        task = get_object_or_404(Task, pk=task_pk)
+        if task.status in (1, 2):
+            return Response(
+                {"detail": "Request has already been processed."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        task.status = 2
+        task.save()
+        return Response(
+            {"detail": f"You successfully rejected the request `{task.title}` by {task.user.surname} {task.user.name} user."},
+             status=status.HTTP_200_OK)
+    
+
+class RestoreVisaAPIView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def put(self, request, task_pk):
+        task_title = "restore a visa due to loss"
+        task = get_object_or_404(Task, pk=task_pk)
+        if task.title != task_title:
+            return Response({"detail": "The task with this id and title wasn`t found."}, 
+                            status=status.HTTP_404_NOT_FOUND)
+        if task.status:
+            return Response(
+                {"detail": "This user's request has already been processed."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        old_visa = Visa.objects.get(pk=task.user_data.get("visa_id"))
+        visa = Visa(
+            photo=task.user_data.get("photo"),
+            type=old_visa.type,
+            country=old_visa.country,
+            entry_amount=old_visa.entry_amount,
+            foreign_passport=task.user.foreign_passport,
+            date_of_expiry=old_visa.date_of_expiry
+        ) 
+        serializer = RestoreVisaSerializer(
+            instance=visa, 
+            data=request.data, 
+            context={'request': request}
+        )
+        if serializer.is_valid():
+            old_visa.is_active = False
+            old_visa.save()
+            serializer.save()
+            task.status = 1
+            task.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

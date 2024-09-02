@@ -1,18 +1,14 @@
 from rest_framework import serializers
 from authentication.models import CustomUser
-from .models import Address, Passport, ForeignPassport
+from .models import Address, Passport, ForeignPassport, Visa
 
 
-class CreateAddressSerializer(serializers.ModelSerializer):
+# Client Serializers
+class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        fields = ['country_code', 'region', 'settlement', 'street', 'apartments', 'post_code']
-
-
-class RetrieveAddressSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Address
-        fields = ['id', 'country_code', 'region', 'settlement', 'street', 'apartments', 'post_code']
+        fields = '__all__'
+        read_only_fields = ('id',)
 
 
 class PhotoSerializer(serializers.Serializer):
@@ -31,7 +27,7 @@ class RetrieveInternalPassportSerializer(serializers.ModelSerializer):
     nationality = serializers.CharField(source='user.get_nationality_display')
     record_number = serializers.CharField(source='user.record_number')
 
-    registration_address = RetrieveAddressSerializer(source='user.address')
+    registration_address = AddressSerializer(source='user.address')
 
     class Meta:
         model = Passport
@@ -81,14 +77,52 @@ class RetrieveDocumentsSerializer(serializers.ModelSerializer):
         fields = ('internal_passport', 'foreign_passport', )
 
 
+class RestorePassportSerializer(serializers.Serializer):
+    reason = serializers.ChoiceField(choices=[('loss', 'Loss'), ('expiry', 'Expiry')])
+    photo = serializers.ImageField()
+
+
+class CreateVisaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Visa
+        fields = ('type', 'country', 'photo', 'entry_amount')
+
+
+class ExtendVisaSerializer(serializers.Serializer):
+    reason = serializers.CharField()
+    extension_date = serializers.DateField()
+
+
+class RestoreVisaSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Visa
+        fields = '__all__'
+        read_only_fields = ('number', 'foreign_passport', 'type', 'country', 'photo', 'entry_amount', 
+                            'is_active', 'date_of_expiry')
+
+
+class VisaSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Visa
+        fields = '__all__'
+        read_only_fields = ('number', 'foreign_passport', 'type', 'country', 'photo', 'entry_amount', 'is_active')
+        
+    def get_photo(self, obj):
+        request = self.context.get('request')
+        if obj.photo and request:
+            return request.build_absolute_uri(obj.photo.url)
+        return None
+    
+
+# Admin Serializers
 class CreateInternalPassportSerializer(serializers.ModelSerializer):
-    number = serializers.IntegerField(required=False)
-    photo = serializers.SerializerMethodField(required=False)
 
     class Meta:
         model = Passport
-        fields = ('number', 'authority', 'date_of_issue', 'date_of_expiry', 
-            'photo', )
+        fields = '__all__'
+        read_only_fields = ('number', 'photo')
         
     def get_photo(self, obj):
         request = self.context.get('request')
@@ -98,21 +132,14 @@ class CreateInternalPassportSerializer(serializers.ModelSerializer):
     
 
 class CreateForeignPassportSerializer(serializers.ModelSerializer):
-    number = serializers.IntegerField(required=False)
-    photo = serializers.SerializerMethodField(required=False)
     
     class Meta:
         model = ForeignPassport
-        fields = ('number', 'authority', 'date_of_issue', 'date_of_expiry', 
-            'photo', )
+        fields = '__all__'
+        read_only_fields = ('number', 'photo')
         
     def get_photo(self, obj):
         request = self.context.get('request')
         if obj.photo and request:
             return request.build_absolute_uri(obj.photo.url)
         return None
-
-
-class RestorePassportSerializer(serializers.Serializer):
-    reason = serializers.ChoiceField(choices=[('loss', 'Loss'), ('expiry', 'Expiry')])
-    photo = serializers.ImageField()

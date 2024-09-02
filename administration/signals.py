@@ -31,7 +31,16 @@ def notify_user_on_task_resolved(sender, instance, **kwargs):
     if instance.status == 1:
         link = f"{HOST}/my-documents/"
         send_notification.delay(
-            subject=f'Your Request {instance.title} Has Been Resolved',
+            subject=f'Your Request "{instance.title}" Has Been Resolved',
             message=f'Hello {instance.user.name},\nYour request "{instance.title}" has been resolved.\nFollow this link to view your documents: {link}',
+            user_emails=[instance.user.email]
+        )
+
+@receiver(post_save, sender=Task)
+def notify_user_on_task_resolved(sender, instance, **kwargs):
+    if instance.status == 2:
+        send_notification.delay(
+            subject=f'Your Request "{instance.title}" Has Been Rejected',
+            message=f'Hello {instance.user.name},\nYour request "{instance.title}" has been rejected.',
             user_emails=[instance.user.email]
         )
