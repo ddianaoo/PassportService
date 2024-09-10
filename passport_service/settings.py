@@ -74,6 +74,11 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
+if 'test' in sys.argv:
+    MIDDLEWARE = [
+        middleware for middleware in MIDDLEWARE
+        if middleware != 'django.contrib.messages.middleware.MessageMiddleware'
+    ]
 
 INTERNAL_IPS = ['127.0.0.1']
 
