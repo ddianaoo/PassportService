@@ -48,6 +48,6 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest --maxfail=10 --disable-warnings
+          python manage.py test
         env:
           CELERY_BROKER_URL: redis://localhost:6379/0
