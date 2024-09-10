@@ -42,7 +42,7 @@ jobs:
 
       - name: Run Celery worker
         run: |
-          celery -A <your_project_name> worker --loglevel=info &
+          celery -A passport_service worker --loglevel=info &
         env:
           CELERY_BROKER_URL: redis://localhost:6379/0
 
