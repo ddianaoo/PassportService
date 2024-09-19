@@ -3,7 +3,8 @@ db.sqlite3
 .env
 *__pycache__
 *DS_Store
-/media
+/media/images
+/media/photos/*
 /logs
 /htmlcov
 .coverage
