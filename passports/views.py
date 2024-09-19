@@ -40,8 +40,8 @@ def get_photo_path(photo, user, task_title, folder='passports'):
     unique_id = uuid.uuid4().hex
     extension = photo.name.split(".")[-1]
     photo_name = f'{user.id}-{user.surname}-{user.name}-{task_title}-{unique_id}.{extension}'
-    photo_path = default_storage.save(f'photos/{folder}/{today.year}/{month}/{day}/{photo_name}', photo)  
-    return photo_path  
+    photo_path = default_storage.save(f'photos/{folder}/{today.year}/{month}/{day}/{photo_name}', photo)
+    return photo_path
 
 
 def get_address(form_data):
@@ -60,8 +60,14 @@ def get_address(form_data):
     street = form_data.get('street')
     apartments = form_data.get('apartments')
     post_code = form_data.get('post_code')
-    adr, created = Address.objects.get_or_create(country_code=country_code, region=region, settlement=settlement, 
-                                         street=street, apartments=apartments, post_code=post_code)
+    adr, created = Address.objects.get_or_create(
+        country_code=country_code,
+        region=region,
+        settlement=settlement,
+        street=street,
+        apartments=apartments,
+        post_code=post_code
+    )
     return adr, created
 
 
@@ -78,7 +84,7 @@ def create_passport(request):
         return redirect('get_documents')
 
     if request.method == 'POST':
-        photo_form = PhotoForm(request.POST, request.FILES)       
+        photo_form = PhotoForm(request.POST, request.FILES)
         address_form = AddressForm(request.POST)
 
         if address_form.is_valid() and photo_form.is_valid():
@@ -86,7 +92,7 @@ def create_passport(request):
             photo = photo_form.cleaned_data.get('photo')
             photo_path = get_photo_path(photo, user, task_title)
             user_data = {'photo': photo_path, 'address_id': adr.pk}
-            task = Task.objects.create(user=user, title=task_title, user_data=user_data)        
+            task = Task.objects.create(user=user, title=task_title, user_data=user_data)
             messages.success(request, 'Ваша заява на створення внутрішнього паспорту відправлена!')
             return redirect('get_documents')
         else:
@@ -95,8 +101,8 @@ def create_passport(request):
     else:
         address_form = AddressForm()
         photo_form = PhotoForm()
-    return render(request, 'passports/create_passport.html', {'address_form': address_form, 
-                                                              'photo_form': photo_form, 
+    return render(request, 'passports/create_passport.html', {'address_form': address_form,
+                                                              'photo_form': photo_form,
                                                               'title': 'Заява на створення паспорту'})
 
 
@@ -113,22 +119,27 @@ def create_fpassport(request):
         return redirect('get_documents')
     if not user.passport:
         messages.error(request, 'Для створення закордонного паспорту необхідно мати внутрішній паспорт.')
-        return redirect('get_documents')        
+        return redirect('get_documents')
 
     if request.method == 'POST':
-        form = PhotoForm(request.POST, request.FILES)       
+        form = PhotoForm(request.POST, request.FILES)
         if form.is_valid():
             photo = form.cleaned_data.get('photo')
-            photo_path = get_photo_path(photo, user, task_title)   
-            task = Task.objects.create(user=user, title=task_title, user_data={'photo': photo_path})        
+            photo_path = get_photo_path(photo, user, task_title)
+            task = Task.objects.create(user=user, title=task_title, user_data={'photo': photo_path})
             messages.success(request, 'Ваша заявка на створення закордонного паспорту відправлена!')
             return redirect('get_documents')
         else:
             messages.error(request, form.errors)
     else:
         form = PhotoForm()
-    return render(request, 'passports/index_form.html', { 'form': form, 'user': user, 'create_fpassport': True,
-                                                        'title': 'Заявка на створення закордонного паспорту'})
+    context = {
+        'form': form,
+        'user': user,
+        'create_fpassport': True,
+        'title': 'Заявка на створення закордонного паспорту'
+    }
+    return render(request, 'passports/index_form.html', context=context)
 
 
 @client_login_required
@@ -140,38 +151,48 @@ def restore_passport(request, title, error_msg):
         return redirect('get_documents')
     if not user.passport:
         messages.error(request, 'У вас ще нема паспорту.')
-        return redirect('get_documents')        
+        return redirect('get_documents')
 
     if request.method == 'POST':
-        form = PhotoForm(request.POST, request.FILES)       
+        form = PhotoForm(request.POST, request.FILES)
         if form.is_valid():
             photo = form.cleaned_data.get('photo')
-            photo_path = get_photo_path(photo, user, title)   
-            task = Task.objects.create(user=user, title=title, user_data={'photo': photo_path})        
+            photo_path = get_photo_path(photo, user, title)
+            task = Task.objects.create(user=user, title=title, user_data={'photo': photo_path})
             messages.success(request, 'Ваша заява на відновлення внутрішнього паспотру відправлена!')
             return redirect('get_documents')
         else:
             messages.error(request, form.errors)
     else:
         form = PhotoForm()
-    return render(request, 'passports/index_form.html', { 'form': form, 'user': user,
-                                                              'title': 'Заява на відновлення внутрішнього паспотру'})
+    context = {
+        'form': form,
+        'user': user,
+        'title': 'Заява на відновлення внутрішнього паспотру'
+    }
+    return render(request, 'passports/index_form.html', context=context)
 
 
 @client_login_required
 def restore_passport_loss(request):
-    return restore_passport(request, "restore an internal passport due to loss", 
-                     'Ви вже відправили заявку на відновлення внутрішнього паспотру через втрату.')
+    return restore_passport(
+        request,
+        "restore an internal passport due to loss",
+        'Ви вже відправили заявку на відновлення внутрішнього паспотру через втрату.'
+    )
 
 
 @client_login_required
 def restore_passport_expiry(request):
-    return restore_passport(request, "restore an internal passport due to expiry",
-                     'Ви вже відправили заяву на відновлення внутрішнього паспотру через закінчення терміну придатності.')
+    return restore_passport(
+        request,
+        "restore an internal passport due to expiry",
+        'Ви вже відправили заяву на відновлення внутрішнього паспотру через закінчення терміну придатності.'
+    )
 
 
 @client_login_required
-def restore_fpassport(request,  title, error_msg):
+def restore_fpassport(request, title, error_msg):
     user = request.user
     task = Task.objects.filter(user=user, title=title, status=0).exists()
     if task:
@@ -179,34 +200,44 @@ def restore_fpassport(request,  title, error_msg):
         return redirect('get_documents')
     if not user.foreign_passport:
         messages.error(request, 'У вас ще нема закордонного паспорту.')
-        return redirect('get_documents')        
+        return redirect('get_documents')
 
     if request.method == 'POST':
-        form = PhotoForm(request.POST, request.FILES)       
+        form = PhotoForm(request.POST, request.FILES)
         if form.is_valid():
             photo = form.cleaned_data.get('photo')
-            photo_path = get_photo_path(photo, user, title)  
-            task = Task.objects.create(user=user, title=title, user_data={'photo': photo_path})        
+            photo_path = get_photo_path(photo, user, title)
+            task = Task.objects.create(user=user, title=title, user_data={'photo': photo_path})
             messages.success(request, 'Ваша заяка на відновлення закордонного паспотру відправлена!')
             return redirect('get_documents')
         else:
             messages.error(request, form.errors)
     else:
         form = PhotoForm()
-    return render(request, 'passports/index_form.html', { 'form': form, 'user': user,
-                                                              'title': 'Заява на відновлення закордонного паспотру'})
+    context = {
+        'form': form,
+        'user': user,
+        'title': 'Заява на відновлення закордонного паспотру'
+    }
+    return render(request, 'passports/index_form.html', context=context)
 
 
 @client_login_required
 def restore_fpassport_loss(request):
-    return restore_fpassport(request, "restore a foreign passport due to loss",
-                     'Ви вже відправили заяву на відновлення закордонного паспотру через втрату.')
+    return restore_fpassport(
+        request,
+        "restore a foreign passport due to loss",
+        'Ви вже відправили заяву на відновлення закордонного паспотру через втрату.'
+    )
 
 
 @client_login_required
 def restore_fpassport_expiry(request):
-    return restore_fpassport(request, "restore a foreign passport due to expiry",
-                     'Ви вже відправили заяву на відновлення закордонного паспотру через закінчення терміну придатності.')
+    return restore_fpassport(
+        request,
+        "restore a foreign passport due to expiry",
+        'Ви вже відправили заяву на відновлення закордонного паспотру через закінчення терміну придатності.'
+    )
 
 
 @client_login_required
@@ -218,21 +249,24 @@ def change_address(request):
         return redirect('get_documents')
     if not request.user.passport:
         messages.error(request, 'У вас ще нема паспорту, тому неможливе оновлення адреси прописки.')
-        return redirect('get_documents')  
-    
-    if request.method == 'POST':     
+        return redirect('get_documents')
+
+    if request.method == 'POST':
         address_form = AddressForm(request.POST)
         if address_form.is_valid():
             adr, created = get_address(address_form.cleaned_data)
-            task = Task.objects.create(user=request.user, title=task_title, user_data={'address_id': adr.pk})        
+            task = Task.objects.create(user=request.user, title=task_title, user_data={'address_id': adr.pk})
             messages.success(request, 'Ваша заява на оновлення адреси прописки відправлена!')
             return redirect('get_documents')
         else:
             messages.error(request, address_form.errors)
     else:
         address_form = AddressForm()
-    return render(request, 'passports/update_address_form.html', {'form': address_form, 
-                                                              'title': 'Заява на оновлення адреси прописки'})
+    context = {
+        'form': address_form,
+        'title': 'Заява на оновлення адреси прописки'
+    }
+    return render(request, 'passports/update_address_form.html', context=context)
 
 
 def change_data(request, task_title, UserDataForm, field):
@@ -243,17 +277,17 @@ def change_data(request, task_title, UserDataForm, field):
         return redirect('get_documents')
     if not user.passport:
         messages.error(request, 'У вас ще нема паспорту, тому неможливе оновлення ваших даних.')
-        return redirect('get_documents')  
-    
-    if request.method == 'POST':     
-        photo_form = PhotoForm(request.POST, request.FILES) 
+        return redirect('get_documents')
+
+    if request.method == 'POST':
+        photo_form = PhotoForm(request.POST, request.FILES)
         user_form = UserDataForm(request.POST, instance=user)
 
         if user_form.is_valid() and photo_form.is_valid():
             field_value = user_form.cleaned_data.get(field)
             photo = photo_form.cleaned_data.get('photo')
-            photo_path = get_photo_path(photo, user, task_title)       
-            task = Task.objects.create(user=request.user, title=task_title, user_data={'photo': photo_path, field: field_value})        
+            photo_path = get_photo_path(photo, user, task_title)
+            task = Task.objects.create(user=request.user, title=task_title, user_data={'photo': photo_path, field: field_value})
             messages.success(request, 'Ваша заява на оновлення даних паспорту відправлена!')
             return redirect('get_documents')
         else:
@@ -262,8 +296,12 @@ def change_data(request, task_title, UserDataForm, field):
     else:
         user_form = UserDataForm(instance=user)
         photo_form = PhotoForm()
-    return render(request, 'passports/update_data_form.html', {'user_form': user_form, 'photo_form': photo_form,
-                                                              'title': 'Заява на оновлення даних паспорту'})    
+    context = {
+        'user_form': user_form,
+        'photo_form': photo_form,
+        'title': 'Заява на оновлення даних паспорту'
+    }
+    return render(request, 'passports/update_data_form.html', context=context)
 
 
 @client_login_required
@@ -279,4 +317,3 @@ def change_surname(request):
 @client_login_required
 def change_patronymic(request):
     return change_data(request, "change user patronymic", UpdateUserPatronymicForm, 'patronymic')
-

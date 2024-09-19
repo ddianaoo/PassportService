@@ -52,20 +52,20 @@ class UserSelfAPITests(APITestCase):
         response = self.client.put(
             path=self.path,
             data={
-	            "id": ANY,
-	            "name": "Ivan",
-	            "surname": "Ivanenko",
-	            "patronymic": "Ivanov",
-	            "email": "test@test.com",
-	            "sex": "M",
-	            "date_of_birth": "2000-01-01",
-	            "place_of_birth": "Kharkiv",
-	            "nationality": "UA",
-	            "record_number": "20000101-11111",
-	            "address": ANY,
-	            "passport": ANY,
-	            "foreign_passport": ANY
-        },
+                "id": ANY,
+                "name": "Ivan",
+                "surname": "Ivanenko",
+                "patronymic": "Ivanov",
+                "email": "test@test.com",
+                "sex": "M",
+                "date_of_birth": "2000-01-01",
+                "place_of_birth": "Kharkiv",
+                "nationality": "UA",
+                "record_number": "20000101-11111",
+                "address": ANY,
+                "passport": ANY,
+                "foreign_passport": ANY
+            },
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -78,7 +78,7 @@ class UserSelfAPITests(APITestCase):
         self.client.force_authenticate(self.user)
         response = self.client.patch(
             path=self.path,
-            data={ "surname": "Petrenko"},
+            data={"surname": "Petrenko"},
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(

@@ -40,12 +40,11 @@ class UserLoginForm(forms.ModelForm):
     def clean(self):
         email = self.cleaned_data.get('email')
         password = self.cleaned_data.get('password')
-        
         if email and password:
             user = authenticate(email=email, password=password)
             if not user:
                 raise ValidationError('Невірний email або пароль.')
-        return self.cleaned_data    
+        return self.cleaned_data
 
 
 class UpdateUserNameForm(forms.ModelForm):
@@ -54,7 +53,7 @@ class UpdateUserNameForm(forms.ModelForm):
         fields = ('name', )
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', }),
-        }   
+        }
 
     def clean_name(self):
         name = self.cleaned_data.get('name')
@@ -69,14 +68,14 @@ class UpdateUserSurnameForm(forms.ModelForm):
         fields = ('surname',)
         widgets = {
             'surname': forms.TextInput(attrs={'class': 'form-control', }),
-        }   
+        }
 
     def clean_surname(self):
         surname = self.cleaned_data.get('surname')
         if surname == self.instance.surname:
             raise ValidationError('The new surname must be different from the current one.')
         return surname
-    
+
 
 class UpdateUserPatronymicForm(forms.ModelForm):
     class Meta:
@@ -84,9 +83,10 @@ class UpdateUserPatronymicForm(forms.ModelForm):
         fields = ('patronymic', )
         widgets = {
             'patronymic': forms.TextInput(attrs={'class': 'form-control', }),
-        }   
+        }
+
     def clean_patronymic(self):
         patronymic = self.cleaned_data.get('patronymic')
         if patronymic == self.instance.patronymic:
             raise ValidationError('The new patronymic must be different from the current one.')
-        return patronymic       
+        return patronymic

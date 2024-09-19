@@ -17,30 +17,30 @@ class TaskListView(ListView):
     paginate_by = 5
     template_name = 'administration/task_list.html'
     title_filters = (
-            'create-passport', 
-            'create-foreign-passport', 
-            # 'create-visa', 
-            'restore-passport-loss', 
-            'restore-fpassport-loss',
-            'restore-passport-expiry', 
-            'restore-fpassport-expiry', 
-            'change-name', 
-            'change-surname', 
-            'change-patronymic', 
-            'change-address', 
+        'create-passport',
+        'create-foreign-passport',
+        # 'create-visa',
+        'restore-passport-loss',
+        'restore-fpassport-loss',
+        'restore-passport-expiry',
+        'restore-fpassport-expiry',
+        'change-name',
+        'change-surname',
+        'change-patronymic',
+        'change-address',
     )
     title_paths = (
-            'create_passport_s',
-            'create_fpassport_s',
-            # '',
-            'restore_passport_s', 
-            'restore_fpassport_s',
-            'restore_passport_s',
-            'restore_fpassport_s',
-            'change_name_s', 
-            'change_surname_s',
-            'change_patronymic_s',
-            'change_address_s'
+        'create_passport_s',
+        'create_fpassport_s',
+        # '',
+        'restore_passport_s',
+        'restore_fpassport_s',
+        'restore_passport_s',
+        'restore_fpassport_s',
+        'change_name_s',
+        'change_surname_s',
+        'change_patronymic_s',
+        'change_address_s'
     )
 
     def get_queryset(self):
@@ -81,7 +81,7 @@ class TaskListView(ListView):
 def create_passport(task, model):
     """Creates a new passport (internal or foreign) for the user."""
     today = datetime.date.today()
-    ten_years_more = today + datetime.timedelta(days=10*365+2)
+    ten_years_more = today + datetime.timedelta(days=10 * 365 + 2)
     new_passport = model(
         date_of_issue=today,
         number=randint(10000000, 99999999),
@@ -97,7 +97,7 @@ def create_ipassport_for_user(request, task_pk):
     if task.status or task.user.passport:
         messages.error(request, 'Заявка від цього користувача вже опрацьована.')
         return redirect('tasks_list')
-    
+
     passport = create_passport(task, Passport)
     address = get_object_or_404(Address, pk=task.user_data['address_id'])
     if request.method == 'POST':
@@ -113,8 +113,14 @@ def create_ipassport_for_user(request, task_pk):
         else:
             messages.error(request, form.errors)
     form = PassportForm(instance=passport)
-    return render(request, 'administration/task_form.html', {'form': form, 
-            'user': task.user, 'address': address, 'task': task, 'title': 'Оформлення паспорту'})
+    context = {
+        'form': form,
+        'user': task.user,
+        'address': address,
+        'task': task,
+        'title': 'Оформлення паспорту'
+    }
+    return render(request, 'administration/task_form.html', context=context)
 
 
 @staff_member_required(login_url='signin')
@@ -123,7 +129,7 @@ def create_fpassport_for_user(request, task_pk):
     if task.status or task.user.foreign_passport:
         messages.error(request, 'Заявка від цього користувача вже опрацьована.')
         return redirect('tasks_list')
-    
+
     passport = create_passport(task, ForeignPassport)
     if request.method == 'POST':
         form = ForeignPassportForm(request.POST, instance=passport)
@@ -163,7 +169,7 @@ def restore_ipassport_for_user(request, task_pk):
             messages.error(request, form.errors)
     form = PassportForm(instance=new_passport)
     return render(request, 'administration/task_form.html',
-                  {'form': form, 'user': task.user, 'title': 'Поновлення паспорту',  
+                  {'form': form, 'user': task.user, 'title': 'Поновлення паспорту',
                    'task': task, 'form_title': 'Встановіть необхідні дані для внутрішнього паспотру:'})
 
 
@@ -190,9 +196,14 @@ def restore_fpassport_for_user(request, task_pk):
         else:
             messages.error(request, form.errors)
     form = ForeignPassportForm(instance=new_passport)
-    return render(request, 'administration/task_form.html',
-                  {'form': form, 'user': task.user,'title': 'Відновлення закордонного паспорту', 
-                   'task': task, 'form_title': 'Встановіть необхідні дані для відновлення закордонного паспотру користувача:'})
+    context = {
+        'form': form,
+        'user': task.user,
+        'title': 'Відновлення закордонного паспорту',
+        'task': task,
+        'form_title': 'Встановіть необхідні дані для відновлення закордонного паспотру користувача:'
+    }
+    return render(request, 'administration/task_form.html', context=context)
 
 
 @staff_member_required(login_url='signin')
@@ -210,7 +221,7 @@ def change_address_for_user(request, task_pk):
         messages.success(request, 'Успішно поновлено адресу прописки!')
         return redirect('tasks_list')
 
-    return render(request, 'administration/address_form.html', 
+    return render(request, 'administration/address_form.html',
                   {'user': task.user, 'address': addr, 'title': 'Оновлення адреси прописки'})
 
 
@@ -295,4 +306,3 @@ def change_surname_for_user(request, task_pk):
 def change_patronymic_for_user(request, task_pk):
     task = get_object_or_404(Task, pk=task_pk)
     return change_user_field(request, task_pk, 'patronymic', task.user_data['patronymic'])
-

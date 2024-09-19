@@ -1,7 +1,6 @@
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
-from unittest.mock import patch
 
 from administration.factories import TaskFactory
 from authentication.factories import CustomUserFactory
@@ -11,7 +10,7 @@ from passports.models import Visa
 
 class ChangeUserDataByStaffAPITests(APITestCase):
     def setUp(self):
-        self.path =  "/api/staff/change-data/"
+        self.path = "/api/staff/change-data/"
 
         self.address = AddressFactory(
             country_code="UA",
@@ -20,8 +19,8 @@ class ChangeUserDataByStaffAPITests(APITestCase):
             street="Zoryana 48",
             apartments="88",
             post_code=61070
-        )     
-        self.internal_passport1 = PassportFactory(photo='')  
+        )
+        self.internal_passport1 = PassportFactory(photo='')
         self.user1 = CustomUserFactory(
             name="name22",
             surname="surname22",
@@ -30,7 +29,7 @@ class ChangeUserDataByStaffAPITests(APITestCase):
             passport=self.internal_passport1,
             foreign_passport=None,
         )
-        self.internal_passport2 = PassportFactory(photo='')  
+        self.internal_passport2 = PassportFactory(photo='')
         self.foreign_passport2 = ForeignPassportFactory(photo='')
         self.visa = VisaFactory(foreign_passport=self.foreign_passport2)
         self.user2 = CustomUserFactory(
@@ -50,60 +49,65 @@ class ChangeUserDataByStaffAPITests(APITestCase):
         )
         self.client.force_authenticate(self.admin)
 
-        self.task_name1 = TaskFactory(user=self.user1,
-                                title="change user name", 
-                                status=0,
-                                user_data={
-                                    "name": "Kate", 
-                                    "photo": "1-surname22-name22-change-data.jpg"
-                                }                             
-                                )
-        self.task_surname1 = TaskFactory(user=self.user1,
-                                title="change user surname", 
-                                status=0,
-                                user_data={
-                                    "surname": "White", 
-                                    "photo": "1-surname22-name22-change-data.jpg"
-                                }                             
-                                )
-        self.task_patronymic1 = TaskFactory(user=self.user1,
-                                title="change user patronymic", 
-                                status=0,
-                                user_data={
-                                    "patronymic": "Ivanovna", 
-                                    "photo": "1-surname22-name22-change-data.jpg"
-                                }                             
-                                )
-        self.task_name2 = TaskFactory(user=self.user2,
-                                title="change user name", 
-                                status=0,
-                                user_data={
-                                    "name": "Kate", 
-                                    "photo": "1-surname22-name22-change-data.jpg"
-                                }                             
-                                )
-        self.task_surname2 = TaskFactory(user=self.user2,
-                                title="change user surname", 
-                                status=0,
-                                user_data={
-                                    "surname": "White", 
-                                    "photo": "1-surname22-name22-change-data.jpg"
-                                }                             
-                                )
-        self.task_patronymic2 = TaskFactory(user=self.user2,
-                                title="change user patronymic", 
-                                status=0,
-                                user_data={
-                                    "patronymic": "Ivanovna", 
-                                    "photo": "1-surname22-name22-change-data.jpg"
-                                }                             
-                                )
-        self.valid_data = {
-                "authority": 6666,
-                "date_of_issue": str(timezone.now().date()),
-			    "date_of_expiry": str(timezone.now().date() + timezone.timedelta(days=365*10+2))
+        self.task_name1 = TaskFactory(
+            user=self.user1,
+            title="change user name",
+            status=0,
+            user_data={
+                "name": "Kate",
+                "photo": "1-surname22-name22-change-data.jpg"
             }
-
+        )
+        self.task_surname1 = TaskFactory(
+            user=self.user1,
+            title="change user surname",
+            status=0,
+            user_data={
+                "surname": "White",
+                "photo": "1-surname22-name22-change-data.jpg"
+            }
+        )
+        self.task_patronymic1 = TaskFactory(
+            user=self.user1,
+            title="change user patronymic",
+            status=0,
+            user_data={
+                "patronymic": "Ivanovna",
+                "photo": "1-surname22-name22-change-data.jpg"
+            }
+        )
+        self.task_name2 = TaskFactory(
+            user=self.user2,
+            title="change user name",
+            status=0,
+            user_data={
+                "name": "Kate",
+                "photo": "1-surname22-name22-change-data.jpg"
+            }
+        )
+        self.task_surname2 = TaskFactory(
+            user=self.user2,
+            title="change user surname",
+            status=0,
+            user_data={
+                "surname": "White",
+                "photo": "1-surname22-name22-change-data.jpg"
+            }
+        )
+        self.task_patronymic2 = TaskFactory(
+            user=self.user2,
+            title="change user patronymic",
+            status=0,
+            user_data={
+                "patronymic": "Ivanovna",
+                "photo": "1-surname22-name22-change-data.jpg"
+            }
+        )
+        self.valid_data = {
+            "authority": 6666,
+            "date_of_issue": str(timezone.now().date()),
+            "date_of_expiry": str(timezone.now().date() + timezone.timedelta(days=365 * 10 + 2))
+        }
 
 # INTERNAL PASSPORT ONLY
     def test_change_user_data_in_internal_passport_name_successful(self):
@@ -148,15 +152,16 @@ class ChangeUserDataByStaffAPITests(APITestCase):
         self.assertEqual(self.user1.patronymic, self.task_patronymic1.user_data['patronymic'])
         self.assertEqual(self.task_patronymic1.status, 1)
 
-
     def test_change_user_data_in_internal_passport_without_authority(self):
         response = self.client.patch(
             path=f"{self.path}{self.task_name1.pk}/",
             data={
-                "internal_passport":{
-	                "date_of_issue": self.valid_data['date_of_issue'],
-	                "date_of_expiry": self.valid_data['date_of_expiry']
-            }},
+                "internal_passport":
+                    {
+                        "date_of_issue": self.valid_data['date_of_issue'],
+                        "date_of_expiry": self.valid_data['date_of_expiry']
+                    }
+            },
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -166,11 +171,12 @@ class ChangeUserDataByStaffAPITests(APITestCase):
         response = self.client.patch(
             path=f"{self.path}{self.task_name1.pk}/",
             data={
-                "internal_passport":{
+                "internal_passport": {
                     "authority": 10,
-	                "date_of_issue": self.valid_data['date_of_issue'],
-	                "date_of_expiry": self.valid_data['date_of_expiry']
-            }},
+                    "date_of_issue": self.valid_data['date_of_issue'],
+                    "date_of_expiry": self.valid_data['date_of_expiry']
+                }
+            },
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -180,18 +186,20 @@ class ChangeUserDataByStaffAPITests(APITestCase):
         response = self.client.patch(
             path=f"{self.path}{self.task_name1.pk}/",
             data={
-                "internal_passport":{
+                "internal_passport": {
                     "authority": self.valid_data['authority'],
                     "date_of_issue": "08-18-2024",
-			        "date_of_expiry": self.valid_data['date_of_expiry']
-            }},
+                    "date_of_expiry": self.valid_data['date_of_expiry']
+                }
+            },
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-            "date_of_issue": 
-                ['Date has wrong format. Use one of these formats instead: YYYY-MM-DD.']
-            }, 
+        self.assertEqual(
+            {
+                "date_of_issue":
+                    ['Date has wrong format. Use one of these formats instead: YYYY-MM-DD.']
+            },
             response.json()
         )
 
@@ -199,11 +207,12 @@ class ChangeUserDataByStaffAPITests(APITestCase):
         response = self.client.patch(
             path=f"{self.path}{self.task_name1.pk}/",
             data={
-                "internal_passport":{
+                "internal_passport": {
                     "authority": self.valid_data['authority'],
                     "date_of_issue": "2024-08-18",
-			        "date_of_expiry": self.valid_data['date_of_expiry']
-            }},
+                    "date_of_expiry": self.valid_data['date_of_expiry']
+                }
+            },
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -213,17 +222,19 @@ class ChangeUserDataByStaffAPITests(APITestCase):
         response = self.client.patch(
             path=f"{self.path}{self.task_name1.pk}/",
             data={
-                "internal_passport":{
+                "internal_passport": {
                     "authority": self.valid_data['authority'],
                     "date_of_issue": self.valid_data['date_of_issue'],
-			        "date_of_expiry": "2024-10-19"
-            }},
+                    "date_of_expiry": "2024-10-19"
+                }
+            },
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-            "date_of_expiry": ["The expiry date must be in 10 years since today."]
-            }, 
+        self.assertEqual(
+            {
+                "date_of_expiry": ["The expiry date must be in 10 years since today."]
+            },
             response.json()
         )
 
@@ -231,7 +242,6 @@ class ChangeUserDataByStaffAPITests(APITestCase):
         response = self.client.patch(path=f"{self.path}{self.task_name1.pk}/", data={})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual({'non_field_errors': ['No data provided']}, response.json())
-
 
 # BOTH PASSPORTS
     def test_change_user_data_in_both_passports_name_successful(self):
@@ -294,23 +304,21 @@ class ChangeUserDataByStaffAPITests(APITestCase):
         self.assertEqual(self.user2.patronymic, self.task_patronymic2.user_data['patronymic'])
         self.assertEqual(self.task_patronymic2.status, 1)
 
-
     def test_change_user_data_in_both_passports_without_authority(self):
         response = self.client.patch(
             path=f"{self.path}{self.task_name2.pk}/",
             data={
-                "internal_passport":{
-	                "date_of_issue": self.valid_data['date_of_issue'],
-	                "date_of_expiry": self.valid_data['date_of_expiry']
+                "internal_passport": {
+                    "date_of_issue": self.valid_data['date_of_issue'],
+                    "date_of_expiry": self.valid_data['date_of_expiry']
                 },
                 "foreign_passport": self.valid_data
             },
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-            'internal_passport': {'authority': ['This field is required.']}
-            }, 
+        self.assertEqual(
+            {'internal_passport': {'authority': ['This field is required.']}},
             response.json()
         )
 
@@ -319,17 +327,19 @@ class ChangeUserDataByStaffAPITests(APITestCase):
             path=f"{self.path}{self.task_name2.pk}/",
             data={
                 "internal_passport": self.valid_data,
-                "foreign_passport":{
+                "foreign_passport": {
                     "authority": 10,
-	                "date_of_issue": self.valid_data['date_of_issue'],
-	                "date_of_expiry": self.valid_data['date_of_expiry']
-            }},
+                    "date_of_issue": self.valid_data['date_of_issue'],
+                    "date_of_expiry": self.valid_data['date_of_expiry']
+                }
+            },
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-            'foreign_passport': {"authority": ["Authority must be in the format xxxx."]}
-            }, 
+        self.assertEqual(
+            {
+                'foreign_passport': {"authority": ["Authority must be in the format xxxx."]}
+            },
             response.json()
         )
 
@@ -337,22 +347,23 @@ class ChangeUserDataByStaffAPITests(APITestCase):
         response = self.client.patch(
             path=f"{self.path}{self.task_name2.pk}/",
             data={
-                "internal_passport":{
+                "internal_passport": {
                     "authority": self.valid_data['authority'],
                     "date_of_issue": "08-18-2024",
-			        "date_of_expiry": self.valid_data['date_of_expiry']
-                }, 
+                    "date_of_expiry": self.valid_data['date_of_expiry']
+                },
                 "foreign_passport": self.valid_data
             },
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-            "internal_passport": 
-                {
-                    "date_of_issue": ['Date has wrong format. Use one of these formats instead: YYYY-MM-DD.']
-                }
-            }, 
+        self.assertEqual(
+            {
+                "internal_passport":
+                    {
+                        "date_of_issue": ['Date has wrong format. Use one of these formats instead: YYYY-MM-DD.']
+                    }
+            },
             response.json()
         )
 
@@ -363,58 +374,58 @@ class ChangeUserDataByStaffAPITests(APITestCase):
                 "internal_passport": {
                     "authority": self.valid_data['authority'],
                     "date_of_issue": "2024-08-18",
-			        "date_of_expiry": self.valid_data['date_of_expiry']
-                }, 
-                "foreign_passport": self.valid_data
+                    "date_of_expiry": self.valid_data['date_of_expiry']
                 },
+                "foreign_passport": self.valid_data
+            },
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-            "internal_passport": {"date_of_issue": ["Issue date must be at least today."]}
-            }, 
+        self.assertEqual(
+            {"internal_passport": {"date_of_issue": ["Issue date must be at least today."]}},
             response.json())
 
     def test_change_user_data_in_both_passports_date_of_expiry_incorrect(self):
         response = self.client.patch(
             path=f"{self.path}{self.task_name2.pk}/",
             data={
-                "internal_passport":{
+                "internal_passport": {
                     "authority": self.valid_data['authority'],
                     "date_of_issue": self.valid_data['date_of_issue'],
-			        "date_of_expiry": "2024-10-19"
+                    "date_of_expiry": "2024-10-19"
                 },
                 "foreign_passport": self.valid_data
-                },
+            },
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-            "internal_passport":
-                {"date_of_expiry": ["The expiry date must be in 10 years since today."]}
-            }, 
+        self.assertEqual(
+            {
+                "internal_passport": {"date_of_expiry": ["The expiry date must be in 10 years since today."]}
+            },
             response.json()
         )
 
     def test_change_user_data_in_both_passports_no_data(self):
         response = self.client.patch(path=f"{self.path}{self.task_name2.pk}/", data={})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-            'internal_passport': {'non_field_errors': ['No data provided']}, 
-            'foreign_passport': {'non_field_errors': ['No data provided']}
+        self.assertEqual(
+            {
+                'internal_passport': {'non_field_errors': ['No data provided']},
+                'foreign_passport': {'non_field_errors': ['No data provided']}
             },
             response.json()
         )
 
-
     def test_change_user_data_task_already_processed(self):
-        task_done = TaskFactory(user=self.user1,
-                                title="change user name", 
-                                status=1,
-                                user_data={
-                                    "name": "Kate", 
-                                    "photo": "1-surname22-name22-change-data.jpg"
-                                }                             
+        task_done = TaskFactory(
+            user=self.user1,
+            title="change user name",
+            status=1,
+            user_data={
+                "name": "Kate",
+                "photo": "1-surname22-name22-change-data.jpg"
+            }
         )
         response = self.client.patch(path=f"{self.path}{task_done.pk}/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -424,29 +435,27 @@ class ChangeUserDataByStaffAPITests(APITestCase):
         )
 
     def test_change_user_data_wrong_task(self):
-        wrong_task = TaskFactory(user=self.user1,
-                                title="create an internal passport",
-                                status=0,
-                                user_data={
-                                    "address_id": AddressFactory().id, 
-                                    "photo": "1-surname22-name22-create-an-internal-passport.jpg"
-                                }
-       )
+        wrong_task = TaskFactory(
+            user=self.user1,
+            title="create an internal passport",
+            status=0,
+            user_data={
+                "address_id": AddressFactory().id,
+                "photo": "1-surname22-name22-create-an-internal-passport.jpg"
+            }
+        )
         response = self.client.patch(path=f"{self.path}{wrong_task.pk}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual({
-            "detail": "The task with this id and title wasn`t found."
-            },
+        self.assertEqual(
+            {"detail": "The task with this id and title wasn`t found."},
             response.json()
         )
-
 
     def test_change_user_data_task_not_found(self):
         response = self.client.patch(path=f"{self.path}100/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual({
-	        "detail": "No Task matches the given query."
-            },
+        self.assertEqual(
+            {"detail": "No Task matches the given query."},
             response.json()
         )
 
@@ -454,9 +463,8 @@ class ChangeUserDataByStaffAPITests(APITestCase):
         self.client.force_authenticate(self.user1)
         response = self.client.patch(path=f"{self.path}{self.task_name1.pk}/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual({
-	        "detail": "You do not have permission to perform this action."
-            },
+        self.assertEqual(
+            {"detail": "You do not have permission to perform this action."},
             response.json()
         )
 

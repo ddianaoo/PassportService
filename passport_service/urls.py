@@ -25,14 +25,13 @@ urlpatterns = [
     path('staff/', include('administration.urls')),
     path('auth/', include('authentication.urls')),
     path('', include('passports.urls')),
-    path('api/auth/', include('authentication.rest_urls')),        
-    path('api/my-documents/', include('passports.rest_urls')),   
+    path('api/auth/', include('authentication.rest_urls')),
+    path('api/my-documents/', include('passports.rest_urls')),
     path('api/staff/', include('administration.rest_urls')),
-    path('', include('django_prometheus.urls')),   
+    path('', include('django_prometheus.urls')),
 ]
 
 if settings.DEBUG:
     import debug_toolbar
     urlpatterns = [path('__debug__/', include(debug_toolbar.urls))] + urlpatterns
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-

@@ -37,11 +37,11 @@ class CustomUser(AbstractBaseUser):
     name           = models.CharField(max_length=50)
     surname        = models.CharField(max_length=50)
     patronymic     = models.CharField(max_length=50)
-    sex            = models.CharField(max_length=1, choices=GENDER_CHOICES) 
+    sex            = models.CharField(max_length=1, choices=GENDER_CHOICES)
     date_of_birth  = models.DateField(validators=[validate_birth_date,])
     place_of_birth = models.CharField(max_length=255)
     nationality    = models.CharField(max_length=2, choices=COUNTRY_CHOICES)
-    record_number  = models.CharField(max_length=14, unique=True, null=True, validators=[validate_record_number,]) 
+    record_number  = models.CharField(max_length=14, unique=True, null=True, validators=[validate_record_number,])
 
     address          = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True)
     passport         = models.OneToOneField(Passport, on_delete=models.SET_NULL, null=True, related_name='user')
@@ -59,15 +59,14 @@ class CustomUser(AbstractBaseUser):
 
     def __str__(self):
         return f"{self.name} {self.surname}"
-    
+
     def has_perm(self, perm, obj=None):
         return self.is_superuser
 
     def has_module_perms(self, app_label):
         return self.is_superuser
-    
+
     def save(self, *args, **kwargs):
         if not self.record_number:
             self.record_number = self.date_of_birth.strftime('%Y%m%d') + f'-{randint(1, 99999):05d}'
-        super().save(*args, **kwargs)   
-    
+        super().save(*args, **kwargs)

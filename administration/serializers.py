@@ -48,14 +48,14 @@ class TaskUserDataSerializer(serializers.Serializer):
 
         if representation.get('new_photo') and request:
             representation['new_photo'] = request.build_absolute_uri(settings.MEDIA_URL + representation['new_photo'])
-        
+
         if representation.get('new_address') is None:
             representation.pop('new_address', None)
 
         if representation.get('visa') is None:
             representation.pop('visa', None)
         return representation
-    
+
 
 class TaskUserSerializer(serializers.ModelSerializer):
     user = UserListSerializer()
@@ -63,11 +63,11 @@ class TaskUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = '__all__' 
+        fields = '__all__'
 
 
 class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = '__all__' 
+        fields = '__all__'

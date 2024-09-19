@@ -1,10 +1,7 @@
-../venv
+../.venv
 db.sqlite3
-.env
 *__pycache__
 *DS_Store
 /media/images
 /media/photos/*
 /logs
-/htmlcov
-.coverage

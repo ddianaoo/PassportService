@@ -17,7 +17,6 @@ class PhotoSerializer(serializers.Serializer):
 
 class RetrieveInternalPassportSerializer(serializers.ModelSerializer):
     photo = serializers.SerializerMethodField()
-    
     name = serializers.CharField(source='user.name')
     surname = serializers.CharField(source='user.surname')
     patronymic = serializers.CharField(source='user.patronymic')
@@ -31,10 +30,12 @@ class RetrieveInternalPassportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Passport
-        fields = ('number', 'authority', 'date_of_issue', 'date_of_expiry', 
-            'photo', 'name', 'surname', 'patronymic', 'sex', 'date_of_birth', 
-            'record_number', 'place_of_birth', 'nationality', 'registration_address')
-        
+        fields = (
+            'number', 'authority', 'date_of_issue', 'date_of_expiry',
+            'photo', 'name', 'surname', 'patronymic', 'sex', 'date_of_birth',
+            'record_number', 'place_of_birth', 'nationality', 'registration_address'
+        )
+
     def get_photo(self, obj):
         request = self.context.get('request')
         if obj.photo and request:
@@ -57,10 +58,12 @@ class RetrieveForeignPassportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ForeignPassport
-        fields = ('number', 'authority', 'date_of_issue', 'date_of_expiry', 
-            'photo', 'name', 'surname', 'patronymic', 'sex', 'date_of_birth', 
-            'record_number', 'place_of_birth', 'nationality', 'country_code')
-        
+        fields = (
+            'number', 'authority', 'date_of_issue', 'date_of_expiry',
+            'photo', 'name', 'surname', 'patronymic', 'sex', 'date_of_birth',
+            'record_number', 'place_of_birth', 'nationality', 'country_code'
+        )
+
     def get_photo(self, obj):
         request = self.context.get('request')
         if obj.photo and request:
@@ -98,8 +101,10 @@ class RestoreVisaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Visa
         fields = '__all__'
-        read_only_fields = ('number', 'foreign_passport', 'type', 'country', 'photo', 'entry_amount', 
-                            'is_active', 'date_of_expiry')
+        read_only_fields = (
+            'number', 'foreign_passport', 'type', 'country', 'photo', 'entry_amount',
+            'is_active', 'date_of_expiry'
+        )
 
 
 class VisaSerializer(serializers.ModelSerializer):
@@ -112,16 +117,17 @@ class VisaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Visa
         fields = '__all__'
-        read_only_fields = ('number', 'foreign_passport', 'type', 'country', 'photo', 'entry_amount', 'is_active',
-                            'name', 'surname', 'sex', 'date_of_birth', 'nationality'
-                            )
-        
+        read_only_fields = (
+            'number', 'foreign_passport', 'type', 'country', 'photo', 'entry_amount',
+            'is_active', 'name', 'surname', 'sex', 'date_of_birth', 'nationality'
+        )
+
     def get_photo(self, obj):
         request = self.context.get('request')
         if obj.photo and request:
             return request.build_absolute_uri(obj.photo.url)
         return None
-    
+
 
 # Admin Serializers
 class CreateInternalPassportSerializer(serializers.ModelSerializer):
@@ -130,21 +136,21 @@ class CreateInternalPassportSerializer(serializers.ModelSerializer):
         model = Passport
         fields = '__all__'
         read_only_fields = ('number', 'photo')
-        
+
     def get_photo(self, obj):
         request = self.context.get('request')
         if obj.photo and request:
             return request.build_absolute_uri(obj.photo.url)
         return None
-    
+
 
 class CreateForeignPassportSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = ForeignPassport
         fields = '__all__'
         read_only_fields = ('number', 'photo')
-        
+
     def get_photo(self, obj):
         request = self.context.get('request')
         if obj.photo and request:

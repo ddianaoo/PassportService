@@ -56,12 +56,12 @@
                         <a class="nav-link" href="{% url 'tasks_list' %}?title=change-surname">
                             Зміна прізвища користувача
                         </a>
-                    </li>   
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'tasks_list' %}?title=change-patronymic">
                             Зміна по батькові користувача
                         </a>
-                    </li>                  
+                    </li>
                 </ul>
             </div>
         </nav>
@@ -92,7 +92,7 @@
                             {% elif task.user.passport.photo %}
                             <div class="d-flex align-items-start">
                                 <img src="{{ task.user.passport.photo.url }}" alt="" width="100" style="height: 90px; width: 80px;" class="img-fluid">
-                            </div>                          
+                            </div>
                             {% endif %}
                         </td>
                         <td>{% if task.status %}

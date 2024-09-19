@@ -20,7 +20,7 @@ class AddressFactory(factory.django.DjangoModelFactory):
     settlement   = factory.Sequence(lambda n: f"Test settlement{n + 1}")
     street       = factory.Sequence(lambda n: f"Test street{n + 1}")
     apartments   = factory.Sequence(lambda n: f"Test apartments{n + 1}")
-    post_code    = factory.LazyAttribute(lambda _: random.randint(1111, 9999))  
+    post_code    = factory.LazyAttribute(lambda _: random.randint(1111, 9999))
 
 
 class AbstractPassportFactory(factory.django.DjangoModelFactory):
@@ -28,16 +28,16 @@ class AbstractPassportFactory(factory.django.DjangoModelFactory):
         abstract = True
 
     number         = factory.LazyAttribute(lambda _: random.randint(10000000, 99999999))
-    authority      = factory.LazyAttribute(lambda _: random.randint(1111, 9999))  
+    authority      = factory.LazyAttribute(lambda _: random.randint(1111, 9999))
     date_of_issue  = factory.LazyAttribute(lambda _: timezone.now().date())
-    date_of_expiry = factory.LazyAttribute(lambda o: o.date_of_issue + timezone.timedelta(days=365*10+2))
+    date_of_expiry = factory.LazyAttribute(lambda o: o.date_of_issue + timezone.timedelta(days=365 * 10 + 2))
 
 
 class PassportFactory(AbstractPassportFactory):
     class Meta:
         model = Passport
 
-    photo = factory.django.ImageField(from_path=os.path.join(settings.MEDIA_ROOT, 'tests/create_ip.png'), 
+    photo = factory.django.ImageField(from_path=os.path.join(settings.MEDIA_ROOT, 'tests/create_ip.png'),
                                       filename="TEST-internal-passport.jpeg")
 
 
@@ -45,8 +45,7 @@ class ForeignPassportFactory(AbstractPassportFactory):
     class Meta:
         model = ForeignPassport
 
-    photo = factory.django.ImageField(from_path=os.path.join(settings.MEDIA_ROOT, 'tests/create_fp.jpg'),
-                                     filename="TEST-foreign-passport.jpeg")
+    photo = factory.django.ImageField(from_path=os.path.join(settings.MEDIA_ROOT, 'tests/create_fp.jpg'), filename="TEST-foreign-passport.jpeg")
 
 
 class VisaFactory(factory.django.DjangoModelFactory):
@@ -57,9 +56,8 @@ class VisaFactory(factory.django.DjangoModelFactory):
     foreign_passport = factory.SubFactory(ForeignPassportFactory)
     place_of_issue   = factory.Sequence(lambda n: f"Test place{n + 1}")
     date_of_issue    = factory.LazyAttribute(lambda _: timezone.now().date())
-    date_of_expiry   = factory.LazyAttribute(lambda o: o.date_of_issue + timezone.timedelta(days=365*10+2))
-    photo            = factory.django.ImageField(from_path=os.path.join(settings.MEDIA_ROOT, 'tests/create_visa.jpg'), 
-                                      filename="TEST-visa.jpeg")
+    date_of_expiry   = factory.LazyAttribute(lambda o: o.date_of_issue + timezone.timedelta(days=365 * 10 + 2))
+    photo            = factory.django.ImageField(from_path=os.path.join(settings.MEDIA_ROOT, 'tests/create_visa.jpg'), filename="TEST-visa.jpeg")
     type             = factory.fuzzy.FuzzyChoice(Visa.TYPE_CHOICES, getter=lambda c: c[0])
     country          = factory.fuzzy.FuzzyChoice(COUNTRY_CHOICES, getter=lambda c: c[0])
     entry_amount     = factory.fuzzy.FuzzyChoice(Visa.ENTRY_CHOICES, getter=lambda c: c[0])

@@ -5,7 +5,7 @@ import factory.django
 import factory.fuzzy
 
 from .models import CustomUser
-from passports.factories import AddressFactory, PassportFactory, ForeignPassportFactory 
+from passports.factories import AddressFactory, PassportFactory, ForeignPassportFactory
 
 
 class CustomUserFactory(factory.django.DjangoModelFactory):
@@ -29,4 +29,4 @@ class CustomUserFactory(factory.django.DjangoModelFactory):
 
     record_number = factory.LazyAttribute(lambda o: o.date_of_birth.strftime('%Y%m%d') + f'-{randint(1, 99999):05d}')
     is_active      = True
-    is_staff       = False 
+    is_staff       = False

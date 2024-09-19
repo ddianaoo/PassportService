@@ -1,13 +1,14 @@
 from django.urls import path
-from .views import (TaskListView, 
-                    create_ipassport_for_user, 
-                    create_fpassport_for_user, 
-                    restore_ipassport_for_user, 
-                    restore_fpassport_for_user,
-                    change_address_for_user,
-                    change_name_for_user,
-                    change_surname_for_user, 
-                    change_patronymic_for_user
+from .views import (
+    TaskListView,
+    create_ipassport_for_user,
+    create_fpassport_for_user,
+    restore_ipassport_for_user,
+    restore_fpassport_for_user,
+    change_address_for_user,
+    change_name_for_user,
+    change_surname_for_user,
+    change_patronymic_for_user
 )
 
 

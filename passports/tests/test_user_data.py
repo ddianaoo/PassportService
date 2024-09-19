@@ -7,7 +7,7 @@ from rest_framework.test import APITestCase
 
 from administration.factories import TaskFactory
 from authentication.factories import CustomUserFactory
-from unittest.mock import ANY, patch
+from unittest.mock import ANY
 from passports.factories import AddressFactory, PassportFactory, ForeignPassportFactory
 
 
@@ -45,11 +45,11 @@ class UserDataAPITests(APITestCase):
         self.client.force_authenticate(self.user)
 
         self.user_data = {
-	        "id": ANY,
-            "name": self.user.name,  
-            "surname": self.user.surname,  
-            "patronymic": self.user.patronymic,   
-	        "email": self.user.email,
+            "id": ANY,
+            "name": self.user.name,
+            "surname": self.user.surname,
+            "patronymic": self.user.patronymic,
+            "email": self.user.email,
             "sex": self.user.sex,
             "date_of_birth": str(self.user.date_of_birth),
             "record_number": self.user.record_number,
@@ -63,19 +63,21 @@ class UserDataAPITests(APITestCase):
     def test_get_user_data_full_data(self):
         response = self.client.get(path=self.path)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual({
-            **self.user_data,
-            "address": {
-                "id": ANY,
-                "country_code": self.user.address.country_code,
-                "region": self.user.address.region,
-                "settlement": self.user.address.settlement,
-                "street": self.user.address.street,
-                "apartments": self.user.address.apartments,
-                "post_code": self.user.address.post_code
-            },
-	        "passport": ANY,
-	        "foreign_passport": ANY
+        self.assertEqual(
+            {
+                **self.user_data,
+                "address":
+                    {
+                        "id": ANY,
+                        "country_code": self.user.address.country_code,
+                        "region": self.user.address.region,
+                        "settlement": self.user.address.settlement,
+                        "street": self.user.address.street,
+                        "apartments": self.user.address.apartments,
+                        "post_code": self.user.address.post_code
+                    },
+                    "passport": ANY,
+                    "foreign_passport": ANY
             },
             response.json()
         )
@@ -84,19 +86,21 @@ class UserDataAPITests(APITestCase):
         self.user.foreign_passport = None
         response = self.client.get(path=self.path)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual({
-            **self.user_data,
-            "address": {
-                "id": ANY,
-                "country_code": self.user.address.country_code,
-                "region": self.user.address.region,
-                "settlement": self.user.address.settlement,
-                "street": self.user.address.street,
-                "apartments": self.user.address.apartments,
-                "post_code": self.user.address.post_code
-            },
-	        "passport": ANY,
-	        "foreign_passport": None
+        self.assertEqual(
+            {
+                **self.user_data,
+                "address":
+                    {
+                        "id": ANY,
+                        "country_code": self.user.address.country_code,
+                        "region": self.user.address.region,
+                        "settlement": self.user.address.settlement,
+                        "street": self.user.address.street,
+                        "apartments": self.user.address.apartments,
+                        "post_code": self.user.address.post_code
+                    },
+                "passport": ANY,
+                "foreign_passport": None
             },
             response.json()
         )
@@ -107,11 +111,12 @@ class UserDataAPITests(APITestCase):
         self.user.address = None
         response = self.client.get(path=self.path)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual({
-            **self.user_data,
-            "address": None,
-	        "passport": None,
-	        "foreign_passport": None
+        self.assertEqual(
+            {
+                **self.user_data,
+                "address": None,
+                "passport": None,
+                "foreign_passport": None
             },
             response.json()
         )
@@ -144,12 +149,12 @@ class UserDataAPITests(APITestCase):
                 'field': 'name',
                 'value': 'New name',
                 'photo': self.valid_photo
-                },
-            format='multipart'                         
+            },
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
-            {"detail": f"Your request for changing the name has been sent."},
+            {"detail": "Your request for changing the name has been sent."},
             response.json()
         )
 
@@ -162,12 +167,12 @@ class UserDataAPITests(APITestCase):
                 'field': 'surname',
                 'value': 'New surname',
                 'photo': self.valid_photo
-                },
-            format='multipart'                        
+            },
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
-            {"detail": f"Your request for changing the surname has been sent."},
+            {"detail": "Your request for changing the surname has been sent."},
             response.json()
         )
 
@@ -180,19 +185,19 @@ class UserDataAPITests(APITestCase):
                 'field': 'patronymic',
                 'value': 'New patronymic',
                 'photo': self.valid_photo
-                },
-            format='multipart'                       
+            },
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
-            {"detail": f"Your request for changing the patronymic has been sent."},
+            {"detail": "Your request for changing the patronymic has been sent."},
             response.json()
         )
 
     def test_change_user_name_task_already_stored(self):
-        task = TaskFactory(
-            user=self.user, 
-            title="change user name", 
+        TaskFactory(
+            user=self.user,
+            title="change user name",
             status=0
         )
         with open(self.image_path, 'rb') as f:
@@ -203,20 +208,21 @@ class UserDataAPITests(APITestCase):
                 'field': "name",
                 'value': 'New name',
                 'photo': self.valid_photo
-                },
-            format='multipart'                       
+            },
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-                "detail": f"You have already sent a request for changing the name."
+        self.assertEqual(
+            {
+                "detail": "You have already sent a request for changing the name."
             },
             response.json()
         )
 
     def test_change_user_surname_task_already_stored(self):
-        task = TaskFactory(
-            user=self.user, 
-            title="change user surname", 
+        TaskFactory(
+            user=self.user,
+            title="change user surname",
             status=0
         )
         with open(self.image_path, 'rb') as f:
@@ -227,20 +233,21 @@ class UserDataAPITests(APITestCase):
                 'field': "surname",
                 'value': 'New surname',
                 'photo': self.valid_photo
-                },
-            format='multipart'                       
+            },
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-                "detail": f"You have already sent a request for changing the surname."
+        self.assertEqual(
+            {
+                "detail": "You have already sent a request for changing the surname."
             },
             response.json()
         )
 
     def test_change_user_patronymic_task_already_stored(self):
-        task = TaskFactory(
-            user=self.user, 
-            title="change user patronymic", 
+        TaskFactory(
+            user=self.user,
+            title="change user patronymic",
             status=0
         )
         with open(self.image_path, 'rb') as f:
@@ -251,12 +258,13 @@ class UserDataAPITests(APITestCase):
                 'field': "patronymic",
                 'value': 'New patronymic',
                 'photo': self.valid_photo
-                },
-            format='multipart'                       
+            },
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-                "detail": f"You have already sent a request for changing the patronymic."
+        self.assertEqual(
+            {
+                "detail": "You have already sent a request for changing the patronymic."
             },
             response.json()
         )
@@ -277,14 +285,10 @@ class UserDataAPITests(APITestCase):
                 'field': "name",
                 'value': "Sasha"
             },
-            format='json'                         
+            format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-            "photo_errors": {"photo": ["No file was submitted."]}
-            },
-            response.json()
-        )
+        self.assertEqual({"photo_errors": {"photo": ["No file was submitted."]}}, response.json())
 
     def test_change_user_data_no_user_fields(self):
         with open(self.image_path, 'rb') as f:
@@ -292,13 +296,15 @@ class UserDataAPITests(APITestCase):
         response = self.client.patch(
             path=self.path,
             data={'photo': self.valid_photo},
-            format='multipart'                     
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-                "user_errors": {"field": ["This field is required."],
-                                "value": ["This field is required."]
-                                }
+        self.assertEqual(
+            {
+                "user_errors": {
+                    "field": ["This field is required."],
+                    "value": ["This field is required."]
+                }
             },
             response.json()
         )
@@ -314,10 +320,11 @@ class UserDataAPITests(APITestCase):
                 'value': "Sasha",
                 'photo': self.valid_photo
             },
-            format='multipart'                    
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
+        self.assertEqual(
+            {
                 "user_errors": {"field": [f"\"{invalid_field}\" is not a valid choice."]}
             },
             response.json()
@@ -332,15 +339,11 @@ class UserDataAPITests(APITestCase):
                 'field': 'name',
                 'value': '',
                 'photo': self.valid_photo
-                },
-            format='multipart'                      
+            },
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-                "user_errors": {"value": ["This field may not be blank."]}
-            },
-            response.json()
-        )
+        self.assertEqual({"user_errors": {"value": ["This field may not be blank."]}}, response.json())
 
     def test_change_user_data_not_logged_in(self):
         self.client.force_authenticate(user=None)

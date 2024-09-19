@@ -12,7 +12,7 @@ class TaskFilter(django_filters.FilterSet):
     class Meta:
         model = Task
         fields = ['status', 'title']
-        
+
     def filter_by_title(self, queryset, name, value):
         if value == "visa":
             return queryset.filter(**{name + '__contains': value})

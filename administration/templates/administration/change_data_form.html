@@ -16,8 +16,8 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-5">
-                            <img src="/media/{{ task.user_data.photo }}" 
-                            alt="User Photo" 
+                            <img src="/media/{{ task.user_data.photo }}"
+                            alt="User Photo"
                             style="height: 220px; width: 190px;"
                             class="img-fluid mb-4">
                             {% include 'passports/inc/_user_card.html' %}
@@ -65,20 +65,20 @@
     </div>
 
     <div class="row justify-content-center">
-        <div class="col-md-6">         
+        <div class="col-md-6">
             <form method="POST" action="">
                 {% csrf_token %}
-                <h4 class="text-center mb-2">Встановіть необхідні дані для внутрішнього паспотру:</h4>   
+                <h4 class="text-center mb-2">Встановіть необхідні дані для внутрішнього паспотру:</h4>
                 {{ passport_form.as_p }}
 
                 {% if fpassport_form %}
-                <h4 class="text-center mb-2">Встановіть необхідні дані для закордонного паспотру:</h4>   
+                <h4 class="text-center mb-2">Встановіть необхідні дані для закордонного паспотру:</h4>
                 {{ fpassport_form.as_p }}
                 {% endif %}
 
                 <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    <strong>Зверніть увагу!</strong> 
-                    Підтверджуючи цю операцію, вами буде видалено внутрішній та закордонний паспорти 
+                    <strong>Зверніть увагу!</strong>
+                    Підтверджуючи цю операцію, вами буде видалено внутрішній та закордонний паспорти
                     зі старим ім`ям цього користувача та створено нові, з оновленими даними.
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -86,7 +86,7 @@
                 <button type="submit" class="btn btn-dark btn-block">Підтвердити</button>
             </form>
         </div>
-    </div>  
-    </div>  
+    </div>
+    </div>
 </div>
 {% endblock %}

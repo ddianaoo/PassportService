@@ -45,4 +45,3 @@ class ForeignPassportForm(forms.ModelForm):
             'date_of_issue': forms.DateInput(attrs={'class': 'form-control'}),
             'date_of_expiry': forms.DateInput(attrs={'class': 'form-control'}),
         }
-    

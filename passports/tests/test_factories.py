@@ -27,4 +27,4 @@ class TestFactories(TestCase):
         self.assertIsNotNone(passport.authority)
         self.assertIsNotNone(passport.date_of_issue)
         self.assertIsNotNone(passport.date_of_expiry)
-        self.assertIsNotNone(passport.photo)      
+        self.assertIsNotNone(passport.photo)

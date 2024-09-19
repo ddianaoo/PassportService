@@ -40,10 +40,10 @@ class GetDocumentsAPITests(APITestCase):
             "authority": self.user.passport.authority,
             "date_of_issue": str(self.user.passport.date_of_issue),
             "date_of_expiry": str(self.user.passport.date_of_expiry),
-            "photo": ANY,  
-            "name": self.user.name,  
-            "surname": self.user.surname,  
-            "patronymic": self.user.patronymic,   
+            "photo": ANY,
+            "name": self.user.name,
+            "surname": self.user.surname,
+            "patronymic": self.user.patronymic,
             "sex": self.user.sex,
             "date_of_birth": str(self.user.date_of_birth),
             "record_number": self.user.record_number,
@@ -58,22 +58,22 @@ class GetDocumentsAPITests(APITestCase):
                 "apartments": self.user.address.apartments,
                 "post_code": self.user.address.post_code
             }
-        }    
+        }
         self.foreign_passport_data = {
             "number": ANY,
             "authority": self.user.foreign_passport.authority,
             "date_of_issue": str(self.user.foreign_passport.date_of_issue),
             "date_of_expiry": str(self.user.foreign_passport.date_of_expiry),
-            "photo": ANY,  
-            "name": self.user.name,  
-            "surname": self.user.surname,  
-            "patronymic": self.user.patronymic,   
+            "photo": ANY,
+            "name": self.user.name,
+            "surname": self.user.surname,
+            "patronymic": self.user.patronymic,
             "sex": self.user.sex,
             "date_of_birth": str(self.user.date_of_birth),
             "record_number": self.user.record_number,
             "place_of_birth": self.user.place_of_birth,
             "country_code": self.user.nationality,
-            "nationality": self.user_nationality,  
+            "nationality": self.user_nationality,
         }
 
     # GET METHOD

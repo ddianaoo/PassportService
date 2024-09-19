@@ -4,7 +4,7 @@ from django.conf import settings
 
 from rest_framework import status
 from rest_framework.test import APITestCase
-from unittest.mock import ANY, patch
+from unittest.mock import ANY
 
 from administration.factories import TaskFactory
 from authentication.factories import CustomUserFactory
@@ -46,17 +46,16 @@ class InternalPassportDetailAPITests(APITestCase):
         self.client.force_authenticate(self.user_without_passport)
 
         self.valid_address_data = {
-	        "country_code": "UA",
-	        "region": "Kharkiv region",
-	        "settlement": "Kharkiv",
-	        "street": "Zoryana 4",
-	        "apartments": "11",
-	        "post_code": 61070
+            "country_code": "UA",
+            "region": "Kharkiv region",
+            "settlement": "Kharkiv",
+            "street": "Zoryana 4",
+            "apartments": "11",
+            "post_code": 61070
         }
         self.image_path = os.path.join(settings.MEDIA_ROOT, 'tests/create_ip.png')
         self.loss_reason = "loss"
         self.expiry_reason = "expiry"
-
 
     # GET METHOD
     def test_get_internal_passport_successful(self):
@@ -68,10 +67,10 @@ class InternalPassportDetailAPITests(APITestCase):
             "authority": self.user.passport.authority,
             "date_of_issue": str(self.user.passport.date_of_issue),
             "date_of_expiry": str(self.user.passport.date_of_expiry),
-            "photo": ANY,  
-            "name": self.user.name,  
-            "surname": self.user.surname,  
-            "patronymic": self.user.patronymic,   
+            "photo": ANY,
+            "name": self.user.name,
+            "surname": self.user.surname,
+            "patronymic": self.user.patronymic,
             "sex": self.user.sex,
             "date_of_birth": str(self.user.date_of_birth),
             "record_number": self.user.record_number,
@@ -126,7 +125,7 @@ class InternalPassportDetailAPITests(APITestCase):
                 **self.valid_address_data,
                 'photo': self.valid_photo
             },
-            format='multipart'                        
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(
@@ -142,9 +141,9 @@ class InternalPassportDetailAPITests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            {'photo_errors': {'photo': ['No file was submitted.']}}, 
+            {'photo_errors': {'photo': ['No file was submitted.']}},
             response.json()
-        ) 
+        )
 
     def test_create_internal_passport_incorrect_address_country_code(self):
         invalid_country_code = "Ukraine"
@@ -153,24 +152,26 @@ class InternalPassportDetailAPITests(APITestCase):
         response = self.client.post(
             path=self.path,
             data={
-	            "country_code": invalid_country_code,
-	            "region": "Kharkiv region",
-	            "settlement": "Kharkiv",
-	            "street": "Zoryana 4",
-	            "apartments": "11",
-	            "post_code": 61070,
-                'photo': self.valid_photo
+                "country_code": invalid_country_code,
+                "region": "Kharkiv region",
+                "settlement": "Kharkiv",
+                "street": "Zoryana 4",
+                "apartments": "11",
+                "post_code": 61070,
+                "photo": self.valid_photo
             },
-            format='multipart'                       
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            {'address_errors': {
-                'country_code': [f"\"{invalid_country_code}\" is not a valid choice."],
-                }, 
+            {
+                'address_errors':
+                    {
+                        'country_code': [f"\"{invalid_country_code}\" is not a valid choice."],
+                    },
             },
             response.json()
-        ) 
+        )
 
     def test_create_internal_passport_incorrect_address_post_code(self):
         with open(self.image_path, 'rb') as f:
@@ -178,46 +179,50 @@ class InternalPassportDetailAPITests(APITestCase):
         response = self.client.post(
             path=self.path,
             data={
-	            "country_code": "UA",
-	            "region": "Kharkiv region",
-	            "settlement": "Kharkiv",
-	            "street": "Zoryana 4",
-	            "apartments": "11",
-	            "post_code": 100003,
-                'photo': self.valid_photo
+                "country_code": "UA",
+                "region": "Kharkiv region",
+                "settlement": "Kharkiv",
+                "street": "Zoryana 4",
+                "apartments": "11",
+                "post_code": 100003,
+                "photo": self.valid_photo
             },
-            format='multipart'                      
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            {'address_errors': {
-                'post_code': ["Post code must be positive and in the format xxxxx."],
-                }, 
+            {
+                'address_errors':
+                    {
+                        'post_code': ["Post code must be positive and in the format xxxxx."],
+                    },
             },
             response.json()
-        ) 
+        )
 
     def test_create_internal_passport_without_any_data(self):
         response = self.client.post(path=self.path, data={})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            {'address_errors': {
-                'country_code': ['This field is required.'], 
-                'region': ['This field is required.'], 
-                'settlement': ['This field is required.'], 
-                'street': ['This field is required.'], 
-                'apartments': ['This field is required.'], 
-                'post_code': ['This field is required.']
-                }, 
-            'photo_errors': {'photo': ['No file was submitted.']}
+            {
+                'address_errors':
+                    {
+                        'country_code': ['This field is required.'],
+                        'region': ['This field is required.'],
+                        'settlement': ['This field is required.'],
+                        'street': ['This field is required.'],
+                        'apartments': ['This field is required.'],
+                        'post_code': ['This field is required.']
+                    },
+                    'photo_errors': {'photo': ['No file was submitted.']}
             },
             response.json()
-        ) 
+        )
 
     def test_create_internal_passport_task_already_stored(self):
-        task = TaskFactory(
-            user=self.user_without_passport, 
-            title='create an internal passport', 
+        TaskFactory(
+            user=self.user_without_passport,
+            title='create an internal passport',
             status=0
         )
         response = self.client.post(path=self.path, data={})
@@ -265,7 +270,7 @@ class InternalPassportDetailAPITests(APITestCase):
                 'reason': self.loss_reason,
                 'photo': self.valid_photo
             },
-            format='multipart'                   
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -283,7 +288,7 @@ class InternalPassportDetailAPITests(APITestCase):
                 'reason': self.expiry_reason,
                 'photo': self.valid_photo
             },
-            format='multipart'                      
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -294,9 +299,9 @@ class InternalPassportDetailAPITests(APITestCase):
     def test_restore_internal_passport_due_to_loss_task_already_stored(self):
         self.client.force_authenticate(self.user)
         task_title = f"restore an internal passport due to {self.loss_reason}"
-        task = TaskFactory(
-            user=self.user, 
-            title=task_title, 
+        TaskFactory(
+            user=self.user,
+            title=task_title,
             status=0
         )
         with open(self.image_path, 'rb') as f:
@@ -307,7 +312,7 @@ class InternalPassportDetailAPITests(APITestCase):
                 'reason': self.loss_reason,
                 'photo': self.valid_photo
             },
-            format='multipart'                       
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -318,9 +323,9 @@ class InternalPassportDetailAPITests(APITestCase):
     def test_restore_internal_passport_due_to_expiry_task_already_stored(self):
         self.client.force_authenticate(self.user)
         task_title = f"restore an internal passport due to {self.expiry_reason}"
-        task = TaskFactory(
-            user=self.user, 
-            title=task_title, 
+        TaskFactory(
+            user=self.user,
+            title=task_title,
             status=0
         )
         with open(self.image_path, 'rb') as f:
@@ -331,7 +336,7 @@ class InternalPassportDetailAPITests(APITestCase):
                 'reason': self.expiry_reason,
                 'photo': self.valid_photo
             },
-            format='multipart'                       
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -348,7 +353,7 @@ class InternalPassportDetailAPITests(APITestCase):
                 'reason': self.loss_reason,
                 'photo': self.valid_photo
             },
-            format='multipart'                         
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -361,7 +366,7 @@ class InternalPassportDetailAPITests(APITestCase):
         response = self.client.put(
             path=self.path,
             data={'reason': self.loss_reason},
-            format='json'                       
+            format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -376,7 +381,7 @@ class InternalPassportDetailAPITests(APITestCase):
         response = self.client.put(
             path=self.path,
             data={'photo': self.valid_photo},
-            format='multipart'                        
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -395,11 +400,12 @@ class InternalPassportDetailAPITests(APITestCase):
                 'reason': invalid_reason,
                 'photo': self.valid_photo
             },
-            format='multipart'                        
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            {"reason": [f"\"{invalid_reason}\" is not a valid choice."]
+            {
+                "reason": [f"\"{invalid_reason}\" is not a valid choice."]
             },
             response.json()
         )

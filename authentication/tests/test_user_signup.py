@@ -13,13 +13,13 @@ class UserRegistrationAPITests(APITestCase):
     def test_register_user_successful(self):
         response = self.client.post(
             path=self.path,
-            data = {
+            data={
                 "name": "Jane",
                 "surname": "Smith",
                 "patronymic": "Dmitrivna",
                 "email": "jane@test.com",
                 "password": "rewq4321",
-                "re_password": "rewq4321",	
+                "re_password": "rewq4321",
                 "sex": "F",
                 "date_of_birth": "1978-11-18",
                 "place_of_birth": "Kharkiv",
@@ -34,12 +34,12 @@ class UserRegistrationAPITests(APITestCase):
                 "name": "Jane",
                 "surname": "Smith",
                 "patronymic": "Dmitrivna",
-	            "sex": "F",
-	            "date_of_birth": "1978-11-18",
-	            "place_of_birth": "Kharkiv",
-	            "nationality": "UA",
+                "sex": "F",
+                "date_of_birth": "1978-11-18",
+                "place_of_birth": "Kharkiv",
+                "nationality": "UA",
                 "email": "jane@test.com",
-	            "id": ANY
+                "id": ANY
             },
             response.json(),
         )
@@ -47,13 +47,13 @@ class UserRegistrationAPITests(APITestCase):
     def test_register_user_email_incorrect(self):
         response = self.client.post(
             path=self.path,
-            data = {
+            data={
                 "name": "Jane",
                 "surname": "Smith",
                 "patronymic": "Dmitrivna",
                 "email": "jane@testcom",
                 "password": "rewq4321",
-                "re_password": "rewq4321",	
+                "re_password": "rewq4321",
                 "sex": "F",
                 "date_of_birth": "1978-11-18",
                 "place_of_birth": "Kharkiv",
@@ -70,13 +70,13 @@ class UserRegistrationAPITests(APITestCase):
     def test_register_user_email_exists(self):
         response = self.client.post(
             path=self.path,
-            data = {
+            data={
                 "name": "Jane",
                 "surname": "Smith",
                 "patronymic": "Dmitrivna",
                 "email": "test@test.com",
                 "password": "rewq4321",
-                "re_password": "rewq4321",	
+                "re_password": "rewq4321",
                 "sex": "F",
                 "date_of_birth": "1978-11-18",
                 "place_of_birth": "Kharkiv",
@@ -93,13 +93,13 @@ class UserRegistrationAPITests(APITestCase):
     def test_register_user_password_incorrect_short(self):
         response = self.client.post(
             path=self.path,
-            data = {
+            data={
                 "name": "Jane",
                 "surname": "Smith",
                 "patronymic": "Dmitrivna",
                 "email": "jane@test.com",
                 "password": "rewq",
-                "re_password": "rewq",	
+                "re_password": "rewq",
                 "sex": "F",
                 "date_of_birth": "1978-11-18",
                 "place_of_birth": "Kharkiv",
@@ -120,13 +120,13 @@ class UserRegistrationAPITests(APITestCase):
     def test_register_user_password_incorrect_common(self):
         response = self.client.post(
             path=self.path,
-            data = {
+            data={
                 "name": "Jane",
                 "surname": "Smith",
                 "patronymic": "Dmitrivna",
                 "email": "jane@test.com",
                 "password": "12345678",
-                "re_password": "12345678",	
+                "re_password": "12345678",
                 "sex": "F",
                 "date_of_birth": "1978-11-18",
                 "place_of_birth": "Kharkiv",
@@ -136,23 +136,25 @@ class UserRegistrationAPITests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            {"password": [
-		        "This password is too common.",
-		        "This password is entirely numeric."
-            ]},
+            {
+                "password": [
+                    "This password is too common.",
+                    "This password is entirely numeric."
+                ]
+            },
             response.json(),
         )
 
     def test_register_user_password_incorrect_dont_match(self):
         response = self.client.post(
             path=self.path,
-            data = {
+            data={
                 "name": "Jane",
                 "surname": "Smith",
                 "patronymic": "Dmitrivna",
                 "email": "jane@test.com",
                 "password": "rewq4321",
-                "re_password": "rewq4322",	
+                "re_password": "rewq4322",
                 "sex": "F",
                 "date_of_birth": "1978-11-18",
                 "place_of_birth": "Kharkiv",
@@ -162,7 +164,7 @@ class UserRegistrationAPITests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            {"non_field_errors": [ "The two password fields didn't match."]},
+            {"non_field_errors": ["The two password fields didn't match."]},
             response.json(),
         )
 
@@ -170,13 +172,13 @@ class UserRegistrationAPITests(APITestCase):
         sex = "Female"
         response = self.client.post(
             path=self.path,
-            data = {
+            data={
                 "name": "Jane",
                 "surname": "Smith",
                 "patronymic": "Dmitrivna",
                 "email": "jane@test.com",
                 "password": "rewq4321",
-                "re_password": "rewq4321",	
+                "re_password": "rewq4321",
                 "sex": sex,
                 "date_of_birth": "1978-11-18",
                 "place_of_birth": "Kharkiv",
@@ -194,13 +196,13 @@ class UserRegistrationAPITests(APITestCase):
         nationality = "UAa"
         response = self.client.post(
             path=self.path,
-            data = {
+            data={
                 "name": "Jane",
                 "surname": "Smith",
                 "patronymic": "Dmitrivna",
                 "email": "jane@test.com",
                 "password": "rewq4321",
-                "re_password": "rewq4321",	
+                "re_password": "rewq4321",
                 "sex": "F",
                 "date_of_birth": "1978-11-18",
                 "place_of_birth": "Kharkiv",
@@ -217,13 +219,13 @@ class UserRegistrationAPITests(APITestCase):
     def test_register_user_date_of_birth_incorrect(self):
         response = self.client.post(
             path=self.path,
-            data = {
+            data={
                 "name": "Jane",
                 "surname": "Smith",
                 "patronymic": "Dmitrivna",
                 "email": "jane@test.com",
                 "password": "rewq4321",
-                "re_password": "rewq4321",	
+                "re_password": "rewq4321",
                 "sex": "F",
                 "date_of_birth": "2011-11-18",
                 "place_of_birth": "Kharkiv",

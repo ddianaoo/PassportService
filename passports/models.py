@@ -29,13 +29,13 @@ class AbstractPassport(models.Model):
     date_of_issue  = models.DateField(validators=[validate_issue_date])
     date_of_expiry = models.DateField(validators=[validate_expiry_date])
     photo          = models.ImageField(upload_to='photos/passports/%Y/%m/%d/')
-    
+
     class Meta:
         abstract = True
 
     def __str__(self):
         return f"Document number: {self.number}"
-    
+
     def save(self, *args, **kwargs):
         if not self.number:
             self.number = random.randint(10000000, 99999999)
@@ -44,16 +44,16 @@ class AbstractPassport(models.Model):
 
 class Passport(AbstractPassport):
     def __str__(self):
-        return super().__str__()+"(Internal Passport)"
-    
+        return super().__str__() + "(Internal Passport)"
+
 
 class ForeignPassport(AbstractPassport):
     def __str__(self):
-        return super().__str__()+"(Foreign Passport)"
+        return super().__str__() + "(Foreign Passport)"
 
 
 class Visa(models.Model):
-    COUNTRY_CHOICES = COUNTRY_CHOICES    
+    COUNTRY_CHOICES = COUNTRY_CHOICES
 
     ENTRY_CHOICES = [
         ('1', 'Single Entry'),
@@ -76,17 +76,15 @@ class Visa(models.Model):
     date_of_issue    = models.DateField(validators=[validate_issue_date])
     date_of_expiry   = models.DateField(validators=[validate_expiry_date])
     photo            = models.ImageField(upload_to='photos/visas/%Y/%m/%d/')
-    type             = models.CharField(max_length=50, choices=TYPE_CHOICES) 
+    type             = models.CharField(max_length=50, choices=TYPE_CHOICES)
     country          = models.CharField(max_length=2, choices=COUNTRY_CHOICES)
     entry_amount     = models.CharField(max_length=4, choices=ENTRY_CHOICES)
     is_active        = models.BooleanField(default=True)
-    
+
     def __str__(self):
         return f"Visa to {self.country}. Expiration date: {self.date_of_expiry})"
-    
 
     def save(self, *args, **kwargs):
         if not self.number:
             self.number = random.randint(10000000, 99999999)
         super().save(*args, **kwargs)
-    

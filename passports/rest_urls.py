@@ -1,8 +1,8 @@
 from django.urls import path, include
 from .rest_views import (
-    InternalPassportDetailAPIView, 
+    InternalPassportDetailAPIView,
     ForeignPassportDetailAPIView,
-    GetDocumentsAPIView, 
+    GetDocumentsAPIView,
     UserAddressAPIView,
     UserDataAPIView,
     VisaViewSet,

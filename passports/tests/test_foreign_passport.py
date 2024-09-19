@@ -1,7 +1,7 @@
 import os
 from io import BytesIO
 
-from unittest.mock import ANY, patch
+from unittest.mock import ANY
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.conf import settings
 from rest_framework import status
@@ -47,12 +47,11 @@ class ForeignPassportGetAPITests(APITestCase):
             is_staff=True
         )
 
-
     def test_get_foreign_passport_successful(self):
         """
         Test that a user can successfully retrieve their foreign passport details.
 
-        Verifies that the API returns a 200 OK status and the correct foreign passport data 
+        Verifies that the API returns a 200 OK status and the correct foreign passport data
         for the authenticated user with a foreign passport.
         """
         self.client.force_authenticate(self.user)
@@ -63,10 +62,10 @@ class ForeignPassportGetAPITests(APITestCase):
             "authority": self.user.foreign_passport.authority,
             "date_of_issue": str(self.user.foreign_passport.date_of_issue),
             "date_of_expiry": str(self.user.foreign_passport.date_of_expiry),
-            "photo": ANY,  
-            "name": self.user.name,  
-            "surname": self.user.surname,  
-            "patronymic": self.user.patronymic,   
+            "photo": ANY,
+            "name": self.user.name,
+            "surname": self.user.surname,
+            "patronymic": self.user.patronymic,
             "sex": self.user.sex,
             "date_of_birth": str(self.user.date_of_birth),
             "record_number": self.user.record_number,
@@ -81,8 +80,8 @@ class ForeignPassportGetAPITests(APITestCase):
         """
         Test that a user without a foreign passport receives a message indicating the absence of a foreign passport.
 
-        Verifies that the API returns a 200 OK status and the appropriate message 
-        when the authenticated user does not have a foreign passport. 
+        Verifies that the API returns a 200 OK status and the appropriate message
+        when the authenticated user does not have a foreign passport.
         The response should indicate that the user does not have a foreign passport yet.
         """
         self.client.force_authenticate(self.user_without_foreign_passport)
@@ -163,7 +162,6 @@ class ForeignPassportCreateAPITests(APITestCase):
         )
         self.client.force_authenticate(self.user_without_foreign_passport)
 
-
     def test_create_foreign_passport_successful(self):
         """
         Test successful creation of a foreign passport.
@@ -184,7 +182,7 @@ class ForeignPassportCreateAPITests(APITestCase):
         response = self.client.post(
             path=self.path,
             data={'photo': valid_photo},
-            format='multipart'                      
+            format='multipart'
         )
         # self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(
@@ -204,7 +202,7 @@ class ForeignPassportCreateAPITests(APITestCase):
         self.assertEqual(
             {'photo': ['No file was submitted.']},
             response.json()
-        ) 
+        )
 
     def test_create_foreign_passport_no_internal_passport(self):
         """
@@ -228,9 +226,9 @@ class ForeignPassportCreateAPITests(APITestCase):
         Verifies that the API returns a 400 Bad Request status and the appropriate error message
         when a creation task for a foreign passport already exists for the user.
         """
-        task = TaskFactory(
-            user=self.user_without_foreign_passport, 
-            title='create a foreign passport', 
+        TaskFactory(
+            user=self.user_without_foreign_passport,
+            title='create a foreign passport',
             status=0
         )
         response = self.client.post(path=self.path, data={})
@@ -306,7 +304,6 @@ class ForeignPassportRestoreAPITests(APITestCase):
         self.loss_reason = "loss"
         self.expiry_reason = "expiry"
 
-
     def test_restore_foreign_passport_due_to_loss_successful(self):
         with open(self.image_path, 'rb') as f:
             valid_photo = SimpleUploadedFile('create_fp.jpg', f.read(), content_type='image/jpg')
@@ -316,14 +313,13 @@ class ForeignPassportRestoreAPITests(APITestCase):
                 'reason': self.loss_reason,
                 'photo': valid_photo
             },
-            format='multipart'                      
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             {"detail": f"Your request for restoring a foreign passport due to {self.loss_reason} has been sent."},
             response.json()
         )
-
 
     def test_restore_foreign_passport_due_to_expiry_successful(self):
         with open(self.image_path, 'rb') as f:
@@ -334,7 +330,7 @@ class ForeignPassportRestoreAPITests(APITestCase):
                 'reason': self.expiry_reason,
                 'photo': valid_photo
             },
-            format='multipart'                       
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -343,9 +339,9 @@ class ForeignPassportRestoreAPITests(APITestCase):
         )
 
     def test_restore_foreign_passport_due_to_loss_task_already_stored(self):
-        task = TaskFactory(
-            user=self.user, 
-            title=f"restore a foreign passport due to {self.loss_reason}", 
+        TaskFactory(
+            user=self.user,
+            title=f"restore a foreign passport due to {self.loss_reason}",
             status=0
         )
         with open(self.image_path, 'rb') as f:
@@ -356,7 +352,7 @@ class ForeignPassportRestoreAPITests(APITestCase):
                 'reason': self.loss_reason,
                 'photo': valid_photo
             },
-            format='multipart'                     
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -365,9 +361,9 @@ class ForeignPassportRestoreAPITests(APITestCase):
         )
 
     def test_restore_foreign_passport_due_to_expiry_task_already_stored(self):
-        task = TaskFactory(
-            user=self.user, 
-            title=f"restore a foreign passport due to {self.expiry_reason}", 
+        TaskFactory(
+            user=self.user,
+            title=f"restore a foreign passport due to {self.expiry_reason}",
             status=0
         )
         with open(self.image_path, 'rb') as f:
@@ -378,7 +374,7 @@ class ForeignPassportRestoreAPITests(APITestCase):
                 'reason': self.expiry_reason,
                 'photo': valid_photo
             },
-            format='multipart'                      
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -396,7 +392,7 @@ class ForeignPassportRestoreAPITests(APITestCase):
                 'reason': self.loss_reason,
                 'photo': valid_photo
             },
-            format='multipart'                       
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -407,8 +403,8 @@ class ForeignPassportRestoreAPITests(APITestCase):
     def test_restore_foreign_passport_no_photo(self):
         response = self.client.put(
             path=self.path,
-            data={'reason': self.loss_reason },
-            format='json'                       
+            data={'reason': self.loss_reason},
+            format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -422,7 +418,7 @@ class ForeignPassportRestoreAPITests(APITestCase):
         response = self.client.put(
             path=self.path,
             data={'photo': valid_photo},
-            format='multipart'                        
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -440,7 +436,7 @@ class ForeignPassportRestoreAPITests(APITestCase):
                 'reason': invalid_reason,
                 'photo': valid_photo
             },
-           format='multipart'                      
+            format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(

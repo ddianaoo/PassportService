@@ -1,16 +1,17 @@
 from django.urls import path
-from .views import (main_page, 
-                    create_passport, 
-                    create_fpassport, 
-                    get_documents, 
-                    restore_passport_loss, 
-                    restore_passport_expiry, 
-                    restore_fpassport_loss,
-                    restore_fpassport_expiry,
-                    change_address,
-                    change_name,
-                    change_surname,
-                    change_patronymic
+from .views import (
+    main_page,
+    create_passport,
+    create_fpassport,
+    get_documents,
+    restore_passport_loss,
+    restore_passport_expiry,
+    restore_fpassport_loss,
+    restore_fpassport_expiry,
+    change_address,
+    change_name,
+    change_surname,
+    change_patronymic
 )
 
 

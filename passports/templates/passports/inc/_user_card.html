@@ -5,11 +5,11 @@
     {% else %}
     <p><strong>Surname:</strong> {{ user.surname }}</p>
     <p><strong>Name:</strong> {{ user.name }}</p>
-    <p><strong>Patronymic:</strong> {{ user.patronymic }}</p>        
+    <p><strong>Patronymic:</strong> {{ user.patronymic }}</p>
     {% endif %}
 </div>
 <div class="col-md-7">
-    {% if user.passport %}    
+    {% if user.passport %}
     <p><strong>Surname:</strong> {{ user.surname }}</p>
     <p><strong>Name:</strong> {{ user.name }}</p>
     <p><strong>Patronymic:</strong> {{ user.patronymic }}</p>
@@ -20,11 +20,11 @@
     <p><strong>Record Number:</strong> {{ user.record_number }}</p>
     <p><strong>Nationality:</strong> {{ user.get_nationality_display }}</p>
     {% else %}
-    <p><strong>Record Number:</strong> {{ user.record_number }}</p>    
-    <p><strong>Sex:</strong> {{ user.sex }}</p>    
+    <p><strong>Record Number:</strong> {{ user.record_number }}</p>
+    <p><strong>Sex:</strong> {{ user.sex }}</p>
     <br>
     <p><strong>Date of Birth:</strong> {{ user.date_of_birth|date:"d/m/Y" }}</p>
     <p><strong>Place of Birth:</strong> {{ user.place_of_birth }}</p>
-    <p><strong>Nationality:</strong> {{ user.get_nationality_display }}</p>  
-    <br>   
+    <p><strong>Nationality:</strong> {{ user.get_nationality_display }}</p>
+    <br>
     {% endif %}

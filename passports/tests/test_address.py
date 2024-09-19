@@ -1,4 +1,4 @@
-from unittest.mock import ANY, patch
+from unittest.mock import ANY
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -49,7 +49,6 @@ class UserAddressGetAPITests(APITestCase):
         )
         self.client.force_authenticate(self.user)
 
-
     def test_get_address_successful(self):
         """
         Test that a user can successfully retrieve their address.
@@ -61,13 +60,13 @@ class UserAddressGetAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             {
-	            "id": ANY,
-	            "country_code": "UA",
-	            "region": "Kharkiv region",
-	            "settlement": "Kharkiv",
-	            "street": "Zoryana 4",
-	            "apartments": "88",
-	            "post_code": 61070
+                "id": ANY,
+                "country_code": "UA",
+                "region": "Kharkiv region",
+                "settlement": "Kharkiv",
+                "street": "Zoryana 4",
+                "apartments": "88",
+                "post_code": 61070
             },
             response.json()
         )
@@ -106,7 +105,7 @@ class UserAddressGetAPITests(APITestCase):
         """
         Test that an admin user receives a 403 error.
 
-        Verifies that the API returns a 403 Forbidden status and the appropriate error message 
+        Verifies that the API returns a 403 Forbidden status and the appropriate error message
         when an admin user attempts to access address data.
         """
         self.client.force_authenticate(self.admin)
@@ -163,26 +162,25 @@ class UserAddressPatchAPITests(APITestCase):
         )
         self.client.force_authenticate(self.user)
 
-
     def test_change_address_successful(self):
         """
         Test that a user can successfully update their address.
 
-        Verifies that the API returns a 200 OK status and the appropriate message 
+        Verifies that the API returns a 200 OK status and the appropriate message
         when the address is updated successfully.
         Ensures that the notification task is triggered.
         """
         response = self.client.patch(
             path=self.path,
             data={
-	            "country_code": "UA",
-	            "region": "Kharkiv region",
-	            "settlement": "Kharkiv",
-	            "street": "Zoryana 4",
-	            "apartments": "11",
-	            "post_code": 61070
+                "country_code": "UA",
+                "region": "Kharkiv region",
+                "settlement": "Kharkiv",
+                "street": "Zoryana 4",
+                "apartments": "11",
+                "post_code": 61070
             },
-            format='json'                 
+            format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -194,12 +192,12 @@ class UserAddressPatchAPITests(APITestCase):
         """
         Test that a user with an existing address update task cannot submit another request.
 
-        Verifies that the API returns a 400 Bad Request status and the appropriate error message 
+        Verifies that the API returns a 400 Bad Request status and the appropriate error message
         if a request to update the address is already pending.
         """
-        task = TaskFactory(
-            user=self.user, 
-            title='change registation address', 
+        TaskFactory(
+            user=self.user,
+            title='change registation address',
             status=0
         )
         response = self.client.patch(path=self.path, data={})
@@ -213,7 +211,7 @@ class UserAddressPatchAPITests(APITestCase):
         """
         Test that a user without a passport cannot update their address.
 
-        Verifies that the API returns a 400 Bad Request status and the appropriate error message 
+        Verifies that the API returns a 400 Bad Request status and the appropriate error message
         when the user does not have a passport and attempts to update the address.
         """
         self.client.force_authenticate(self.user_without_address)
@@ -228,18 +226,19 @@ class UserAddressPatchAPITests(APITestCase):
         """
         Test that a request to update the address with no data provided returns validation errors.
 
-        Verifies that the API returns a 400 Bad Request status and the appropriate validation error messages 
+        Verifies that the API returns a 400 Bad Request status and the appropriate validation error messages
         when no data is provided in the request.
         """
-        response = self.client.patch(path=self.path,data={})
+        response = self.client.patch(path=self.path, data={})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-            'country_code': ['This field is required.'], 
-            'region': ['This field is required.'], 
-            'settlement': ['This field is required.'], 
-            'street': ['This field is required.'], 
-            'apartments': ['This field is required.'], 
-            'post_code': ['This field is required.']
+        self.assertEqual(
+            {
+                'country_code': ['This field is required.'],
+                'region': ['This field is required.'],
+                'settlement': ['This field is required.'],
+                'street': ['This field is required.'],
+                'apartments': ['This field is required.'],
+                'post_code': ['This field is required.']
             },
             response.json()
         )
@@ -248,58 +247,58 @@ class UserAddressPatchAPITests(APITestCase):
         """
         Test that an incorrect country code results in a validation error.
 
-        Verifies that the API returns a 400 Bad Request status and the appropriate error message 
+        Verifies that the API returns a 400 Bad Request status and the appropriate error message
         when an invalid country code is provided.
         """
         invalid_country_code = "Ukraine"
         response = self.client.patch(
             path=self.path,
             data={
-	            "country_code": invalid_country_code,
-	            "region": "Kharkiv region",
-	            "settlement": "Kharkiv",
-	            "street": "Zoryana 4",
-	            "apartments": "11",
-	            "post_code": 61070,
+                "country_code": invalid_country_code,
+                "region": "Kharkiv region",
+                "settlement": "Kharkiv",
+                "street": "Zoryana 4",
+                "apartments": "11",
+                "post_code": 61070,
             },
-            format='json'                         
+            format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            {'country_code': [f"\"{invalid_country_code}\" is not a valid choice."]}, 
+            {'country_code': [f"\"{invalid_country_code}\" is not a valid choice."]},
             response.json()
-        ) 
+        )
 
     def test_change_address_incorrect_address_post_code(self):
         """
         Test that an incorrect post code results in a validation error.
 
-        Verifies that the API returns a 400 Bad Request status and the appropriate error message 
+        Verifies that the API returns a 400 Bad Request status and the appropriate error message
         when an invalid post code is provided.
         """
         response = self.client.patch(
             path=self.path,
             data={
-	            "country_code": "UA",
-	            "region": "Kharkiv region",
-	            "settlement": "Kharkiv",
-	            "street": "Zoryana 4",
-	            "apartments": "11",
-	            "post_code": 100003,
+                "country_code": "UA",
+                "region": "Kharkiv region",
+                "settlement": "Kharkiv",
+                "street": "Zoryana 4",
+                "apartments": "11",
+                "post_code": 100003,
             },
-            format='json'                       
+            format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            {'post_code': ["Post code must be positive and in the format xxxxx."]}, 
+            {'post_code': ["Post code must be positive and in the format xxxxx."]},
             response.json()
-        ) 
+        )
 
     def test_change_address_not_logged_in(self):
         """
         Test that unauthenticated users receive a 401 error when attempting to update the address.
 
-        Verifies that the API returns a 401 Unauthorized status and the appropriate error message 
+        Verifies that the API returns a 401 Unauthorized status and the appropriate error message
         when no authentication credentials are provided.
         """
         self.client.force_authenticate(user=None)
@@ -314,7 +313,7 @@ class UserAddressPatchAPITests(APITestCase):
         """
         Test that an admin user receives a 403 error when attempting to update a user's address.
 
-        Verifies that the API returns a 403 Forbidden status and the appropriate error message 
+        Verifies that the API returns a 403 Forbidden status and the appropriate error message
         when an admin user tries to update a user's address, which should be restricted to regular users.
         """
         self.client.force_authenticate(self.admin)
