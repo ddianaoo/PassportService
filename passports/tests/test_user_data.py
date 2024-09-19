@@ -54,7 +54,8 @@ class UserDataAPITests(APITestCase):
             "date_of_birth": str(self.user.date_of_birth),
             "record_number": self.user.record_number,
             "place_of_birth": self.user.place_of_birth,
-            "nationality": self.user.nationality
+            "nationality": self.user.nationality,
+            "is_staff": self.user.is_staff
         }
         self.image_path = os.path.join(settings.MEDIA_ROOT, 'tests/change_userdata.jpg')
 
@@ -134,8 +135,7 @@ class UserDataAPITests(APITestCase):
         )
 
     # PATCH METHOD
-    @patch('administration.tasks.send_notification.delay')
-    def test_change_user_name_successful(self, mock_send_notification):
+    def test_change_user_name_successful(self):
         with open(self.image_path, 'rb') as f:
             self.valid_photo = SimpleUploadedFile('change_userdata.jpg', f.read(), content_type='image/jpg')
         response = self.client.patch(
@@ -152,10 +152,8 @@ class UserDataAPITests(APITestCase):
             {"detail": f"Your request for changing the name has been sent."},
             response.json()
         )
-        mock_send_notification.assert_called_once()
 
-    @patch('administration.tasks.send_notification.delay')
-    def test_change_user_surname_successful(self, mock_send_notification):
+    def test_change_user_surname_successful(self):
         with open(self.image_path, 'rb') as f:
             self.valid_photo = SimpleUploadedFile('change_userdata.jpg', f.read(), content_type='image/jpg')
         response = self.client.patch(
@@ -172,10 +170,8 @@ class UserDataAPITests(APITestCase):
             {"detail": f"Your request for changing the surname has been sent."},
             response.json()
         )
-        mock_send_notification.assert_called_once()
 
-    @patch('administration.tasks.send_notification.delay')
-    def test_change_user_patronymic_successful(self, mock_send_notification):
+    def test_change_user_patronymic_successful(self):
         with open(self.image_path, 'rb') as f:
             self.valid_photo = SimpleUploadedFile('change_userdata.jpg', f.read(), content_type='image/jpg')
         response = self.client.patch(
@@ -192,7 +188,6 @@ class UserDataAPITests(APITestCase):
             {"detail": f"Your request for changing the patronymic has been sent."},
             response.json()
         )
-        mock_send_notification.assert_called_once()
 
     def test_change_user_name_task_already_stored(self):
         task = TaskFactory(

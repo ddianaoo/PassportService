@@ -19,7 +19,7 @@ class TaskListView(ListView):
     title_filters = (
             'create-passport', 
             'create-foreign-passport', 
-            'create-visa', 
+            # 'create-visa', 
             'restore-passport-loss', 
             'restore-fpassport-loss',
             'restore-passport-expiry', 
@@ -32,7 +32,7 @@ class TaskListView(ListView):
     title_paths = (
             'create_passport_s',
             'create_fpassport_s',
-            '',
+            # '',
             'restore_passport_s', 
             'restore_fpassport_s',
             'restore_passport_s',

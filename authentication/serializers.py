@@ -16,7 +16,7 @@ class UserListSerializer(serializers.ModelSerializer):
     address = AddressSerializer()
     class Meta:
         model = CustomUser
-        fields = ('id', 'name', 'surname', 'patronymic', 'email', 
+        fields = ('id', 'name', 'surname', 'patronymic', 'email', 'is_staff',
                    'sex', 'date_of_birth', 'place_of_birth', 'nationality',
                    'record_number', 'address', 'passport', 'foreign_passport')
 

@@ -103,11 +103,18 @@ class RestoreVisaSerializer(serializers.ModelSerializer):
 
 
 class VisaSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='foreign_passport.user.name', required=False)
+    surname = serializers.CharField(source='foreign_passport.user.surname', required=False)
+    sex = serializers.CharField(source='foreign_passport.user.sex', required=False)
+    date_of_birth = serializers.DateField(source='foreign_passport.user.date_of_birth', required=False)
+    nationality = serializers.CharField(source='foreign_passport.user.nationality', required=False)
 
     class Meta:
         model = Visa
         fields = '__all__'
-        read_only_fields = ('number', 'foreign_passport', 'type', 'country', 'photo', 'entry_amount', 'is_active')
+        read_only_fields = ('number', 'foreign_passport', 'type', 'country', 'photo', 'entry_amount', 'is_active',
+                            'name', 'surname', 'sex', 'date_of_birth', 'nationality'
+                            )
         
     def get_photo(self, obj):
         request = self.context.get('request')

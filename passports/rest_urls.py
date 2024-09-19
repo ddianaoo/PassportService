@@ -5,13 +5,15 @@ from .rest_views import (
     GetDocumentsAPIView, 
     UserAddressAPIView,
     UserDataAPIView,
-    VisaViewSet
+    VisaViewSet,
+    TaskListForUserViewSet
 )
 from rest_framework import routers
 
 
 r = routers.DefaultRouter()
 r.register(r'visas', VisaViewSet, basename='visas')
+r.register(r'tasks', TaskListForUserViewSet, basename='tasks')
 
 
 urlpatterns = [

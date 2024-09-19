@@ -1,11 +1,15 @@
 import datetime
+
+from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.viewsets import ViewSet
+from rest_framework.viewsets import ViewSet, ReadOnlyModelViewSet
+from rest_framework.pagination import PageNumberPagination
 
 from administration.models import Task
+from administration.filters import TaskFilter
 from authentication.serializers import (
     ChangeUserDataSerializer,
     UserListSerializer
@@ -24,6 +28,13 @@ from .serializers import (
 )
 from .views import get_photo_path, get_address 
 from .permissions import IsClient
+from administration.serializers import TaskSerializer
+
+
+class CustomPagination(PageNumberPagination):
+    page_size = 6
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 
 class InternalPassportDetailAPIView(APIView):
@@ -103,7 +114,7 @@ class ForeignPassportDetailAPIView(APIView):
             user_serializer = RetrieveForeignPassportSerializer(foreign_passport, context={'request': request})
             return Response(user_serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response({"detail": "Foreign passport not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "You don`t have a foreign passport yet."}, status=status.HTTP_200_OK)
         
     def post(self, request):
         user = request.user
@@ -170,7 +181,7 @@ class UserAddressAPIView(APIView):
             user_serializer = AddressSerializer(address, context={'request': request})
             return Response(user_serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response({"detail": "Registration address not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "You don`t have a registration address yet."}, status=status.HTTP_200_OK)
 
     def patch(self, request):
         task_title = 'change registation address'
@@ -257,7 +268,6 @@ class VisaViewSet(ViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
         serializer = CreateVisaSerializer(data=request.data)
-
         if serializer.is_valid():
             visa_type = serializer.validated_data.get('type')
             country = serializer.validated_data.get('country')
@@ -278,10 +288,9 @@ class VisaViewSet(ViewSet):
                 entry_amount=entry_amount,
                 is_active=True
             )
-            if old_visa.exists() and old_visa.date_of_expiry > datetime.date.today() + datetime.timedelta(days=30):
+            if old_visa.exists() and old_visa.get().date_of_expiry > datetime.date.today() + datetime.timedelta(days=30):
                 return Response({"detail": f"You have already have a visa of {country}."},
                             status=status.HTTP_400_BAD_REQUEST)          
-
             photo = serializer.validated_data.get('photo')
             photo_path = get_photo_path(photo, user, task_title, 'visas')
             user_data = {'photo': photo_path, 'visa_country': country, 'visa_type': visa_type, 'visa_entry_amount': entry_amount}
@@ -312,7 +321,7 @@ class VisaViewSet(ViewSet):
             user_data = {'visa_id': pk,'visa_extension_reason': reason, 'visa_extension_date': str(extension_date)}
             task = Task.objects.create(user=user, title=task_title, user_data=user_data)
             return Response({"detail": "Your request for extending a visa has been sent."},
-                            status=status.HTTP_201_CREATED)
+                            status=status.HTTP_200_OK)
         else:
             return Response(visa_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
@@ -336,4 +345,25 @@ class VisaViewSet(ViewSet):
                             status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+        
 
+class TaskListForUserViewSet(ReadOnlyModelViewSet):
+    queryset = Task.objects.all().order_by('status', '-created_at')
+    serializer_class = TaskSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TaskFilter
+    permission_classes = [IsClient]
+    pagination_class = CustomPagination
+
+    def get_queryset(self):
+        return Task.objects.filter(user=self.request.user).order_by('status', '-created_at')
+
+    def list(self, request, *args, **kwargs):
+        page = request.query_params.get('page')
+        if page == 'all':
+            queryset = self.filter_queryset(self.get_queryset())
+            count = len(queryset)
+            serializer = self.get_serializer(queryset, many=True)
+            return Response({'count': count, 'tasks': serializer.data})
+        else:
+            return super().list(request, *args, **kwargs)

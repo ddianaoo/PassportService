@@ -79,7 +79,8 @@ class TaskListAPITests(APITestCase):
             "date_of_birth": str(self.user.date_of_birth),
             "place_of_birth": self.user.place_of_birth,
             'nationality': self.user.nationality,
-             "record_number": self.user.record_number,
+            "record_number": self.user.record_number,
+            "is_staff": self.user.is_staff,
                        'address': {
                 "id": ANY,
                 "country_code": self.user.address.country_code,
@@ -155,11 +156,16 @@ class TaskListAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['count'], 4)
 
-    def test_task_filtering_status_incorrect(self):
+    def test_task_filtering_status_two_successful(self):
         response = self.client.get(self.path, {'status': 2})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 0)
+
+    def test_task_filtering_status_incorrect(self):
+        response = self.client.get(self.path, {'status': 3})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual({
-	        "status": ["Select a valid choice. 2 is not one of the available choices."]
+	        "status": ["Select a valid choice. 3 is not one of the available choices."]
             },                       
             response.json()
         )
@@ -182,20 +188,12 @@ class TaskListAPITests(APITestCase):
     def test_task_filtering_title_change_patronymic_with_spaces(self):
         response = self.client.get(self.path, {'title': 'change user patronymic'})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-	        	"title": ["Select a valid choice. change user patronymic is not one of the available choices."]
-            },                       
-            response.json()
-        )
+        self.assertEqual({'detail': 'Spaces are not allowed in the title filter.'}, response.json())
 
     def test_task_filtering_title_incorrect(self):
         response = self.client.get(self.path, {'title': 'passport'})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({
-	        	"title": ["Select a valid choice. passport is not one of the available choices."]
-            },                       
-            response.json()
-        )        
+        self.assertEqual({'detail': 'Invalid title.'}, response.json())        
 
     def test_task_filtering_title_and_status_successful(self):
         response = self.client.get(self.path, {'status': 0, 'title': 'change-user-patronymic'})

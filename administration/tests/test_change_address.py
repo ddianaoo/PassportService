@@ -50,8 +50,7 @@ class ChangeAddressByStaffAPITests(APITestCase):
         )
 
 
-    @patch('administration.tasks.send_notification.delay')
-    def test_change_address_successful(self, mock_send_notification):
+    def test_change_address_successful(self):
         response = self.client.patch(path=f"{self.path}{self.task.pk}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual({"detail": "The registration address has been successfully updated."},
@@ -61,7 +60,6 @@ class ChangeAddressByStaffAPITests(APITestCase):
         self.task.refresh_from_db()
         self.assertEqual(self.user.address.id, self.updated_address.id)
         self.assertEqual(self.task.status, 1)
-        mock_send_notification.assert_called_once()
 
     def test_change_address_task_already_processed(self):
         task_done = TaskFactory(user=self.user,

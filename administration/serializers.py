@@ -57,9 +57,16 @@ class TaskUserDataSerializer(serializers.Serializer):
         return representation
     
 
-class TaskSerializer(serializers.ModelSerializer):
+class TaskUserSerializer(serializers.ModelSerializer):
     user = UserListSerializer()
     user_data = TaskUserDataSerializer()
+
+    class Meta:
+        model = Task
+        fields = '__all__' 
+
+
+class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task

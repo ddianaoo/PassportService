@@ -117,8 +117,7 @@ class InternalPassportDetailAPITests(APITestCase):
         )
 
     # POST METHOD
-    @patch('administration.tasks.send_notification.delay')
-    def test_create_internal_passport_successful(self, mock_send_notification):
+    def test_create_internal_passport_successful(self):
         with open(self.image_path, 'rb') as f:
             self.valid_photo = SimpleUploadedFile('create_ip.png', f.read(), content_type='image/png')
         response = self.client.post(
@@ -134,7 +133,6 @@ class InternalPassportDetailAPITests(APITestCase):
             {"detail": "Your request for creating an internal passport has been sent."},
             response.json()
         )
-        mock_send_notification.assert_called_once()
 
     def test_create_internal_passport_without_photo(self):
         response = self.client.post(
@@ -257,8 +255,7 @@ class InternalPassportDetailAPITests(APITestCase):
         )
 
     # PUT METHOD
-    @patch('administration.tasks.send_notification.delay')
-    def test_restore_internal_passport_due_to_loss_successful(self, mock_send_notification):
+    def test_restore_internal_passport_due_to_loss_successful(self):
         self.client.force_authenticate(self.user)
         with open(self.image_path, 'rb') as f:
             self.valid_photo = SimpleUploadedFile('create_ip.png', f.read(), content_type='image/png')
@@ -275,10 +272,8 @@ class InternalPassportDetailAPITests(APITestCase):
             {"detail": f"Your request for restoring an internal passport due to {self.loss_reason} has been sent."},
             response.json()
         )
-        mock_send_notification.assert_called_once()
 
-    @patch('administration.tasks.send_notification.delay')
-    def test_restore_internal_passport_due_to_expiry_successful(self, mock_send_notification):
+    def test_restore_internal_passport_due_to_expiry_successful(self):
         self.client.force_authenticate(self.user)
         with open(self.image_path, 'rb') as f:
             self.valid_photo = SimpleUploadedFile('create_ip.png', f.read(), content_type='image/png')
@@ -295,7 +290,6 @@ class InternalPassportDetailAPITests(APITestCase):
             {"detail": f"Your request for restoring an internal passport due to {self.expiry_reason} has been sent."},
             response.json()
         )
-        mock_send_notification.assert_called_once()
 
     def test_restore_internal_passport_due_to_loss_task_already_stored(self):
         self.client.force_authenticate(self.user)

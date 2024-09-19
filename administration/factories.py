@@ -4,10 +4,8 @@ import factory.fuzzy
 
 from authentication.factories import CustomUserFactory
 from .models import Task
-from . import signals
 
 
-@factory.django.mute_signals(signals.post_save)
 class TaskFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Task

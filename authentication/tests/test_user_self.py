@@ -33,7 +33,8 @@ class UserSelfAPITests(APITestCase):
             "record_number": self.user.record_number,
             "address": None,
             "passport": None,
-            "foreign_passport": None
+            "foreign_passport": None,
+            "is_staff": False
         },
             response.json(),
         )

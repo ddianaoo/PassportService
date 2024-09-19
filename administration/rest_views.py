@@ -1,24 +1,26 @@
-from datetime import datetime, date
-from administration.models import Task
+from datetime import date
+
 from django_filters.rest_framework import DjangoFilterBackend
-from .filters import TaskFilter
-from .serializers import TaskSerializer
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework.permissions import IsAdminUser
+from rest_framework.response import Response
+
+from administration.models import Task
+from .filters import TaskFilter
+from .serializers import TaskUserSerializer
 from passports.serializers import (CreateInternalPassportSerializer, 
                                    CreateForeignPassportSerializer, 
                                    VisaSerializer,
                                    RestoreVisaSerializer)
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.shortcuts import get_object_or_404
 from passports.models import Address, Passport, ForeignPassport, Visa
-from rest_framework.permissions import IsAdminUser
 
 
 class TaskListAPIView(ReadOnlyModelViewSet):
     queryset = Task.objects.all().order_by('status', '-created_at')
-    serializer_class = TaskSerializer
+    serializer_class = TaskUserSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TaskFilter
     permission_classes = [IsAdminUser]
@@ -27,6 +29,17 @@ class TaskListAPIView(ReadOnlyModelViewSet):
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+
+    def list(self, request, *args, **kwargs):
+        page = request.query_params.get('page')
+        if page == 'all':
+            queryset = self.filter_queryset(self.get_queryset())
+            count = len(queryset)
+            serializer = self.get_serializer(queryset, many=True)
+            return Response({'count': count, 'tasks': serializer.data})
+        else:
+            return super().list(request, *args, **kwargs)    
+
 
 class CreateInternalPassportAPIView(APIView):
     permission_classes = [IsAdminUser]

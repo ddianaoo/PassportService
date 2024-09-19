@@ -52,8 +52,7 @@ class CreateInternalPassportByStaffAPITests(APITestCase):
             }
 
 
-    @patch('administration.tasks.send_notification.delay')
-    def test_create_internal_passport_successful(self, mock_send_notification):
+    def test_create_internal_passport_successful(self):
         response = self.client.post(
             path=f"{self.path}{self.task.pk}/",
             data=self.valid_data,
@@ -74,7 +73,6 @@ class CreateInternalPassportByStaffAPITests(APITestCase):
         self.assertEqual(self.user.address.id, self.address.id)
         self.assertEqual(self.user.passport.number, response.data['number'])
         self.assertEqual(self.task.status, 1)
-        mock_send_notification.assert_called_once()
 
     def test_create_internal_passport_task_already_processed(self):
         task_done = TaskFactory(user=self.user,

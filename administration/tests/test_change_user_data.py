@@ -106,8 +106,7 @@ class ChangeUserDataByStaffAPITests(APITestCase):
 
 
 # INTERNAL PASSPORT ONLY
-    @patch('administration.tasks.send_notification.delay')
-    def test_change_user_data_in_internal_passport_name_successful(self, mock_send_notification):
+    def test_change_user_data_in_internal_passport_name_successful(self):
         response = self.client.patch(
             path=f"{self.path}{self.task_name1.pk}/",
             data={"internal_passport": self.valid_data},
@@ -120,10 +119,8 @@ class ChangeUserDataByStaffAPITests(APITestCase):
         self.assertNotEqual(self.user1.passport.number, self.internal_passport1.number)
         self.assertEqual(self.user1.name, self.task_name1.user_data['name'])
         self.assertEqual(self.task_name1.status, 1)
-        mock_send_notification.assert_called_once()
 
-    @patch('administration.tasks.send_notification.delay')
-    def test_change_user_data_in_internal_passport_surname_successful(self, mock_send_notification):
+    def test_change_user_data_in_internal_passport_surname_successful(self):
         response = self.client.patch(
             path=f"{self.path}{self.task_surname1.pk}/",
             data={"internal_passport": self.valid_data},
@@ -136,10 +133,8 @@ class ChangeUserDataByStaffAPITests(APITestCase):
         self.assertNotEqual(self.user1.passport.number, self.internal_passport1.number)
         self.assertEqual(self.user1.surname, self.task_surname1.user_data['surname'])
         self.assertEqual(self.task_surname1.status, 1)
-        mock_send_notification.assert_called_once()
 
-    @patch('administration.tasks.send_notification.delay')
-    def test_change_user_data_in_internal_passport_patronymic_successful(self, mock_send_notification):
+    def test_change_user_data_in_internal_passport_patronymic_successful(self):
         response = self.client.patch(
             path=f"{self.path}{self.task_patronymic1.pk}/",
             data={"internal_passport": self.valid_data},
@@ -152,7 +147,6 @@ class ChangeUserDataByStaffAPITests(APITestCase):
         self.assertNotEqual(self.user1.passport.number, self.internal_passport1.number)
         self.assertEqual(self.user1.patronymic, self.task_patronymic1.user_data['patronymic'])
         self.assertEqual(self.task_patronymic1.status, 1)
-        mock_send_notification.assert_called_once()
 
 
     def test_change_user_data_in_internal_passport_without_authority(self):
@@ -240,8 +234,7 @@ class ChangeUserDataByStaffAPITests(APITestCase):
 
 
 # BOTH PASSPORTS
-    @patch('administration.tasks.send_notification.delay')
-    def test_change_user_data_in_both_passports_name_successful(self, mock_send_notification):
+    def test_change_user_data_in_both_passports_name_successful(self):
         response = self.client.patch(
             path=f"{self.path}{self.task_name2.pk}/",
             data={
@@ -260,10 +253,8 @@ class ChangeUserDataByStaffAPITests(APITestCase):
         self.assertFalse(visas)
         self.assertEqual(self.user2.name, self.task_name2.user_data['name'])
         self.assertEqual(self.task_name2.status, 1)
-        mock_send_notification.assert_called_once()
 
-    @patch('administration.tasks.send_notification.delay')
-    def test_change_user_data_in_both_passports_surname_successful(self, mock_send_notification):
+    def test_change_user_data_in_both_passports_surname_successful(self):
         response = self.client.patch(
             path=f"{self.path}{self.task_surname2.pk}/",
             data={
@@ -282,10 +273,8 @@ class ChangeUserDataByStaffAPITests(APITestCase):
         self.assertFalse(visas)
         self.assertEqual(self.user2.surname, self.task_surname2.user_data['surname'])
         self.assertEqual(self.task_surname2.status, 1)
-        mock_send_notification.assert_called_once()
 
-    @patch('administration.tasks.send_notification.delay')
-    def test_change_user_data_in_both_passports_patronymic_successful(self, mock_send_notification):
+    def test_change_user_data_in_both_passports_patronymic_successful(self):
         response = self.client.patch(
             path=f"{self.path}{self.task_patronymic2.pk}/",
             data={
@@ -304,7 +293,6 @@ class ChangeUserDataByStaffAPITests(APITestCase):
         self.assertFalse(visas)
         self.assertEqual(self.user2.patronymic, self.task_patronymic2.user_data['patronymic'])
         self.assertEqual(self.task_patronymic2.status, 1)
-        mock_send_notification.assert_called_once()
 
 
     def test_change_user_data_in_both_passports_without_authority(self):

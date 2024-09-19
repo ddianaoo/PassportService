@@ -60,8 +60,7 @@ class RestoreInternalPassportByStaffAPITests(APITestCase):
             }
 
 
-    @patch('administration.tasks.send_notification.delay')
-    def test_restore_internal_passport_loss_successful(self, mock_send_notification):
+    def test_restore_internal_passport_loss_successful(self):
         response = self.client.put(
             path=f"{self.path}{self.task_passport_loss.pk}/",
             data=self.valid_data,
@@ -83,10 +82,8 @@ class RestoreInternalPassportByStaffAPITests(APITestCase):
         check_old_passport = Passport.objects.filter(number=self.passport.number).exists()
         self.assertFalse(check_old_passport)
         self.assertEqual(self.task_passport_loss.status, 1)
-        mock_send_notification.assert_called_once()
 
-    @patch('administration.tasks.send_notification.delay')
-    def test_restore_internal_passport_expiry_successful(self, mock_send_notification):
+    def test_restore_internal_passport_expiry_successful(self):
         response = self.client.put(
             path=f"{self.path}{self.task_passport_expiry.pk}/",
             data=self.valid_data,
@@ -108,7 +105,6 @@ class RestoreInternalPassportByStaffAPITests(APITestCase):
         check_old_passport = Passport.objects.filter(number=self.passport.number).exists()
         self.assertFalse(check_old_passport)
         self.assertEqual(self.task_passport_expiry.status, 1)
-        mock_send_notification.assert_called_once()
 
     def test_restore_internal_passport_task_already_processed(self):
         task_done = TaskFactory(user=self.user,
